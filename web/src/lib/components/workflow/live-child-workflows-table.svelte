@@ -1,0 +1,83 @@
+<script lang="ts">
+  import { page } from '$app/state';
+
+  import WorkflowStatus from '$lib/components/execution-status.svelte';
+  import Link from '$lib/holocene/link.svelte';
+  import Pagination from '$lib/holocene/pagination.svelte';
+  import TableHeaderRow from '$lib/holocene/table/table-header-row.svelte';
+  import TableRow from '$lib/holocene/table/table-row.svelte';
+  import Table from '$lib/holocene/table/table.svelte';
+  import { translate } from '$lib/i18n/translate';
+  import type { WorkflowExecution } from '$lib/types/workflows';
+  import { routeForWorkflow } from '$lib/utilities/route-for';
+
+  interface Props {
+    children?: WorkflowExecution[];
+  }
+
+  let { children: childWorkflows = [] }: Props = $props();
+
+  const namespace = $derived(page.params.namespace);
+</script>
+
+<Pagination
+  items={childWorkflows}
+  aria-label={translate('workflows.child-workflows')}
+  pageSizeSelectLabel={translate('common.per-page')}
+  previousButtonLabel={translate('common.previous')}
+  nextButtonLabel={translate('common.next')}
+>
+  {#snippet paginationTop()}
+    <div></div>
+  {/snippet}
+  {#snippet children({ visibleItems })}
+    <Table class="w-full">
+      {#snippet caption()}
+        <caption class="sr-only"
+          >{translate('workflows.child-workflows')}</caption
+        >
+      {/snippet}
+      {#snippet headers()}
+        <TableHeaderRow>
+          <th scope="col" class="max-md:hidden">{translate('common.status')}</th
+          >
+          <th scope="col" class="max-lg:hidden">{translate('common.type')}</th>
+          <th scope="col">{translate('workflows.child-id')}</th>
+          <th scope="col">{translate('workflows.child-run-id')}</th>
+        </TableHeaderRow>
+      {/snippet}
+      {#each visibleItems as child}
+        <TableRow>
+          <td class="max-md:hidden">
+            <WorkflowStatus status={child.status} />
+          </td>
+          <td class="max-lg:hidden">
+            {child.name}
+          </td>
+          <td class="hover:text-blue-700 hover:underline">
+            <Link
+              href={routeForWorkflow({
+                namespace,
+                workflow: child.id,
+                run: child.runId,
+              })}
+            >
+              {child.id}
+            </Link>
+          </td>
+          <td class="hover:text-blue-700 hover:underline">
+            <Link
+              href={routeForWorkflow({
+                namespace,
+                workflow: child.id,
+                run: child.runId,
+              })}
+            >
+              {child.runId}
+            </Link>
+          </td>
+        </TableRow>
+      {/each}
+    </Table>
+  {/snippet}
+</Pagination>

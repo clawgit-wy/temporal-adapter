@@ -1,0 +1,28 @@
+server:
+  port: 18090
+
+spring:
+  application:
+    name: temporal-workers
+  jackson:
+    default-property-inclusion: non_null
+
+temporal:
+  server:
+    address: ${TEMPORAL_ADDRESS:127.0.0.1:7233}
+
+hik:
+  api:
+    url: ${HIK_API_URL:http://localhost:19090/api/hikvision/verify}
+
+webhook:
+  callback:
+    url: ${WEBHOOK_CALLBACK_URL:http://localhost:19090/api/webhook/callback}
+
+worker:
+  scenarios: ${WORKER_SCENARIOS:all}
+
+logging:
+  level:
+    com.hik.worker: INFO
+    io.temporal: INFO

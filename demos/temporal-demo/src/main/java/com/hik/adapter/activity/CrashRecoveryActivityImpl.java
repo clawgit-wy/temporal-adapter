@@ -1,0 +1,33 @@
+package com.hik.adapter.activity;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * 场景3: 断点续传Activity实现
+ * 每个步骤打印日志并返回结果，用于验证断点续传
+ */
+@Slf4j
+@Component
+public class CrashRecoveryActivityImpl implements CrashRecoveryActivity {
+
+    private final AtomicInteger stepCounter = new AtomicInteger(0);
+
+    @Override
+    public String executeStep(String stepName) {
+        int count = stepCounter.incrementAndGet();
+        log.info("[断点续传] 执行步骤: {}, 全局步骤计数: {}", stepName, count);
+
+        // 模拟业务处理耗时（2秒）
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        log.info("[断点续传] 步骤 {} 执行完成", stepName);
+        return stepName + " 处理成功 @" + System.currentTimeMillis();
+    }
+}

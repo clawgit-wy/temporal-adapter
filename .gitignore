@@ -1,0 +1,37 @@
+# 构建产物
+**/target/
+**/build/
+**/dist/
+**/.svelte-kit/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+logs/
+
+# 环境配置（含敏感信息）
+.env
+.env.local
+.env.*.local
+
+# Docker 数据卷
+temporal/postgres_data/
+
+# Node 依赖
+node_modules/
+
+# Go 依赖
+server/ui/
+
+# 临时文件
+*.tmp
+*.bak

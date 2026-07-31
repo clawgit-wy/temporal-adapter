@@ -1,0 +1,23 @@
+server:
+  port: 18080
+
+spring:
+  application:
+    name: temporal-demo
+  jackson:
+    default-property-inclusion: non_null
+
+# Temporal Server 配置
+temporal:
+  server:
+    address: ${TEMPORAL_ADDRESS:127.0.0.1:7233}
+
+# 海康API地址（指向mokapi模拟服务，仅MockHikController使用）
+hik:
+  api:
+    url: ${HIK_API_URL:http://localhost:19090/api/hikvision/verify}
+
+logging:
+  level:
+    com.hik.adapter: INFO
+    io.temporal: INFO

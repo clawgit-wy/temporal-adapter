@@ -1,0 +1,6 @@
+worker.heartbeatEnabled:
+  - value: true
+frontend.workerHeartbeatsEnabled:
+  - value: true
+system.enableWorkerHeartbeats:
+  - value: true
