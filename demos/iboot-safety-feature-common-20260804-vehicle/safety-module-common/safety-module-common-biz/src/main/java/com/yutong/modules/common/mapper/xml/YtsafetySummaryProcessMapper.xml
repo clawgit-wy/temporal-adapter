@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.common.mapper.YtsafetySummaryProcessMapper">
+
+    <!-- 优化：以nowapprover小表为驱动表（按工号先查出待办process_id），再按主键回查汇总表，避免百万行逐行EXISTS探测 -->
+    <select id="queryProcessTodo" resultType="com.yutong.modules.common.vo.YtsafetySummaryProcessVO">
+        select tb.*,bp.sys_id,bp.model_id model_flag,bp.form_id template_form_id from (
+        select p.* from (select distinct process_id from ytsafety_summary_process_nowapprover where node_handler_no=#{empNo}) na
+        inner join ytsafety_summary_process p on p.id=na.process_id
+        ${ew.customSqlSegment}) tb
+        inner join safety_bpm_model bp on bp.model_id=tb.model_flag
+        order by tb.handler_date desc
+    </select>
+
+    <!-- 优化：同上，以approver小表为驱动表 -->
+    <select id="queryProcessCompleted" resultType="com.yutong.modules.common.vo.YtsafetySummaryProcessVO">
+        select tb.*,bp.sys_id,bp.model_id model_flag,bp.form_id template_form_id from (
+        select p.* from (select distinct process_id from ytsafety_summary_process_approver where node_handler_no=#{empNo} and is_approver=1) na
+        inner join ytsafety_summary_process p on p.id=na.process_id
+        ${ew.customSqlSegment}) tb
+        inner join safety_bpm_model bp on bp.model_id=tb.model_flag
+        order by tb.handler_date desc
+    </select>
+
+    <!-- 优化：同上，以approver小表为驱动表 -->
+    <select id="queryAllProcess" resultType="com.yutong.modules.common.vo.YtsafetySummaryProcessVO">
+        select tb.*,bp.sys_id,bp.model_id model_flag,bp.form_id template_form_id from (
+        select p.* from (select distinct process_id from ytsafety_summary_process_approver where node_handler_no=#{empNo}) na
+        inner join ytsafety_summary_process p on p.id=na.process_id
+        ${ew.customSqlSegment}) tb
+        inner join safety_bpm_model bp on bp.model_id=tb.model_flag
+        order by tb.handler_date desc
+    </select>
+
+    <select id="queryProcessDraft" resultType="com.yutong.modules.common.vo.YtsafetySummaryProcessVO">
+        select tb.*,bp.sys_id,bp.model_id model_flag,bp.form_id template_form_id from (select * from ytsafety_summary_process ${ew.customSqlSegment}) tb
+        inner join safety_bpm_model bp on bp.model_id=tb.model_flag
+        order by create_time desc
+    </select>
+
+    <select id="queryMyApply" resultType="com.yutong.modules.common.vo.YtsafetySummaryProcessVO">
+        select tb.*,bp.sys_id,bp.model_id model_flag,bp.form_id template_form_id from (select * from ytsafety_summary_process ${ew.customSqlSegment}) tb
+        inner join safety_bpm_model bp on bp.model_id=tb.model_flag
+        order by handler_date desc
+    </select>
+
+</mapper>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.enter.SafetyEnterCheckMapper">
+    <select id="checkUserInBlack" parameterType="map" resultType="integer">
+        select count(1)
+        from safety_black_message
+        where state=1 and delete_falg=0
+        <if test="phoneNo!=null and phoneNo!=''">
+            and phone_no = #{phoneNo}
+        </if>
+        <if test="idCardNo!=null and idCardNo!=''">
+            and id_card_no = #{idCardNo}
+        </if>
+    </select>
+    <select id="checkUserInBlackBatch" parameterType="list" resultType="integer">
+        select count(1)
+        from safety_black_message
+        where state=1
+        and delete_falg=0
+        and phone_no in
+        <foreach collection="list" item="phone" index="index" separator="," open="(" close=")">
+            #{phone}
+        </foreach>
+    </select>
+    <resultMap id="DockInfoMap" type="com.yutong.safety.core.db.entity.enter.SafetyEnterFilingDock">
+        <result column="emp_no" jdbcType="VARCHAR" property="fdDockNo" />
+        <result column="emp_name" jdbcType="VARCHAR" property="fdDockName" />
+        <result column="org_name" jdbcType="VARCHAR" property="fdDockDepartment" />
+        <result column="phone_no" jdbcType="VARCHAR" property="fdDockPhone" />
+    </resultMap>
+    <select id="checkDockInfo" resultMap="DockInfoMap"
+            parameterType="com.yutong.safety.core.db.entity.enter.SafetyEnterFilingDock">
+        select emp_no,emp_name,phone_no,org_name
+        from safety_employee_message
+        where phone_no = #{fdDockPhone} and emp_name=#{fdDockName} limit 1
+    </select>
+
+    <resultMap id="EnterAuthMap" type="com.yutong.safety.core.db.entity.enter.result.SafetyEnterAuthRt">
+        <result column="fd_filing_type_code" jdbcType="VARCHAR" property="fdFilingTypeCode" />
+        <result column="fd_filing_type" jdbcType="VARCHAR" property="fdFilingType" />
+        <result column="fd_emp_no" jdbcType="VARCHAR" property="fdEmpNo" />
+        <result column="fd_emp_name" jdbcType="VARCHAR" property="fdEmpName" />
+        <result column="fd_phone" jdbcType="VARCHAR" property="fdPhone" />
+        <result column="fd_auth_code" jdbcType="VARCHAR" property="fdAuthCode" />
+        <result column="fd_auth" jdbcType="VARCHAR" property="fdAuth" />
+        <result column="fd_factory_code" jdbcType="VARCHAR" property="fdFactoryCode" />
+        <result column="fd_factory" jdbcType="VARCHAR" property="fdFactory" />
+        <result column="fd_filing_user_type_code" jdbcType="VARCHAR" property="fdFilingUserTypeCode" />
+        <result column="fd_filing_user_type" jdbcType="VARCHAR" property="fdFilingUserType" />
+        <result column="fd_limit" jdbcType="INTEGER" property="fdLimit" />
+        <result column="fd_limit_day" jdbcType="INTEGER" property="fdLimitDay" />
+        <result column="fd_long_term" jdbcType="VARCHAR" property="fdLongTerm" />
+        <result column="fd_black" jdbcType="VARCHAR" property="fdBlack" />
+        <result column="fd_notification" jdbcType="VARCHAR" property="fdNotification" />
+    </resultMap>
+    <select id="checkDockAuthBlack" resultMap="EnterAuthMap">
+        select fd_filing_type_code,fd_filing_type,fd_emp_no,fd_emp_name,fd_phone,
+                fd_auth,fd_auth_code,fd_factory_code,fd_factory,fd_filing_user_type_code,fd_filing_user_type,
+                fd_limit,fd_limit_day,fd_long_term,fd_black,fd_notification
+         from safety_enter_auth t
+        where t.del='0'
+        and t.fd_phone in
+        <foreach collection="arr" item="phone" index="index" separator="," open="(" close=")">
+            #{phone}
+        </foreach>
+    </select>
+</mapper>

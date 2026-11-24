@@ -1,0 +1,50 @@
+server:
+  port: 7001
+  
+spring:
+  application:
+    name: iboot-safety-system
+  cloud:
+    nacos:
+      username: safetytest
+      password: safetytest
+      server-addr: 10.66.228.170:8142,10.66.228.171:8142,10.66.228.172:8142
+      config:
+        server-addr: ${spring.cloud.nacos.server-addr}
+        namespace: safetytest
+        group: DEFAULT_GROUP
+      discovery:
+        server-addr: ${spring.cloud.nacos.server-addr}
+        namespace: mp
+        group: DEFAULT_GROUP
+  config:
+    import:
+      - optional:nacos:iboot-safety-dev.yaml
+
+#开发和生产环境配置不一样，需要放到线上nacos
+# 宇信通机器人消息推送配置（线上和开发测试配置不一样）
+# 生产配置
+#ytsafety:
+#  yxt:
+#    robotId: 340117
+
+#宇信通发消息-放在ytsafety_api_route_config表route_code为sys001
+#im:
+#  sendMsg:
+#    postUrl: http://console.yutong.com/shake/admin/push/robot?appId=1&sessionType=r&contentType=0&content=%s&from=%s&to=%s
+
+#车辆黑名单
+#car:
+#  black:
+#    list:
+#      add:
+#        url: http://10.66.32.53:60009/api/TokenBlackList/Add
+#发邮件配置
+#iam:
+#  mail:
+#    url: http://sg.yutong.com/msg-center/sendMsgEmail?apikey=330b46484c0a456b99a92e199ef6ab4e
+#    templateCode: 68014fa153770b64b7aabaacffc23924
+#员工号01转换
+#  employee:
+#    workNoConvert:
+#      url: http://sg.yutong.com/emp-center/wxOldWorkNoConvertWorkNo?apikey=330b46484c0a456b99a92e199ef6ab4e&targeId=%s&workNo=%s

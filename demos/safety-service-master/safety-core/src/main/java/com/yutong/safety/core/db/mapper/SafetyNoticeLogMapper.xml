@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.SafetyNoticeLogMapper">
+
+  <select id="queryList" resultType="com.yutong.safety.common.vo.NoticeLogVO">
+    SELECT n.car_no, n.car_type,n.car_category car_cate, n.staff_name, n.staff_no, m.telephone phone, n.factory,
+    m.retention_num retention_nums, m.ctime noticeTime,m.inform_type notice_type, timestampdiff( HOUR, m.in_time, m.ctime ) stop_hours,
+    m.nums notice_nums, m.in_time, m.remind_type
+    FROM (SELECT t.car_no, t.in_time, t.inform_type, max( t.create_time ) ctime, count( t.in_time ) nums, t.telephone, t.remind_type, t.retention_num
+    FROM safety.safety_retention_inform_record t WHERE 1 = 1
+    <if test="param.carNo !=null">
+        AND t.car_no like concat('%',#{param.carNo},'%')
+    </if>
+    <if test="param.staffNo !=null">
+        AND t.staff_no like concat('%',#{param.staffNo},'%')
+    </if>
+    <if test="param.factory !=null">
+        AND t.factory like concat('%',#{param.factory},'%')
+    </if>
+    <if test="param.noticeTimeStart !=null">
+        AND t.create_time <![CDATA[>=]]> #{param.noticeTimeStart}
+    </if>
+    <if test="param.noticeTimeEnd !=null">
+        AND t.create_time <![CDATA[<=]]> #{param.noticeTimeEnd}
+    </if>
+    <if test="param.noticeType !=null">
+        AND t.inform_type = #{param.noticeType}
+    </if>
+    GROUP BY t.car_no, t.in_time, t.telephone, t.inform_type, t.remind_type, t.retention_num) m
+    LEFT JOIN safety.safety_car_in_factory n ON n.car_no = m.car_no WHERE 1 = 1
+    <if test="param.carStatus !=null">
+        AND n.park_status = #{param.carStatus}
+    </if>
+    <if test="param.noticeStatus !=null">
+        AND n.inform_status = #{param.noticeStatus}
+    </if>
+    ORDER BY ctime DESC LIMIT #{start}, #{end}
+
+  </select>
+  <select id="pageListCount" resultType="java.lang.Long">
+      SELECT count(*) FROM (SELECT t.car_no, t.in_time, t.inform_type, max( t.create_time ) ctime, count( t.in_time ) nums, t.telephone, t.remind_type
+      FROM safety.safety_retention_inform_record t WHERE 1 = 1
+      <if test="param.carNo !=null">
+          AND t.car_no = #{param.carNo}
+      </if>
+      <if test="param.staffNo !=null">
+          AND t.staff_no like concat('%',#{param.staffNo},'%')
+      </if>
+      <if test="param.factory !=null">
+          AND t.factory like concat('%',#{param.factory},'%')
+      </if>
+      <if test="param.noticeTimeStart !=null">
+          AND t.create_time <![CDATA[>=]]> #{param.noticeTimeStart}
+      </if>
+      <if test="param.noticeTimeEnd !=null">
+          AND t.create_time <![CDATA[<=]]> #{param.noticeTimeEnd}
+      </if>
+      <if test="param.noticeType !=null">
+          AND t.inform_type = #{param.noticeType}
+      </if>
+      GROUP BY t.car_no, t.in_time, t.telephone, t.inform_type, t.remind_type) m
+      LEFT JOIN safety.safety_car_in_factory n ON n.car_no = m.car_no WHERE 1 = 1
+      <if test="param.carStatus !=null">
+          AND n.park_status = #{param.carStatus}
+      </if>
+      <if test="param.noticeStatus !=null">
+          AND n.inform_status = #{param.noticeStatus}
+      </if>
+  </select>
+</mapper>

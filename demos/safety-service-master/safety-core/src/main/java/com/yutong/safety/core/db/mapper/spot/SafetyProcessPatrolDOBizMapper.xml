@@ -1,0 +1,542 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.spot.SafetyProcessPatrolDOBizMapper">
+    <sql id="search">
+        <if test="factoryId != null">
+            and sp.factory_id = #{factoryId}
+        </if>
+        <if test="flowNo != null and flowNo != '' ">
+            and sp.flow_no like CONCAT('%',#{flowNo},'%')
+        </if>
+        <if test="eventType != null and eventType != ''">
+            and M1.field_name like CONCAT('%',#{eventType},'%')
+        </if>
+        <if test="teamName != null and teamName != ''">
+            and M2.field_name like CONCAT('%',#{teamName},'%')
+        </if>
+        <if test="submitName != null and submitName != ''">
+            and sp.submit_name like CONCAT('%',#{submitName},'%')
+        </if>
+        <if test="eventSource != null ">
+            and sp.event_source = #{eventSource}
+        </if>
+        <if test="eventId != null">
+            and sp.event_id = #{eventId}
+        </if>
+        <if test="teamId != null">
+            and sp.team_id = #{teamId}
+        </if>
+        <if test="eventLevel != null and eventLevel != '' ">
+            and sp.event_level = #{eventLevel}
+        </if>
+        <if test="isScene != null">
+            and sp.is_scene = #{isScene}
+        </if>
+        <if test="dutyDept != null and dutyDept != ''">
+            and sp.duty_dept = #{dutyDept}
+        </if>
+        <if test="eventAddress != null and eventAddress != '' ">
+            and sp.event_address like CONCAT('%',#{eventAddress},'%')
+        </if>
+        <if test="isTransfer != null">
+            <if test=" isTransfer == 1">
+                and (sp.is_transfer = 1 or sp.is_transfer = 1)
+            </if>
+            <if test=" isTransfer != 1">
+                and (sp.is_transfer != 1 and sp.is_transfer != 1)
+            </if>
+        </if>
+        <if test="transferDept != null and transferDept != '' ">
+            and sp.transfer_dept like CONCAT('%',#{transferDept},'%')
+        </if>
+        <if test="isKeynote != null">
+            and sp.is_keynote = #{isKeynote}
+        </if>
+        <if test="status != null">
+            and sp.status = #{status}
+        </if>
+        <if test="isGrab != null">
+            and sp.isGrab = #{isGrab}
+        </if>
+        <if test="isAssign != null">
+            and sp.isAssign = #{isAssign}
+        </if>
+        <if test="creator != null and creator != ''">
+            and sp.creator = #{creator}
+        </if>
+        <if test="factoryIdStr != null and factoryIdStr != '' ">
+            and sp.factory_id in
+            <foreach item="item" index="index" collection="factoryIdStr.split(',')"  open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="taskIdStr != null and taskIdStr != '' ">
+            and sp.task_id in
+            <foreach item="item" index="index" collection="taskIdStr.split(',')"  open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="occurBegin != null and occurBegin != '' ">
+            and sp.occur_time >= #{occurBegin}
+            <if test="occurEnd != null and occurEnd != '' ">
+                <![CDATA[
+                    and sp.occur_time < #{occurEnd}
+                ]]>
+            </if>
+        </if>
+        <if test="planDealBegin != null and planDealBegin != '' ">
+            and sp.plan_deal_time >= #{planDealBegin}
+            <if test="planDealEnd != null and planDealEnd != ''">
+            <![CDATA[
+                and sp.plan_deal_time < #{planDealEnd}
+            ]]>
+            </if>
+        </if>
+        <if test="createBegin != null and createBegin != '' ">
+            and sp.create_time >= #{createBegin}
+            <if test="createEnd != null and createEnd != ''">
+                <![CDATA[
+                and sp.create_time < #{createEnd}
+            ]]>
+            </if>
+        </if>
+        <if test="dealFinishBegin != null and dealFinishBegin != '' ">
+            and sp.deal_time >= #{dealFinishBegin}
+            <if test="dealFinishEnd != null and dealFinishEnd != ''">
+                <![CDATA[
+                and sp.deal_time < #{dealFinishEnd}
+            ]]>
+            </if>
+        </if>
+        <if test="guardPerson != null and guardPerson !=''">
+            and sp.guard_person like CONCAT('%',#{guardPerson},'%')
+        </if>
+        <if test="dealPersonGroup !=null and dealPersonGroup !='' ">
+            and sp.deal_person_group like CONCAT('%',#{dealPersonGroup},'%')
+        </if>
+        <if test="dealPerson !=null and dealPerson !='' ">
+            and sp.deal_person = #{dealPerson}
+        </if>
+        <if test="submitDept!=null and submitDept!='' ">
+            and sp.submit_dept  like CONCAT('%',#{submitDept},'%')
+        </if>
+    </sql>
+
+    <sql id="search2">
+        <if test="factoryId != null">
+            and sv.factory_id = #{factoryId}
+        </if>
+        <if test="flowNo != null and flowNo != '' ">
+            and sv.flow_no like CONCAT('%',#{flowNo},'%')
+        </if>
+        <if test="eventSource != null ">
+            and sv.event_source = #{eventSource}
+        </if>
+        <if test="eventType != null and eventType != ''">
+            and M3.field_name like CONCAT('%',#{eventType},'%')
+        </if>
+        <if test="teamName != null and teamName != ''">
+            and M4.field_name like CONCAT('%',#{teamName},'%')
+        </if>
+        <if test="submitName != null and submitName != ''">
+            and 1 = 2
+        </if>
+        <if test="eventId != null">
+            and sv.event_id = #{eventId}
+        </if>
+        <if test="teamId != null">
+            and sv.team_id = #{teamId}
+        </if>
+        <if test="eventLevel != null and eventLevel != '' ">
+            and 1 = 2
+        </if>
+        <if test="isScene != null">
+            and 1 = 2
+        </if>
+        <if test="dutyDept != null and dutyDept != ''">
+            and 1 = 2
+        </if>
+        <if test="eventAddress != null and eventAddress != '' ">
+            and sv.location like CONCAT('%',#{eventAddress},'%')
+        </if>
+        <if test="isTransfer != null">
+            and 1 = 2
+        </if>
+        <if test="transferDept != null and transferDept != '' ">
+            and 1 = 2
+        </if>
+        <if test="isKeynote != null">
+            and 1 = 2
+        </if>
+        <if test="status != null">
+            and 1 = 2
+        </if>
+        <if test="isGrab != null">
+            and 1 = 2
+        </if>
+        <if test="isAssign != null">
+            and 1 = 2
+        </if>
+        <if test="guardPerson != null and guardPerson !=''">
+            and 1 = 2
+        </if>
+        <if test="factoryIdStr != null and factoryIdStr != '' ">
+            and sv.factory_id in
+            <foreach item="item" index="index" collection="factoryIdStr.split(',')"  open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="taskIdStr != null and taskIdStr != '' ">
+            and sv.task_id in
+            <foreach item="item" index="index" collection="taskIdStr.split(',')"  open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="occurBegin != null and occurBegin != '' ">
+            and 1 = 2
+        </if>
+        <if test="planDealBegin != null and planDealBegin != '' ">
+            and 1 = 2
+        </if>
+        <if test="createBegin != null and createBegin != '' ">
+            and sv.create_time >= #{createBegin}
+            <if test="createEnd != null and createEnd != ''">
+                <![CDATA[
+                and sv.create_time <= #{createEnd}
+            ]]>
+            </if>
+        </if>
+        <if test="dealFinishBegin != null and dealFinishBegin != '' ">
+            and 1 = 2
+        </if>
+        <if test="creator != null and creator != ''">
+            and sv.creator = #{creator}
+        </if>
+        <if test="guardPerson != null and guardPerson !=''">
+            and 1 = 2
+        </if>
+        <if test="dealPersonGroup !=null and dealPersonGroup !='' ">
+            and 1 = 2
+        </if>
+        <if test="dealPerson !=null and dealPerson !='' ">
+            and sv.check_person = #{dealPerson}
+        </if>
+        <if test="submitDept!=null and submitDept!='' ">
+            and sv.check_dept  like CONCAT('%',#{submitDept},'%')
+        </if>
+    </sql>
+
+    <sql id="search3">
+        <if test="factoryId != null">
+            and ep.site_id = #{factoryId}
+        </if>
+        <if test="flowNo != null and flowNo != '' ">
+            and ep.process_id like CONCAT('%',#{flowNo},'%')
+        </if>
+        <if test="eventType != null and eventType != ''">
+            and ep.event_type like CONCAT('%',#{eventType},'%')
+        </if>
+        <if test="teamName != null and teamName != ''">
+            and ep.issue_type like CONCAT('%',#{teamName},'%')
+        </if>
+        <if test="eventLevel != null and eventLevel != '' ">
+            and ep.event_level = #{eventLevel}
+        </if>
+        <if test="eventAddress != null and eventAddress != '' ">
+            and ep.specific_location like CONCAT('%',#{eventAddress},'%')
+        </if>
+        <if test="occurBegin != null">
+            and ep.event_occurrence_time >= #{occurBegin}
+            <if test="occurEnd != null">
+                <![CDATA[
+                    and ep.event_occurrence_time < #{occurEnd}
+                ]]>
+            </if>
+        </if>
+        <if test="dealPerson !=null and dealPerson !='' ">
+            and ep.remediation_name = #{dealPerson}
+        </if>
+        <if test="dealFinishBegin != null">
+            and ep.remediation_completion_time >= #{dealFinishBegin}
+            <if test="dealFinishEnd != null">
+                <![CDATA[
+                and ep.remediation_completion_time < #{dealFinishEnd}
+            ]]>
+            </if>
+        </if>
+        <if test="submitName != null and submitName != ''">
+            and ep.reporter_name like CONCAT('%',#{submitName},'%')
+        </if>
+        <if test="submitDept!=null and submitDept!='' ">
+            and ep.reporter_department  like CONCAT('%',#{submitDept},'%')
+        </if>
+        <if test="isAssign != null">
+            and 0 = #{isAssign}
+        </if>
+        <if test="createBegin != null">
+            and ep.creation_time >= #{createBegin}
+            <if test="createEnd != null">
+                <![CDATA[
+                and ep.creation_time < #{createEnd}
+            ]]>
+            </if>
+        </if>
+    </sql>
+
+    <!-- 查询任务业务数据 -->
+    <select id="getPatrolRecordList" resultType="com.yutong.safety.common.vo.web.spot.PatrolRecordVO"
+            parameterType="com.yutong.safety.common.param.web.spot.PatrolRecordListParam">
+        select * from(
+            SELECT sp.id,sp.flow_id,sp.flow_no,sp.factory_id,sp.factory,sp.event_source,sp.event_id,M1.field_name event_type,sp.task_id,
+                    sp.team_id,M2.field_name team_name,case sp.event_source when 2 then '事件上报' else sp.plan_name end plan_name,
+                    sp.is_exception,sp.event_level,sp.duty_dept,sp.occur_time,sp.event_address,sp.is_keynote,sp.problem_desc,
+                    sp.problem_image,sp.plan_deal_time,sp.plan_measure,sp.is_scene,sp.is_transfer,sp.transfer_dept,sp.deal_person,sp.deal_person_group,
+                    sp.guard_person,sp.deal_time,sp.deal_record,sp.deal_image,sp.result_score,sp.result_desc,sp.result_person,
+                    sp.is_delay,sp.submit_name,sp.submit_dept,sp.grab_person,sp.grab_time,DATE_FORMAT(sp.create_time,'%Y-%m-%d %H:%i:%s') create_time,
+                    sp.is_grab,sp.is_dispatch,sp.dispatch_person,IFNULL(dh.rework_num,0) rework_num,sp.status,sp.is_deal_transfer,sp.cur_deal_handler,
+                    '' car_number,'' telephone,'' driver_name,1 plan_type,'' is_assign,sp.cur_node_id,
+                    <![CDATA[ CONCAT(#{bpmUrlPre},'&formInstanceId=',sp.id,'&processId=',sp.flow_id) flow_url ]]>,
+                              '' goods_out_flow_url
+            FROM safety_process_patrol sp
+            LEFT JOIN (select pd.process_id,count(1) rework_num from safety_patrol_deal_history pd group by pd.process_id) dh on sp.id = dh.process_id
+            LEFT JOIN SAFETY.safety_field_manage M1 ON sp.event_id = M1.ID
+            LEFT JOIN SAFETY.safety_field_manage M2 ON sp.team_id = M2.ID
+            WHERE 1 = 1
+            <include refid="search"/>
+            union all
+            SELECT sv.id,'' flow_id,sv.flow_no,sv.factory_id,sv.factory,sv.event_source,sv.event_id,M3.field_name event_type,sv.task_id,
+                sv.team_id,M4.field_name team_name,sv.plan_name,0 is_exception,'' event_level,'' duty_dept,'' occur_time,'' event_address,
+                0 is_keynote,'' problem_desc,'' problem_image, '' plan_deal_time,'' plan_measure,0 is_scene,0 is_transfer,
+                '' transfer_dept,sv.check_person deal_person,sv.check_dept deal_person_group,'' guard_person,sv.check_time
+                deal_time,'' deal_record,'' deal_image,'' result_score,'' result_desc,'' result_person, 0 is_delay, sv.check_person
+                submit_name,sv.check_dept submit_dept,'' grab_person,'' grab_time,DATE_FORMAT(sv.create_time,'%Y-%m-%d %H:%i:%s')
+                create_time,0 is_grab,0 is_dispatch,'' dispatch_person,0 rework_num,'' status,0, '' cur_deal_handler,
+                sv.car_number,sv.telephone,sv.driver_name,2 plan_type,'' is_assign,'' cur_node_id,
+                <![CDATA[ CONCAT(#{bpmUrlPre},'&formInstanceId=',sv.id,'&processId=',sv.flow_no) flow_url ]]>,
+                '' goods_out_flow_url
+            FROM safety_validate_environment sv
+            LEFT JOIN SAFETY.safety_field_manage M3 ON sv.event_id = M3.ID
+            LEFT JOIN SAFETY.safety_field_manage M4 ON sv.team_id = M4.ID
+            where 1 = 1
+            <include refid="search2"/>
+
+            <!--物资出门证异常上报-->
+            union all
+            select ep.id,
+                   ep.process_id as flow_id,
+                   ep.flow_no as flow_no,
+                   ep.site_id as factory_id,
+                   ep.site_name as factory,
+                   '' as event_source,
+                   '' as event_id,
+                    ep.event_type ,
+                   '' as task_id,
+                   '' as team_id,
+                    ep.issue_type as team_name,
+                   '出门证违规上报' as plan_name,
+                   '' as is_exception,
+                   ep.event_level ,
+                   ep.responsible_person_department as duty_dept,
+                    ep.event_occurrence_time as occur_time,
+                    ep.specific_location as event_address,
+                    '' as is_keynote,
+                    ep.issue_description as problem_desc,
+                    '' problem_image,
+                    '' plan_deal_time,
+                    '' plan_measure,
+                    '' is_scene,
+                    '' is_transfer,
+                    '' transfer_dept,
+                    ep.remediation_name as deal_person,
+                    '' deal_person_group,
+                    '' guard_person,
+                    ep.remediation_completion_time as deal_time,
+                    ep.remediation_measure as deal_record,
+                    '' deal_image,
+                    '' result_score,
+                    '' result_desc,
+                    '' result_person,
+                    '' is_delay,
+                    ep.reporter_name as submit_name,
+                    '' submit_dept,
+                    '' grab_person,
+                    '' grab_time,
+                    ep.creation_time as create_time,
+                    '' is_grab,
+                    '' is_dispatch,
+                    '' dispatch_person,
+                    '' rework_num,
+                    '' status,
+                    '' is_deal_transfer,
+                    '' cur_deal_handler,
+                    '' car_number,
+                    '' telephone,
+                    '' driver_name,
+                    1 plan_type,
+                   0 as is_assign,'' cur_node_id,
+                   <![CDATA[ CONCAT(#{goodsExceptionBpmUrlPre},'&formInstanceId=',ep.id,'&processId=',ep.process_id) flow_url ]]>,
+                    <![CDATA[ CONCAT(#{goodsOutBpmUrlPre},'&formInstanceId=',gp.id,'&processId=',gp.flow_id) goods_out_flow_url ]]>
+            from safety_goods_out_events_process ep
+            inner join safety_goods_out_process gp on ep.related_process_id = gp.id
+            <where>
+                <include refid="search3"/>
+            </where>
+        ) as cur
+         where event_type is not null
+        <if test="planType != null">
+            and plan_type = #{planType}
+        </if>
+        <if test="planName != null and planName != ''">
+            and plan_name like CONCAT('%',#{planName},'%')
+        </if>
+         order by create_time desc
+        <if test="begin != null">
+            <if test="offset != null">
+                  limit ${offset}, ${limit}
+            </if>
+            <if test="offset == null">
+                  limit ${limit}
+            </if>
+        </if>
+    </select>
+
+    <select id="getPatrolRecordCount" resultType="java.lang.Long">
+        select count(1) from(SELECT sp.id,sp.flow_id,sp.flow_no,sp.factory_id,sp.factory,sp.event_source,sp.event_id,M1.field_name event_type,sp.task_id,
+        sp.team_id,M2.field_name team_name,case sp.event_source when 2 then '事件上报' else sp.plan_name end plan_name,
+        sp.is_exception,sp.event_level,sp.duty_dept,sp.occur_time,sp.event_address,sp.is_keynote,sp.problem_desc,
+        sp.problem_image,sp.plan_deal_time,sp.plan_measure,sp.is_scene,sp.is_transfer,sp.transfer_dept,sp.deal_person,sp.deal_person_group,
+        sp.guard_person,sp.deal_time,sp.deal_record,sp.deal_image,sp.result_score,sp.result_desc,sp.result_person,
+        sp.is_delay,sp.submit_name,sp.submit_dept,sp.grab_person,sp.grab_time,DATE_FORMAT(sp.create_time,'%Y-%m-%d %H:%i:%s') create_time,
+        sp.is_grab,sp.is_dispatch,sp.dispatch_person,IFNULL(dh.rework_num,0) rework_num,sp.status,sp.is_deal_transfer,sp.cur_deal_handler,
+        '' car_number,'' telephone,'' driver_name,1 plan_type,'' as is_assign
+        FROM safety_process_patrol sp
+        LEFT JOIN (select pd.process_id,count(1) rework_num from safety_patrol_deal_history pd group by pd.process_id) dh on sp.id = dh.process_id
+        LEFT JOIN SAFETY.safety_field_manage M1 ON sp.event_id = M1.ID
+        LEFT JOIN SAFETY.safety_field_manage M2 ON sp.team_id = M2.ID
+        WHERE 1 = 1
+        <include refid="search"/>
+        union all
+        SELECT sv.id,'' flow_id,sv.flow_no,sv.factory_id,sv.factory,sv.event_source,sv.event_id,M3.field_name event_type,sv.task_id,
+        sv.team_id,M4.field_name team_name,sv.plan_name,0 is_exception,'' event_level,'' duty_dept,'' occur_time,'' event_address,
+        0 is_keynote,'' problem_desc,'' problem_image, '' plan_deal_time,'' plan_measure,0 is_scene,0 is_transfer,
+        '' transfer_dept,sv.check_person deal_person,sv.check_dept deal_person_group,'' guard_person,sv.check_time
+        deal_time,'' deal_record,'' deal_image,'' result_score,'' result_desc,'' result_person, 0 is_delay, sv.check_person
+        submit_name,sv.check_dept submit_dept,'' grab_person,'' grab_time,DATE_FORMAT(sv.create_time,'%Y-%m-%d %H:%i:%s')
+        create_time,0 is_grab,0 is_dispatch,'' dispatch_person,0 rework_num,'' status,0, '' cur_deal_handler,
+        sv.car_number,sv.telephone,sv.driver_name,2 plan_type,'' as is_assign
+        FROM safety_validate_environment sv
+        LEFT JOIN SAFETY.safety_field_manage M3 ON sv.event_id = M3.ID
+        LEFT JOIN SAFETY.safety_field_manage M4 ON sv.team_id = M4.ID
+        where 1 = 1
+        <include refid="search2"/>
+        <!--物资出门证异常上报-->
+        union all
+        select ep.id,
+                ep.process_id as flow_id,
+                ep.process_id as flow_no,
+                ep.site_id as factory_id,
+                ep.site_name as factory,
+                '' as event_source,
+                '' as event_id,
+                ep.event_type ,
+                '' as task_id,
+                '' as team_id,
+                ep.issue_type as team_name,
+                '出门证违规上报' as plan_name,
+                '' as is_exception,
+                ep.event_level ,
+                ep.responsible_person_department as duty_dept,
+                ep.event_occurrence_time as occur_time,
+                ep.specific_location as event_address,
+                '' as is_keynote,
+                ep.issue_description as problem_desc,
+                '' problem_image,
+                '' plan_deal_time,
+                '' plan_measure,
+                '' is_scene,
+                '' is_transfer,
+                '' transfer_dept,
+                ep.remediation_name as deal_person,
+                '' deal_person_group,
+                '' guard_person,
+                ep.remediation_completion_time as deal_time,
+                ep.remediation_measure as deal_record,
+                '' deal_image,
+                '' result_score,
+                '' result_desc,
+                '' result_person,
+                '' is_delay,
+                ep.reporter_name as submit_name,
+                '' submit_dept,
+                '' grab_person,
+                '' grab_time,
+                ep.creation_time as create_time,
+                '' is_grab,
+                '' is_dispatch,
+                '' dispatch_person,
+                '' rework_num,
+                '' status,
+                '' is_deal_transfer,
+                '' cur_deal_handler,
+                '' car_number,
+                '' telephone,
+                '' driver_name,
+                1 plan_type,
+                0 as is_assign
+        from safety_goods_out_events_process ep
+        <where>
+            <include refid="search3"/>
+        </where>
+        ) as cur
+        where event_type is not null
+        <if test="planType != null">
+            and plan_type = #{planType}
+        </if>
+        <if test="planName != null and planName != ''">
+            and plan_name like CONCAT('%',#{planName},'%')
+        </if>
+    </select>
+
+    <update id="modifyCurDealHandler" parameterType="com.yutong.safety.common.param.web.spot.PatrolNodeUpdateParam">
+        update safety_process_patrol
+           set cur_deal_handler = #{curDealHandler}
+         where id = #{id}
+    </update>
+
+    <update id="modifyFlowId" parameterType="com.yutong.safety.common.param.web.spot.PatrolNodeUpdateParam">
+        update safety_process_patrol
+           set flow_id = #{flowId}
+         where id = #{id}
+    </update>
+
+    <sql id="recordBaseColumnList">
+        t1.id, t1.flow_id, t1.title, t1.creator, t1.create_time, t1.publish_time, t1.status, t1.flow_no, t1.submit_name,
+        t1.submit_no, t1.submit_dept, t1.occur_time, t1.factory_id, t1.factory, t1.event_source, t1.plan_id, t1.task_id,
+        t1.plan_name, t1.event_type, t1.event_id, t1.team_id, t1.team_name, t1.event_time, t2.remark plan_desc, t1.is_finish,
+        t1.is_exception, t1.patrol_image, t1.event_level, t1.duty_dept, t1.event_address, t1.is_keynote, t1.problem_desc,
+        t1.problem_image, t1.is_scene, t1.deal_record, t1.deal_image, t1.duty_person_no, t1.duty_person, t1.guard_person_no,
+        t1.guard_person, t1.guard_phone, t1.plan_deal_time, t1.plan_measure, t1.is_transfer, t1.transfer_dept,
+        t1.deal_time, t1.deal_person_no, t1.deal_person, t1.deal_person_group, t1.result_score, t1.result_desc,
+        t1.result_person, t1.result_person_no, t1.result_time, t1.is_grab, t1.grab_person, t1.grab_person_no,
+        t1.grab_time, t1.is_delay, t1.is_dispatch, t1.dispatch_person, t1.dispatch_person_no, t1.node_flag,
+        t1.patrol_role_users, t1.is_deal_transfer, t1.cur_deal_handler,t1.result_remark,t1.cur_node_id
+    </sql>
+
+    <select id="selectRecordsById" resultType="com.yutong.safety.core.db.entity.spot.SafetyProcessPatrolDO">
+        select
+        <include refid="recordBaseColumnList"/>
+        from safety_process_patrol t1
+        left join safety_patrol_plan t2 on t1.plan_id = t2.id
+        where t1.id = #{id}
+    </select>
+
+    <update id="batchModifyCurDeal" parameterType="java.util.List">
+        <foreach collection="list" item="item" separator=";">
+            update safety_process_patrol
+            set cur_deal_handler = #{item.fdCurrLoginNames},
+            cur_node_id=#{item.nodeIds},
+            status = #{item.fdStatus}
+            where flow_id = #{item.modelId}
+        </foreach>
+    </update>
+</mapper>

@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.build.SafetyBuildDeviceDOBizMapper">
+    <insert id="batchUpdate"  parameterType="java.util.List" useGeneratedKeys="true" keyColumn="device_code">
+        insert into safety_build_device (ID,DEVICE_CODE,DEVICE_NAME,EXTEND_CODE,AREA_ID,AREA_NAME,FACTORY_CODE,
+            FACTORY_NAME,TERM_ID,TERM_ADDR,TERM_NAME,TERM_TYPE,LEVF,DEVICE_STATUS,device_type,
+            CREATE_TIME,REMOVE_FLAG,UPDATE_TIME)
+        values
+            <foreach collection="list" item="item" index="index" separator=",">
+                (#{item.id},
+                #{item.deviceCode},
+                #{item.deviceName},
+                #{item.extendCode},
+                #{item.areaId},
+                #{item.areaName},
+                #{item.factoryCode},
+                #{item.factoryName},
+                #{item.termId},
+                #{item.termAddr},
+                #{item.termName},
+                #{item.termType},
+                #{item.levf},
+                #{item.deviceStatus},
+                #{item.deviceType},
+                CURRENT_TIMESTAMP,
+                #{item.removeFlag},
+                CURRENT_TIMESTAMP)
+            </foreach>
+        ON DUPLICATE KEY UPDATE
+            DEVICE_NAME = VALUES(DEVICE_NAME),
+            EXTEND_CODE = VALUES(EXTEND_CODE),
+            AREA_ID = VALUES(AREA_ID),
+            AREA_NAME = VALUES(AREA_NAME),
+            FACTORY_CODE = VALUES(FACTORY_CODE),
+            FACTORY_NAME = VALUES(FACTORY_NAME),
+            TERM_ID = VALUES(TERM_ID),
+            TERM_ADDR = VALUES(TERM_ADDR),
+            TERM_NAME = VALUES(TERM_NAME),
+            TERM_TYPE = VALUES(TERM_TYPE),
+            LEVF = VALUES(LEVF),
+            DEVICE_STATUS = VALUES(DEVICE_STATUS),
+            REMOVE_FLAG=VALUES(REMOVE_FLAG),
+            UPDATE_TIME = CURRENT_TIMESTAMP,
+            IS_DELETE = VALUES(IS_DELETE)
+    </insert>
+
+
+    <resultMap id="BaseResultMap" type="com.yutong.safety.core.db.entity.build.vo.BuildDeviceVO">
+        <id column="ID" jdbcType="VARCHAR" property="id" />
+        <result column="DEVICE_CODE" jdbcType="VARCHAR" property="deviceCode" />
+        <result column="DEVICE_NAME" jdbcType="VARCHAR" property="deviceName" />
+        <result column="FACTORY_NAME" jdbcType="VARCHAR" property="factoryName" />
+        <result column="FACTORY_CODE" jdbcType="VARCHAR" property="factoryCode" />
+        <result column="BUILDING" jdbcType="VARCHAR" property="building" />
+        <result column="SECURITY_LEVEL" jdbcType="VARCHAR" property="securityLevel" />
+        <result column="DEVICE_STATUS" jdbcType="VARCHAR" property="deviceStatus" />
+        <result column="REMOVE_FLAG" jdbcType="VARCHAR" property="removeFlag" />
+        <result column="AN_DEVICE_NAME" jdbcType="VARCHAR" property="anDeviceName" />
+        <result column="AN_FACTORY_NAME" jdbcType="VARCHAR" property="anFactoryName" />
+        <result column="AN_FACTORY_CODE" jdbcType="VARCHAR" property="anFactoryCode" />
+        <result column="AN_BUILDING" jdbcType="VARCHAR" property="anBuilding" />
+        <result column="AN_SHORT" jdbcType="INTEGER" property="anShort" />
+        <result column="AN_REMARK" jdbcType="VARCHAR" property="anRemark" />
+        <result column="IS_DELETE" jdbcType="VARCHAR" property="isDelete" />
+        <result column="IS_PUBLIC" jdbcType="VARCHAR" property="isPublic" />
+        <result column="AREA_ID" jdbcType="INTEGER" property="areaId" />
+        <result column="AREA_NAME" jdbcType="VARCHAR" property="areaName" />
+        <result column="TERM_ID" jdbcType="INTEGER" property="termId" />
+        <result column="TERM_ADDR" jdbcType="VARCHAR" property="termAddr" />
+        <result column="TERM_NAME" jdbcType="VARCHAR" property="termName" />
+        <result column="TERM_TYPE" jdbcType="VARCHAR" property="termType" />
+        <result column="LEVF" jdbcType="INTEGER" property="levf" />
+        <result column="TOP_SECRET_EMP_CODE" jdbcType="VARCHAR" property="topSecretEmpCode" />
+        <result column="TOP_SECRET_EMP_NAME" jdbcType="VARCHAR" property="topSecretEmpName" />
+        <result column="TOP_SECRET_EMP_LOGIN" jdbcType="VARCHAR" property="topSecretEmpLogin" />
+        <result column="AN_BUILDING_CODE" jdbcType="VARCHAR" property="anBuildingCode" />
+        <result column="extend_code" jdbcType="VARCHAR" property="extendCode" />
+        <result column="CREATE_TIME_STR" jdbcType="VARCHAR" property="createTimeStr" />
+        <result column="OFFICE_TIME_STR" jdbcType="TIMESTAMP" property="officeTimeStr" />
+        <result column="UPDATE_TIME_STR" jdbcType="TIMESTAMP" property="updateTimeStr" />
+        <result column="SECURITY_LEVEL_NAME" jdbcType="VARCHAR" property="securityLevelName" />
+        <result column="device_type" jdbcType="VARCHAR" property="deviceType"/>
+    </resultMap>
+
+    <sql id="Example_Where_Clause_Biz">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+
+    <sql id="Base_Column_List">
+        ID, DEVICE_CODE, DEVICE_NAME, FACTORY_NAME, FACTORY_CODE, BUILDING, SECURITY_LEVEL,
+        REMOVE_FLAG, AN_DEVICE_NAME, AN_FACTORY_NAME, AN_FACTORY_CODE, AN_BUILDING,
+        AN_SHORT, AN_REMARK, IS_DELETE, IS_PUBLIC, AREA_ID, AREA_NAME,TERM_ID, TERM_ADDR, TERM_NAME,
+        TERM_TYPE, LEVF, TOP_SECRET_EMP_CODE, TOP_SECRET_EMP_NAME,TOP_SECRET_EMP_LOGIN, AN_BUILDING_CODE,
+        CREATE_TIME, OFFICE_TIME, UPDATE_TIME,
+        extend_code, SECURITY_LEVEL_NAME,CREATE_TIME_STR, OFFICE_TIME_STR, UPDATE_TIME_STR,
+        case when device_type = '1' then '新开普' else '富士' end device_type,
+        case when DEVICE_STATUS = '1' then '启用' else '禁用' end DEVICE_STATUS
+    </sql>
+    <select id="selectByExampleBiz" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildDeviceDOExample" resultMap="BaseResultMap">
+        select
+        <if test="distinct">
+            distinct
+        </if>
+        <include refid="Base_Column_List" />
+        from (select sbd.*,sfm.field_name SECURITY_LEVEL_NAME,
+                     DATE_FORMAT(sbd.create_time,'%Y-%m-%d %H:%i:%m') CREATE_TIME_STR,
+                     DATE_FORMAT(sbd.OFFICE_TIME,'%Y-%m-%d %H:%i:%m') OFFICE_TIME_STR,
+                     DATE_FORMAT(sbd.UPDATE_TIME,'%Y-%m-%d %H:%i:%m') UPDATE_TIME_STR
+               from safety.safety_build_device sbd
+               left join safety.safety_field_manage sfm
+               on sbd.SECURITY_LEVEL = sfm.field_code  and sfm.field_type = 'secretLevel_bmdj_0' and sfm.delete_falg = 0
+            <if test="_parameter != null">
+                <include refid="Example_Where_Clause_Biz" />
+            </if>
+            <if test="orderByClause != null">
+                order by ${orderByClause}
+            </if>
+        ) AS LIM
+        <if test="limit != null">
+            <if test="offset != null">
+                limit ${offset}, ${limit}
+            </if>
+            <if test="offset == null">
+                limit ${limit}
+            </if>
+        </if>
+    </select>
+
+    <select id="getListByCondition" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildDeviceDO"
+            resultType="com.yutong.safety.core.db.entity.build.SafetyBuildDeviceDO">
+        select
+            <include refid="Base_Column_List_D"/>
+          from safety_build_device d
+         where REMOVE_FLAG = 0 and device_status = 1
+        <if test="deviceName != null and deviceName != ''">
+            and (DEVICE_NAME like concat('%',#{deviceName},'%') or AN_DEVICE_NAME like concat('%',#{deviceName},'%'))
+        </if>
+    </select>
+
+    <select id="selectBuildCollectDetail" parameterType="java.lang.String"
+            resultType="com.yutong.safety.core.db.entity.build.SafetyBuildDeviceDO">
+        select
+        <include refid="Base_Column_List_D"/>
+        from safety_build_device d
+                 left join safety_build_device_collect c on find_in_set(d.DEVICE_CODE,c.device_ids)>0
+            where d.REMOVE_FLAG = 0 and device_status = 1
+              and c.id = #{id}
+    </select>
+
+    <sql id="Base_Column_List_D">
+        D.ID, D.DEVICE_CODE, IFNULL(D.AN_DEVICE_NAME,D.DEVICE_NAME) DEVICE_NAME,
+        IFNULL(D.AN_FACTORY_NAME,D.FACTORY_NAME) FACTORY_NAME, D.FACTORY_CODE,
+        IFNULL(D.AN_BUILDING,D.BUILDING) BUILDING, D.SECURITY_LEVEL,
+        D.REMOVE_FLAG, D.AN_DEVICE_NAME, D.AN_FACTORY_NAME, D.AN_FACTORY_CODE, D.AN_BUILDING,
+        D.AN_SHORT, D.AN_REMARK, D.IS_DELETE, D.IS_PUBLIC, D.AREA_ID, D.AREA_NAME,D.TERM_ID, D.TERM_ADDR, D.TERM_NAME,
+        D.TERM_TYPE, D.LEVF, D.TOP_SECRET_EMP_CODE, D.TOP_SECRET_EMP_NAME,D.TOP_SECRET_EMP_LOGIN, D.AN_BUILDING_CODE,
+        D.CREATE_TIME, D.OFFICE_TIME, D.UPDATE_TIME,
+        case when D.device_type = '1' then '新开普' else '富士' end device_type,
+        case when D.DEVICE_STATUS = '1' then '启用' else '禁用' end DEVICE_STATUS
+    </sql>
+
+    <sql id="Base_Column_List_Two">
+        ID, DEVICE_CODE, IFNULL(AN_DEVICE_NAME,DEVICE_NAME) DEVICE_NAME,
+        IFNULL(AN_FACTORY_NAME,FACTORY_NAME) FACTORY_NAME, FACTORY_CODE,
+        IFNULL(AN_BUILDING,BUILDING) BUILDING, SECURITY_LEVEL,
+        REMOVE_FLAG, AN_DEVICE_NAME, AN_FACTORY_NAME, AN_FACTORY_CODE, AN_BUILDING,
+        AN_SHORT, AN_REMARK, IS_DELETE, IS_PUBLIC, AREA_ID, AREA_NAME,TERM_ID, TERM_ADDR, TERM_NAME,
+        TERM_TYPE, LEVF, TOP_SECRET_EMP_CODE, TOP_SECRET_EMP_NAME,TOP_SECRET_EMP_LOGIN, AN_BUILDING_CODE,
+        CREATE_TIME, OFFICE_TIME, UPDATE_TIME,
+        extend_code, SECURITY_LEVEL_NAME,CREATE_TIME_STR, OFFICE_TIME_STR, UPDATE_TIME_STR,
+        case when device_type = '1' then '新开普' else '富士' end device_type,
+        case when DEVICE_STATUS = '1' then '启用' else '禁用' end DEVICE_STATUS
+    </sql>
+
+    <sql id="Diy_Where_Clause_Biz">
+        <if test="factoryCode!=null and factoryCode!=''">
+            and AN_FACTORY_CODE = #{factoryCode}
+        </if>
+        <if test="building != null and building != ''">
+            and AN_BUILDING_CODE = #{building}
+        </if>
+        <if test="deviceName != null and deviceName != ''">
+            and (AN_DEVICE_NAME like concat('%',#{deviceName},'%') or DEVICE_NAME like concat('%',#{deviceName},'%'))
+        </if>
+        <if test="securityLevel != null and securityLevel != '' ">
+            and SECURITY_LEVEL = #{securityLevel}
+        </if>
+    </sql>
+
+    <select id="selectByExampleBizTwo" parameterType="com.yutong.safety.core.db.entity.build.param.BuildDeviceListParam"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List_Two" />
+        from (select sbd.*,sfm.field_name SECURITY_LEVEL_NAME,
+        DATE_FORMAT(sbd.create_time,'%Y-%m-%d %H:%i:%m') CREATE_TIME_STR,
+        DATE_FORMAT(sbd.OFFICE_TIME,'%Y-%m-%d %H:%i:%m') OFFICE_TIME_STR,
+        DATE_FORMAT(sbd.UPDATE_TIME,'%Y-%m-%d %H:%i:%m') UPDATE_TIME_STR
+         from safety.safety_build_device sbd
+         left join safety.safety_field_manage sfm
+           on sbd.SECURITY_LEVEL = sfm.field_code  and sfm.field_type = 'secretLevel_bmdj_0' and sfm.delete_falg = 0
+        where sbd.DEVICE_STATUS = 1 and sbd.REMOVE_FLAG = 0
+        <include refid="Diy_Where_Clause_Biz" />
+        <if test="orderByClause != null">
+            order by ${orderByClause}
+        </if>
+        ) AS LIM
+        <if test="pageFlag!= null">
+            <if test="offset != null">
+                limit ${offset}, ${limit}
+            </if>
+            <if test="offset == null">
+                limit ${limit}
+            </if>
+        </if>
+    </select>
+
+    <select id="countByExampleBizTwo" parameterType="com.yutong.safety.core.db.entity.build.param.BuildDeviceListParam"
+            resultType="java.lang.Long">
+        select count(1)
+          from safety.safety_build_device sbd
+          left join safety.safety_field_manage sfm
+            on sbd.SECURITY_LEVEL = sfm.field_code  and sfm.field_type = 'secretLevel_bmdj_0' and sfm.delete_falg = 0
+        where sbd.DEVICE_STATUS = 1 and sbd.REMOVE_FLAG = 0
+        <include refid="Diy_Where_Clause_Biz" />
+    </select>
+
+    <select id="selectByRemoveAndDisableList" resultType="com.yutong.safety.core.db.entity.build.SafetyBuildDeviceDO">
+        select
+        <include refid="Base_Column_List_D"/>
+        from safety_build_device d
+        where d.REMOVE_FLAG = 1 or d.device_status = 0
+    </select>
+
+    <select id="getListByFactoryName" parameterType="java.util.List" resultType="com.yutong.safety.core.db.entity.build.SafetyBuildDeviceDO">
+        select AN_FACTORY_CODE from safety_build_device where DEVICE_STATUS = 1 and REMOVE_FLAG = 0 and IS_DELETE = 0 and AN_FACTORY_CODE in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+</mapper>

@@ -1,0 +1,588 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.entry.SafetyEntryImportFailDOMapper">
+  <resultMap id="BaseResultMap" type="com.yutong.safety.core.db.entity.entry.SafetyEntryImportFailDO">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="butt_joint_code" jdbcType="VARCHAR" property="buttJointCode" />
+    <result column="butt_joint_name" jdbcType="VARCHAR" property="buttJointName" />
+    <result column="record_type" jdbcType="VARCHAR" property="recordType" />
+    <result column="record_type_code" jdbcType="VARCHAR" property="recordTypeCode" />
+    <result column="company_name" jdbcType="VARCHAR" property="companyName" />
+    <result column="company_code" jdbcType="VARCHAR" property="companyCode" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="card_no" jdbcType="VARCHAR" property="cardNo" />
+    <result column="phone" jdbcType="VARCHAR" property="phone" />
+    <result column="enter_factory" jdbcType="VARCHAR" property="enterFactory" />
+    <result column="enter_factory_code" jdbcType="VARCHAR" property="enterFactoryCode" />
+    <result column="enter_start_time" jdbcType="VARCHAR" property="enterStartTime" />
+    <result column="enter_end_time" jdbcType="VARCHAR" property="enterEndTime" />
+    <result column="photo_url" jdbcType="VARCHAR" property="photoUrl" />
+    <result column="submit_phone" jdbcType="VARCHAR" property="submitPhone" />
+    <result column="create_by" jdbcType="VARCHAR" property="createBy" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="night_flag" jdbcType="INTEGER" property="nightFlag" />
+    <result column="version_no" jdbcType="VARCHAR" property="versionNo" />
+    <result column="del_flag" jdbcType="INTEGER" property="delFlag" />
+    <result column="fail_remark" jdbcType="VARCHAR" property="failRemark" />
+    <result column="blank_type" jdbcType="VARCHAR" property="blankType" />
+    <result column="competitor_director" jdbcType="VARCHAR" property="competitorDirector" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, butt_joint_code, butt_joint_name, record_type, record_type_code, company_name,
+    company_code, name, card_no, phone, enter_factory, enter_factory_code, enter_start_time,
+    enter_end_time, photo_url, submit_phone, create_by, create_time, remark, night_flag,
+    version_no, del_flag, fail_remark, blank_type, competitor_director
+  </sql>
+  <select id="selectByExample" parameterType="com.yutong.safety.core.db.entity.entry.SafetyEntryImportFailDOExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from safety_entry_import_fail
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Wed Oct 22 15:47:45 CST 2025.
+    -->
+    select
+    <include refid="Base_Column_List" />
+    from safety_entry_import_fail
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Wed Oct 22 15:47:45 CST 2025.
+    -->
+    delete from safety_entry_import_fail
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.yutong.safety.core.db.entity.entry.SafetyEntryImportFailDOExample">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Wed Oct 22 15:47:45 CST 2025.
+    -->
+    delete from safety_entry_import_fail
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.yutong.safety.core.db.entity.entry.SafetyEntryImportFailDO">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Wed Oct 22 15:47:45 CST 2025.
+    -->
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into safety_entry_import_fail (butt_joint_code, butt_joint_name, record_type,
+    record_type_code, company_name, company_code,
+    name, card_no, phone,
+    enter_factory, enter_factory_code, enter_start_time,
+    enter_end_time, photo_url, submit_phone,
+    create_by, create_time, remark,
+    night_flag, version_no, del_flag,
+    fail_remark)
+    values (#{buttJointCode,jdbcType=VARCHAR}, #{buttJointName,jdbcType=VARCHAR}, #{recordType,jdbcType=VARCHAR},
+    #{recordTypeCode,jdbcType=VARCHAR}, #{companyName,jdbcType=VARCHAR}, #{companyCode,jdbcType=VARCHAR},
+    #{name,jdbcType=VARCHAR}, #{cardNo,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR},
+    #{enterFactory,jdbcType=VARCHAR}, #{enterFactoryCode,jdbcType=VARCHAR}, #{enterStartTime,jdbcType=VARCHAR},
+    #{enterEndTime,jdbcType=VARCHAR}, #{photoUrl,jdbcType=VARCHAR}, #{submitPhone,jdbcType=VARCHAR},
+    #{createBy,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{remark,jdbcType=VARCHAR},
+    #{nightFlag,jdbcType=INTEGER}, #{versionNo,jdbcType=VARCHAR}, #{delFlag,jdbcType=INTEGER},
+    #{failRemark,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.yutong.safety.core.db.entity.entry.SafetyEntryImportFailDO">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Wed Oct 22 15:47:45 CST 2025.
+    -->
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into safety_entry_import_fail
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="buttJointCode != null">
+        butt_joint_code,
+      </if>
+      <if test="buttJointName != null">
+        butt_joint_name,
+      </if>
+      <if test="recordType != null">
+        record_type,
+      </if>
+      <if test="recordTypeCode != null">
+        record_type_code,
+      </if>
+      <if test="companyName != null">
+        company_name,
+      </if>
+      <if test="companyCode != null">
+        company_code,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+      <if test="cardNo != null">
+        card_no,
+      </if>
+      <if test="phone != null">
+        phone,
+      </if>
+      <if test="enterFactory != null">
+        enter_factory,
+      </if>
+      <if test="enterFactoryCode != null">
+        enter_factory_code,
+      </if>
+      <if test="enterStartTime != null">
+        enter_start_time,
+      </if>
+      <if test="enterEndTime != null">
+        enter_end_time,
+      </if>
+      <if test="photoUrl != null">
+        photo_url,
+      </if>
+      <if test="submitPhone != null">
+        submit_phone,
+      </if>
+      <if test="createBy != null">
+        create_by,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="remark != null">
+        remark,
+      </if>
+      <if test="nightFlag != null">
+        night_flag,
+      </if>
+      <if test="versionNo != null">
+        version_no,
+      </if>
+      <if test="delFlag != null">
+        del_flag,
+      </if>
+      <if test="failRemark != null">
+        fail_remark,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="buttJointCode != null">
+        #{buttJointCode,jdbcType=VARCHAR},
+      </if>
+      <if test="buttJointName != null">
+        #{buttJointName,jdbcType=VARCHAR},
+      </if>
+      <if test="recordType != null">
+        #{recordType,jdbcType=VARCHAR},
+      </if>
+      <if test="recordTypeCode != null">
+        #{recordTypeCode,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null">
+        #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="companyCode != null">
+        #{companyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="cardNo != null">
+        #{cardNo,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null">
+        #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="enterFactory != null">
+        #{enterFactory,jdbcType=VARCHAR},
+      </if>
+      <if test="enterFactoryCode != null">
+        #{enterFactoryCode,jdbcType=VARCHAR},
+      </if>
+      <if test="enterStartTime != null">
+        #{enterStartTime,jdbcType=VARCHAR},
+      </if>
+      <if test="enterEndTime != null">
+        #{enterEndTime,jdbcType=VARCHAR},
+      </if>
+      <if test="photoUrl != null">
+        #{photoUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="submitPhone != null">
+        #{submitPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="createBy != null">
+        #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="nightFlag != null">
+        #{nightFlag,jdbcType=INTEGER},
+      </if>
+      <if test="versionNo != null">
+        #{versionNo,jdbcType=VARCHAR},
+      </if>
+      <if test="delFlag != null">
+        #{delFlag,jdbcType=INTEGER},
+      </if>
+      <if test="failRemark != null">
+        #{failRemark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.yutong.safety.core.db.entity.entry.SafetyEntryImportFailDOExample" resultType="java.lang.Long">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Wed Oct 22 15:47:45 CST 2025.
+    -->
+    select count(*) from safety_entry_import_fail
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Wed Oct 22 15:47:45 CST 2025.
+    -->
+    update safety_entry_import_fail
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.buttJointCode != null">
+        butt_joint_code = #{record.buttJointCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.buttJointName != null">
+        butt_joint_name = #{record.buttJointName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.recordType != null">
+        record_type = #{record.recordType,jdbcType=VARCHAR},
+      </if>
+      <if test="record.recordTypeCode != null">
+        record_type_code = #{record.recordTypeCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyName != null">
+        company_name = #{record.companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyCode != null">
+        company_code = #{record.companyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.name != null">
+        name = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.cardNo != null">
+        card_no = #{record.cardNo,jdbcType=VARCHAR},
+      </if>
+      <if test="record.phone != null">
+        phone = #{record.phone,jdbcType=VARCHAR},
+      </if>
+      <if test="record.enterFactory != null">
+        enter_factory = #{record.enterFactory,jdbcType=VARCHAR},
+      </if>
+      <if test="record.enterFactoryCode != null">
+        enter_factory_code = #{record.enterFactoryCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.enterStartTime != null">
+        enter_start_time = #{record.enterStartTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.enterEndTime != null">
+        enter_end_time = #{record.enterEndTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.photoUrl != null">
+        photo_url = #{record.photoUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.submitPhone != null">
+        submit_phone = #{record.submitPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createBy != null">
+        create_by = #{record.createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null">
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.remark != null">
+        remark = #{record.remark,jdbcType=VARCHAR},
+      </if>
+      <if test="record.nightFlag != null">
+        night_flag = #{record.nightFlag,jdbcType=INTEGER},
+      </if>
+      <if test="record.versionNo != null">
+        version_no = #{record.versionNo,jdbcType=VARCHAR},
+      </if>
+      <if test="record.delFlag != null">
+        del_flag = #{record.delFlag,jdbcType=INTEGER},
+      </if>
+      <if test="record.failRemark != null">
+        fail_remark = #{record.failRemark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Wed Oct 22 15:47:45 CST 2025.
+    -->
+    update safety_entry_import_fail
+    set id = #{record.id,jdbcType=INTEGER},
+      butt_joint_code = #{record.buttJointCode,jdbcType=VARCHAR},
+      butt_joint_name = #{record.buttJointName,jdbcType=VARCHAR},
+      record_type = #{record.recordType,jdbcType=VARCHAR},
+      record_type_code = #{record.recordTypeCode,jdbcType=VARCHAR},
+      company_name = #{record.companyName,jdbcType=VARCHAR},
+      company_code = #{record.companyCode,jdbcType=VARCHAR},
+      name = #{record.name,jdbcType=VARCHAR},
+      card_no = #{record.cardNo,jdbcType=VARCHAR},
+      phone = #{record.phone,jdbcType=VARCHAR},
+      enter_factory = #{record.enterFactory,jdbcType=VARCHAR},
+      enter_factory_code = #{record.enterFactoryCode,jdbcType=VARCHAR},
+      enter_start_time = #{record.enterStartTime,jdbcType=VARCHAR},
+      enter_end_time = #{record.enterEndTime,jdbcType=VARCHAR},
+      photo_url = #{record.photoUrl,jdbcType=VARCHAR},
+      submit_phone = #{record.submitPhone,jdbcType=VARCHAR},
+      create_by = #{record.createBy,jdbcType=VARCHAR},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      remark = #{record.remark,jdbcType=VARCHAR},
+      night_flag = #{record.nightFlag,jdbcType=INTEGER},
+      version_no = #{record.versionNo,jdbcType=VARCHAR},
+      del_flag = #{record.delFlag,jdbcType=INTEGER},
+      fail_remark = #{record.failRemark,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.yutong.safety.core.db.entity.entry.SafetyEntryImportFailDO">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Wed Oct 22 15:47:45 CST 2025.
+    -->
+    update safety_entry_import_fail
+    <set>
+      <if test="buttJointCode != null">
+        butt_joint_code = #{buttJointCode,jdbcType=VARCHAR},
+      </if>
+      <if test="buttJointName != null">
+        butt_joint_name = #{buttJointName,jdbcType=VARCHAR},
+      </if>
+      <if test="recordType != null">
+        record_type = #{recordType,jdbcType=VARCHAR},
+      </if>
+      <if test="recordTypeCode != null">
+        record_type_code = #{recordTypeCode,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null">
+        company_name = #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="companyCode != null">
+        company_code = #{companyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="cardNo != null">
+        card_no = #{cardNo,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null">
+        phone = #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="enterFactory != null">
+        enter_factory = #{enterFactory,jdbcType=VARCHAR},
+      </if>
+      <if test="enterFactoryCode != null">
+        enter_factory_code = #{enterFactoryCode,jdbcType=VARCHAR},
+      </if>
+      <if test="enterStartTime != null">
+        enter_start_time = #{enterStartTime,jdbcType=VARCHAR},
+      </if>
+      <if test="enterEndTime != null">
+        enter_end_time = #{enterEndTime,jdbcType=VARCHAR},
+      </if>
+      <if test="photoUrl != null">
+        photo_url = #{photoUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="submitPhone != null">
+        submit_phone = #{submitPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="createBy != null">
+        create_by = #{createBy,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remark != null">
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="nightFlag != null">
+        night_flag = #{nightFlag,jdbcType=INTEGER},
+      </if>
+      <if test="versionNo != null">
+        version_no = #{versionNo,jdbcType=VARCHAR},
+      </if>
+      <if test="delFlag != null">
+        del_flag = #{delFlag,jdbcType=INTEGER},
+      </if>
+      <if test="failRemark != null">
+        fail_remark = #{failRemark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.yutong.safety.core.db.entity.entry.SafetyEntryImportFailDO">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Wed Oct 22 15:47:45 CST 2025.
+    -->
+    update safety_entry_import_fail
+    set butt_joint_code = #{buttJointCode,jdbcType=VARCHAR},
+      butt_joint_name = #{buttJointName,jdbcType=VARCHAR},
+      record_type = #{recordType,jdbcType=VARCHAR},
+      record_type_code = #{recordTypeCode,jdbcType=VARCHAR},
+      company_name = #{companyName,jdbcType=VARCHAR},
+      company_code = #{companyCode,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      card_no = #{cardNo,jdbcType=VARCHAR},
+      phone = #{phone,jdbcType=VARCHAR},
+      enter_factory = #{enterFactory,jdbcType=VARCHAR},
+      enter_factory_code = #{enterFactoryCode,jdbcType=VARCHAR},
+      enter_start_time = #{enterStartTime,jdbcType=VARCHAR},
+      enter_end_time = #{enterEndTime,jdbcType=VARCHAR},
+      photo_url = #{photoUrl,jdbcType=VARCHAR},
+      submit_phone = #{submitPhone,jdbcType=VARCHAR},
+      create_by = #{createBy,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      remark = #{remark,jdbcType=VARCHAR},
+      night_flag = #{nightFlag,jdbcType=INTEGER},
+      version_no = #{versionNo,jdbcType=VARCHAR},
+      del_flag = #{delFlag,jdbcType=INTEGER},
+      fail_remark = #{failRemark,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <insert id="batchSave">
+    insert into safety.safety_entry_import_fail (butt_joint_code, butt_joint_name, record_type,
+    record_type_code, company_name, company_code,
+    name, card_no, phone,
+    enter_factory, enter_factory_code, enter_start_time,
+    enter_end_time, photo_url, submit_phone,
+    create_by, create_time, remark,
+    night_flag, version_no, del_flag,
+    fail_remark, blank_type, competitor_director)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.buttJointCode,jdbcType=VARCHAR}, #{item.buttJointName,jdbcType=VARCHAR}, #{item.recordType,jdbcType=VARCHAR},
+      #{item.recordTypeCode,jdbcType=VARCHAR}, #{item.companyName,jdbcType=VARCHAR}, #{item.companyCode,jdbcType=VARCHAR},
+      #{item.name,jdbcType=VARCHAR}, #{item.cardNo,jdbcType=VARCHAR}, #{item.phone,jdbcType=VARCHAR},
+      #{item.enterFactory,jdbcType=VARCHAR}, #{item.enterFactoryCode,jdbcType=VARCHAR}, #{item.enterStartTime,jdbcType=VARCHAR},
+      #{item.enterEndTime,jdbcType=VARCHAR}, #{item.photoUrl,jdbcType=VARCHAR}, #{item.submitPhone,jdbcType=VARCHAR},
+      #{item.createBy,jdbcType=VARCHAR}, #{item.createTime,jdbcType=TIMESTAMP}, #{item.remark,jdbcType=VARCHAR},
+      #{item.nightFlag,jdbcType=INTEGER}, #{item.versionNo,jdbcType=VARCHAR}, #{item.delFlag,jdbcType=INTEGER},
+      #{item.failRemark,jdbcType=VARCHAR}, #{item.blankType,jdbcType=VARCHAR}, #{item.competitorDirector,jdbcType=VARCHAR})
+    </foreach>
+  </insert>
+
+  <select id="getDtoListByVersionNo" resultType="com.yutong.safety.core.db.entity.entry.SafetyEntryBlankProcessDetailDO">
+    select f.id, f.butt_joint_code, f.butt_joint_name, f.record_type, f.record_type_code, f.company_name,
+           f.company_code, f.name, f.card_no, f.phone, f.enter_factory, f.enter_factory_code, f.enter_start_time,
+           f.enter_end_time, f.photo_url, f.submit_phone, f.create_by, f.create_time, f.remark, f.night_flag,
+           f.version_no, f.del_flag, f.fail_remark,m.position_type
+    from safety.safety_entry_import_fail f ,safety.safety_black_message m
+    where f.version_no = #{versionNo} and f.fail_remark='禁止入厂-二级黑名单'
+      and m.id_card_no = f.card_no
+  </select>
+</mapper>

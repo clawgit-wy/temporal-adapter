@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.enter.SafetyEnterRegisterMapper">
+    <resultMap id="EnterRegisterMap" type="com.yutong.safety.core.db.entity.enter.result.SafetyEnterRegisterRt">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="fd_name" jdbcType="VARCHAR" property="fdName" />
+        <result column="fd_card_no" jdbcType="VARCHAR" property="fdCardNo" />
+        <result column="fd_phone" jdbcType="VARCHAR" property="fdPhone" />
+        <result column="fd_img" jdbcType="VARCHAR" property="fdImg" />
+        <result column="fd_in_factory" jdbcType="VARCHAR" property="fdInFactory" />
+        <result column="create_time" jdbcType="VARCHAR" property="createTime" />
+        <result column="create_user" jdbcType="VARCHAR" property="createUser" />
+    </resultMap>
+    <sql id="EnterRegisterSh">
+        1=1
+        <if test="fdName!=null and fdName!=''">
+            AND t.fd_name LIKE CONCAT(CONCAT('%', #{fdName}),'%')
+        </if>
+        <if test="fdCardNo!=null and fdCardNo!=''">
+            AND t.fd_card_no = #{fdCardNo}
+        </if>
+        <if test="fdPhone!=null and fdPhone!=''">
+            AND t.fd_phone = #{fdPhone}
+        </if>
+        <if test="fdInFactory!=null and fdInFactory!=''">
+            AND t.fd_in_factory = #{fdInFactory}
+        </if>
+    </sql>
+    <select id="selectEnterRegisterById" resultMap="EnterRegisterMap">
+        select id,fd_name,fd_card_no,fd_phone,fd_img,fd_in_factory,
+        date_format(create_time,'%Y-%m-%d %H:%i:%s') create_time,create_user
+        from safety_enter_register t
+        where t.id=#{id}
+    </select>
+    <select id="selectEnterRegisterByPhone" resultMap="EnterRegisterMap">
+        select id,fd_name,fd_card_no,fd_phone,fd_img,fd_in_factory
+        from safety_enter_register t
+        where t.fd_phone=#{fdPhone}
+        limit 1
+    </select>
+    <select id="selectEnterRegisterByCard" resultMap="EnterRegisterMap">
+        select id,fd_name,fd_card_no,fd_phone,fd_img,fd_in_factory
+        from safety_enter_register t
+        where t.fd_card_no=#{fdCard}
+        limit 1
+    </select>
+    <select id="selectEnterRegisterHas" resultMap="EnterRegisterMap">
+        select id,fd_name,fd_card_no,fd_phone,fd_img,fd_in_factory
+        from safety_enter_register t
+        where t.fd_phone=#{fdPhone} and t.fd_name=#{userName}
+        limit 1
+    </select>
+    <select id="checkEnterRegister" resultType="integer">
+        select count(*)
+        from safety_enter_register t
+        where fd_phone=#{fdPerPhone} and fd_name=#{fdPerName}
+    </select>
+    <select id="checkEnterRegisterOld" resultType="integer">
+        select count(*)
+        from safety_enter_register t
+        where fd_phone=#{phone}
+    </select>
+    <select id="selectEnterRegisterList" resultMap="EnterRegisterMap"
+            parameterType="com.yutong.safety.core.db.entity.enter.search.SafetyEnterRegisterSh">
+        select id,fd_name,fd_card_no,fd_phone,fd_img,fd_in_factory,
+        date_format(create_time,'%Y-%m-%d %H:%i:%s') create_time,create_user
+        from safety_enter_register t
+        where <include refid="EnterRegisterSh"/>
+        order by t.create_time desc
+        <if test="export == null">
+            <if test="limit != null">
+                <if test="offset != null">
+                    limit #{offset}, #{limit}
+                </if>
+                <if test="offset == null">
+                    limit #{limit}
+                </if>
+            </if>
+        </if>
+        <if test="export != null">
+            limit 5000
+        </if>
+    </select>
+    <select id="selectEnterRegisterCount" resultType="integer"
+            parameterType="com.yutong.safety.core.db.entity.enter.search.SafetyEnterRegisterSh">
+        select count(*)
+        from safety_enter_register t
+        where <include refid="EnterRegisterSh"/>
+    </select>
+
+    <insert id="insertEnterRegister" parameterType="com.yutong.safety.core.db.entity.enter.SafetyEnterRegister">
+        insert into safety_enter_register(
+        fd_name,fd_card_no,fd_phone,fd_img,fd_in_factory,create_time,create_user,update_time,update_user
+        )
+        values (
+        #{fdName},#{fdCardNo},#{fdPhone},#{fdImg},#{fdInFactory},#{createTime},#{createUser},#{updateTime},#{updateUser}
+        )
+    </insert>
+
+
+    <insert id="insertEnterRegisterBatch" keyColumn="fd_phone">
+        insert into safety_enter_register(
+            fd_name,fd_card_no,fd_phone,fd_img,fd_in_factory,create_time,create_user,update_time,update_user
+        )
+        values
+        <foreach collection="batch" item="batch" separator=",">
+            (
+                #{batch.fdName},
+                #{batch.fdCardNo},
+                #{batch.fdPhone},
+                #{batch.fdImg},
+                #{batch.fdInFactory},
+                NOW(),
+                #{batch.createUser},
+                NOW(),
+                #{batch.updateUser}
+            )
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        fd_name = VALUES(fd_name),
+        fd_phone = VALUES(fd_phone),
+        fd_img = VALUES(fd_img),
+        fd_in_factory = VALUES(fd_in_factory),
+        update_time = CURRENT_TIMESTAMP,
+        update_user = VALUES(update_user)
+    </insert>
+
+    <update id="updateEnterRegister" parameterType="com.yutong.safety.core.db.entity.enter.SafetyEnterRegister">
+        update safety_enter_register
+        <set>
+            <if test="fdName!=null and fdName!=''">
+                fd_name=#{fdName},
+            </if>
+            <if test="fdCardNo!=null and fdCardNo!=''">
+                fd_card_no=#{fdCardNo},
+            </if>
+            <if test="fdPhone!=null and fdPhone!=''">
+                fd_phone=#{fdPhone},
+            </if>
+            <if test="fdImg!=null and fdImg!=''">
+                fd_img=#{fdImg},
+            </if>
+            <if test="fdInFactory!=null and fdInFactory!=''">
+                fd_in_factory=#{fdInFactory},
+            </if>
+            <if test="updateTime!=null">
+                update_time=#{updateTime},
+            </if>
+            <if test="updateUser!=null and updateUser!=''">
+                update_user=#{updateUser},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <delete id="deleteEnterRegister">
+        delete from safety_enter_register where id=#{id}
+    </delete>
+
+    <resultMap id="EnterRegisterExMap" type="com.yutong.safety.core.db.entity.enter.excel.SafetyEnterRegisterEx">
+        <result column="fd_name" jdbcType="VARCHAR" property="fdName" />
+        <result column="fd_card_no" jdbcType="VARCHAR" property="fdCardNo" />
+        <result column="fd_phone" jdbcType="VARCHAR" property="fdPhone" />
+        <result column="fd_img" jdbcType="VARCHAR" property="fdImg" />
+        <result column="fd_in_factory" jdbcType="VARCHAR" property="fdInFactory" />
+        <result column="create_time" jdbcType="VARCHAR" property="createTime" />
+    </resultMap>
+    <select id="selectEnterRegisterExport" resultMap="EnterRegisterExMap"
+            parameterType="com.yutong.safety.core.db.entity.enter.search.SafetyEnterRegisterSh">
+        select fd_name,fd_card_no,fd_phone,fd_img,fd_in_factory,date_format(create_time,'%Y-%m-%d %H:%i:%s') create_time
+        from safety_enter_register t
+        where <include refid="EnterRegisterSh"/>
+        order by t.id
+    </select>
+
+    <select id="selectEnterRegisterByPhoneList" resultMap="EnterRegisterMap"
+            parameterType="com.yutong.safety.core.db.entity.enter.search.SafetyEnterRegisterSh">
+        select id, fd_name,fd_card_no,fd_phone,fd_img,fd_in_factory,date_format(create_time,'%Y-%m-%d %H:%i:%s') create_time, create_user
+        from safety_enter_register t
+        where fd_phone in
+        <foreach collection="list" close=")" open="(" separator="," item="item">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="selectEnterRegisterByCardNos" resultMap="EnterRegisterMap"
+            parameterType="com.yutong.safety.core.db.entity.enter.search.SafetyEnterRegisterSh">
+        select id, fd_name,fd_card_no,fd_phone,fd_img,fd_in_factory,date_format(create_time,'%Y-%m-%d %H:%i:%s') create_time, create_user
+        from safety_enter_register t
+        where fd_card_no in
+        <foreach collection="list" close=")" open="(" separator="," item="item">
+            #{item}
+        </foreach>
+    </select>
+
+    <update id="batchUpdate">
+        <foreach collection="list" item="item" index="index" separator=";">
+            UPDATE safety_enter_register
+            SET
+            fd_phone = #{item.fdPhone,jdbcType=VARCHAR},
+            update_time = now()
+            WHERE id = #{item.id,jdbcType=INTEGER}
+        </foreach>
+    </update>
+
+    <select id="selectListByUpdateTime" resultMap="EnterRegisterMap">
+        select * from safety.safety_enter_register where update_time between #{start} and #{end}
+    </select>
+</mapper>

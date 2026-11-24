@@ -1,0 +1,15 @@
+package com.yutong.modules.common.entity.bpm.fields;
+
+import com.yutong.modules.common.entity.bpm.createapprove.CreateAndApproveProcessResponse;
+import lombok.Data;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+
+@Data
+@XmlAccessorType(XmlAccessType.FIELD)
+public class GetFieldAuthInfoBody {
+    @XmlElement(name = "GetFieldAuthInfoResponse", namespace = "http://interfaces.lbpmdocking.sys.kmss.landray.com/")
+    private GetFieldAuthInfoResponse fieldAuthInfoResponse;
+}

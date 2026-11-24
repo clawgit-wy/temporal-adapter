@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.SafetyUserMessageDOBizMapper">
+  <update id="batchInsert">
+    insert into `safety_user_message` (`emp_name`, `emp_no`, `role`, `role_id`, `modify_emp`, `modify_emp_no`, `create_time`, `update_time`, `delete_falg`) values
+    <foreach collection="blackList" item="item" separator=",">
+      (#{item.empName}, #{item.empNo}, #{item.role}, #{item.roleId}, #{item.modifyEmp}, #{item.modifyEmpNo}, now(), now(), '0')
+    </foreach>
+  </update>
+</mapper>

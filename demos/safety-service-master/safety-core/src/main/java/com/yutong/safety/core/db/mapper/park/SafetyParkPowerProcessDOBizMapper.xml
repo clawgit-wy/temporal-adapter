@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.park.SafetyParkPowerProcessDOBizMapper">
+    <sql id="queryCondition">
+        <where>
+            <if test="createEmployeeNo != null and createEmployeeNo != ''">
+                and p.CREATE_EMPLOYEE_NO = #{createEmployeeNo}
+            </if>
+            <if test="createEmployeeName != null and createEmployeeName != ''">
+                and p.CREATE_EMPLOYEE_NAME like concat('%',#{createEmployeeName},'%')
+            </if>
+            <if test="status != null and status != ''">
+                and p.status = #{status}
+            </if>
+            <if test="createStartTime != null and createStartTime != ''">
+                and p.CREATE_TIME >= #{createStartTime}
+            </if>
+            <if test="createEndTime != null and createEndTime != ''">
+                <![CDATA[
+                    and p.CREATE_TIME <= #{createStartTime}
+                ]]>
+            </if>
+            <if test="montageFactoryCode != null and montageFactoryCode != ''">
+                and FIND_IN_SET(#{montageFactoryCode},p.MONTAGE_FACTORY_CODE)
+            </if>
+
+            <if test='"1" == roleType or "3" == roleType'>
+                and (CREATE_EMPLOYEE_NO = #{curPerson} or cur_node_handler = #{curNodeHandler})
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectList" parameterType="com.yutong.safety.core.dto.park.SafetyParkPowerProcessDTO"
+            resultType="com.yutong.safety.core.dto.park.SafetyParkPowerProcessDTO">
+        select p.*,
+        <![CDATA[
+       CONCAT(#{bpmUrlPre},'&formInstanceId=',p.id,'&processId=',p.BPM_FLOW_ID) bpm_url
+            ]]>
+        from safety_park_power_process p
+        <include refid="queryCondition"/>
+        order by p.CREATE_TIME desc
+        <if test="limit != null">
+            <if test="offset != null">
+                limit ${offset}, ${limit}
+            </if>
+            <if test="offset == null">
+                limit ${limit}
+            </if>
+        </if>
+    </select>
+
+    <select id="selectListCount" resultType="java.lang.Integer"
+            parameterType="com.yutong.safety.core.dto.park.SafetyParkPowerProcessDTO">
+        select count(1) from safety_park_power_process p
+        <include refid="queryCondition"/>
+    </select>
+
+    <select id="getListByUserCode" parameterType="java.util.List" resultType="com.yutong.safety.core.db.entity.employeeprivatecar.SafetyEmployeePrivateCarDO">
+        select employee_no,employee_name,group_concat(car_no) as car_no
+        from safety_employee_private_car
+        where myself_car = '是'
+        and lock_flag != '1' and delete_flag = '0'
+        and employee_no in
+        <foreach collection="list" separator="," item="ll" close=")" open="(">
+            #{ll}
+        </foreach>
+        group by employee_no,employee_name
+    </select>
+
+    <select id="getUserList" parameterType="java.lang.String" resultType="com.yutong.safety.core.dto.ParamDTO">
+        select m.emp_no,m.emp_name,m.phone_no,
+               group_concat(ei.FACTORY_ID) as factory_id,
+               group_concat(fm.field_name) as factory_name,
+               max(ei.POWER_END_TIME) as power_end_time
+        from safety_employee_message m
+        left join safety_park_employee_power_info ei on m.emp_no = ei.EMPLOYEE_CODE and ei.IS_DELETE = '0'
+        left join safety_field_manage fm on ei.FACTORY_ID = fm.id
+        where m.status = 'NORMAL'
+          and m.emp_no in (
+            select distinct d.EMPLOYEE_CODE from safety_park_power_process p
+                     inner join safety_park_power_process_detail d on p.id = d.PROCESS_ID
+                     where p.id = #{processId}
+            )
+        group by m.emp_no, m.emp_name, m.phone_no
+    </select>
+
+    <select id="getCarList" parameterType="java.util.List" resultType="com.yutong.safety.core.dto.ParamDTO">
+        select employee_no as emp_no,group_concat(car_no) as car_no from safety_employee_private_car
+        where lock_flag != '1' and delete_flag = '0'
+          and employee_no in
+        <foreach collection="list" item="ll" separator="," close=")" open="(">
+            #{ll.empNo}
+        </foreach>
+        group by employee_no
+    </select>
+
+    <select id="getCarListForEmpNos" parameterType="java.util.List" resultType="com.yutong.safety.core.dto.ParamDTO">
+        select employee_no as emp_no,group_concat(car_no) as car_no from safety_employee_private_car
+        where lock_flag != '1' and delete_flag = '0'
+        and employee_no in
+        <foreach collection="list" item="ll" separator="," close=")" open="(">
+            #{ll}
+        </foreach>
+        group by employee_no
+    </select>
+
+    <select id="getUserListByEmpNo" parameterType="java.lang.String" resultType="com.yutong.safety.core.dto.ParamDTO">
+        select m.emp_no,m.emp_name,m.phone_no,group_concat(ei.FACTORY_ID) as factory_id,max(ei.POWER_END_TIME) as power_end_time
+        from safety_employee_message m
+        left join safety_park_employee_power_info ei on m.emp_no = ei.EMPLOYEE_CODE and ei.IS_DELETE = '0'
+        where status = 'NORMAL'
+          <if test="userType != null and userType != ''">
+              and m.user_type = #{userType}
+          </if>
+        and emp_no in
+        <foreach collection="empNos.split(',')" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+        group by m.emp_no, m.emp_name, m.phone_no
+    </select>
+</mapper>

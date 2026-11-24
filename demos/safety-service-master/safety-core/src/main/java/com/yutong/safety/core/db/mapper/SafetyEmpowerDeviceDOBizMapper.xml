@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.SafetyEmpowerDeviceDOBizMapper">
+  <insert id="batchInsert">
+    INSERT INTO `safety_empower_device` (`factory_id`, `factory_name`, `region_name`, `empower_no`, `create_time`, `update_time`, `delete_falg`, `region_id`) VALUES
+    <foreach collection="blackList" item="item" separator=",">
+      (#{item.factoryId}, #{item.factoryName}, #{item.regionName}, #{item.empowerNo}, now(), now(), '0', #{item.regionId})
+    </foreach>
+  </insert>
+</mapper>

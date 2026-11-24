@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.user.mapper.YtsafetySysUserDataRuleMapper">
+
+    <select id="getListByUserId" resultType="com.yutong.modules.user.entity.YtsafetySysUserDataRule">
+        SELECT
+            id AS id,
+            user_id AS userId,
+            perm_id AS permId,
+            field_code AS fieldCode,
+            field_name AS fieldName,
+            relation AS relation,
+            rule_conditions AS ruleConditions,
+            rule_value AS ruleValue,
+            create_time AS createTime,
+            create_user AS createUser,
+            update_time AS updateTime,
+            update_user AS updateUser,
+            del_flag AS delFlag,
+            version AS version,
+            sort AS sort
+        FROM ytsafety_sys_user_data_rule
+        <where>
+            and del_flag = 0 and rule_value !='column_hide'
+            <if test="userId != null">
+                and user_id = #{userId}
+            </if>
+            <if test="permCode != null and permCode != ''">
+                and perm_code = #{permCode}
+            </if>
+        </where>
+        ORDER BY sort ASC
+    </select>
+
+
+    <select id="getColumnPermissionByUserId" resultType="com.yutong.modules.user.entity.YtsafetySysUserDataRule">
+        SELECT
+        id AS id,
+        user_id AS userId,
+        perm_id AS permId,
+        field_code AS fieldCode,
+        field_name AS fieldName,
+        relation AS relation,
+        rule_conditions AS ruleConditions,
+        rule_value AS ruleValue,
+        create_time AS createTime,
+        create_user AS createUser,
+        update_time AS updateTime,
+        update_user AS updateUser,
+        del_flag AS delFlag,
+        version AS version,
+        sort AS sort
+        FROM ytsafety_sys_user_data_rule
+        <where>
+            del_flag = 0
+            <if test="userId != null">
+                AND user_id = #{userId}
+            </if>
+            <if test="ruleValue != null and ruleValue != ''">
+                AND rule_value = #{ruleValue}
+            </if>
+            <if test="permCode != null and permCode != ''">
+                AND perm_code = #{permCode}
+            </if>
+        </where>
+        ORDER BY sort ASC
+    </select>
+</mapper>

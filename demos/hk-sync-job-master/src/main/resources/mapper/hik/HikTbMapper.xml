@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.hksync.mapper.hik.HikTbMapper">
+
+    <insert id="batchPersonSave" parameterType="java.util.List">
+        INSERT INTO public.tb_middle_person (job_no, name, person_type, sex, org_id, mobile, cert_type, certificate_no, status, update_time)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.jobNo},
+            #{item.name},
+            #{item.personType},
+            #{item.sex},
+            #{item.orgId},
+            #{item.mobile},
+            #{item.certType},
+            #{item.certificateNo},
+            #{item.status},
+            now()
+            )
+        </foreach>
+        ON CONFLICT (certificate_no) DO UPDATE SET job_no         = EXCLUDED.job_no,
+        name           = EXCLUDED.name,
+        person_type    = EXCLUDED.person_type,
+        sex            = EXCLUDED.sex,
+        org_id         = EXCLUDED.org_id,
+        mobile         = EXCLUDED.mobile,
+        cert_type      = EXCLUDED.cert_type,
+        certificate_no = EXCLUDED.certificate_no,
+        status         = EXCLUDED.status,
+        update_time    = now()
+    </insert>
+
+    <insert id="batchOrgSave" parameterType="java.util.List">
+        INSERT INTO public.tb_middle_org (org_id, org_name, parent_org_id, status, update_time)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.orgId},
+            #{item.orgName},
+            #{item.parentOrgId},
+            #{item.status},
+            #{item.updateTimeStr}
+            )
+        </foreach>
+        ON CONFLICT (org_id) DO UPDATE SET org_id        = EXCLUDED.org_id,
+        org_name      = EXCLUDED.org_name,
+        parent_org_id = EXCLUDED.parent_org_id,
+        status        = EXCLUDED.status,
+        update_time   = EXCLUDED.update_time
+    </insert>
+
+    <insert id="batchFaceSave" parameterType="java.util.List">
+        INSERT INTO public.tb_middle_face (job_no, face_data, face_url, status, update_time, certificate_no)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.jobNo},
+            #{item.faceData},
+            #{item.faceUrl},
+            #{item.status},
+            now(),
+            #{item.certificateNo}
+            )
+        </foreach>
+        ON CONFLICT (certificate_no) DO UPDATE SET job_no         = EXCLUDED.job_no,
+        face_data      = EXCLUDED.face_data,
+        face_url      = EXCLUDED.face_url,
+        status         = EXCLUDED.status,
+        update_time    = now(),
+        certificate_no = EXCLUDED.certificate_no
+    </insert>
+
+</mapper>

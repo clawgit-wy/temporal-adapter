@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.spot.SafetyPatrolPositionValidQuestDOBizMapper">
+  <resultMap id="BaseResultMap" type="com.yutong.safety.core.db.entity.spot.SafetyPatrolPositionValidQuestDO">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="plant_id" jdbcType="INTEGER" property="plantId" />
+    <result column="role_id" jdbcType="INTEGER" property="roleId" />
+    <result column="role_name" jdbcType="VARCHAR" property="roleName" />
+    <result column="factory_id" jdbcType="VARCHAR" property="factoryId" />
+    <result column="begin_date" jdbcType="DATE" property="beginDate" />
+    <result column="end_date" jdbcType="DATE" property="endDate" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="team_id" jdbcType="INTEGER" property="teamId" />
+    <result column="has_mes" jdbcType="INTEGER" property="hasMes" />
+    <result column="team_name" jdbcType="VARCHAR" property="teamName" />
+    <result column="plan_name" jdbcType="VARCHAR" property="planName" />
+    <result column="event_type" jdbcType="VARCHAR" property="eventType" />
+    <result column="event_type_id" jdbcType="VARCHAR" property="eventTypeId" />
+    <result column="cycle" jdbcType="INTEGER" property="cycle" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    id, plant_id, role_id, role_name, factory_id, begin_date, end_date, create_time,
+    team_id, has_mes, team_name, plan_name, event_type, event_type_id, cycle
+  </sql>
+
+  <insert id="insertSelectiveBiz" parameterType="java.util.List">
+    <if test="paramList != null">
+      <foreach collection="paramList" separator=";" item="item">
+        insert into safety_patrol_position_valid_quest
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+          <if test="item.plantId != null">
+            plant_id,
+          </if>
+          <if test="item.roleId != null">
+            role_id,
+          </if>
+          <if test="item.roleName != null">
+            role_name,
+          </if>
+          <if test="item.factoryId != null">
+            factory_id,
+          </if>
+          <if test="item.beginDate != null">
+            begin_date,
+          </if>
+          <if test="item.endDate != null">
+            end_date,
+          </if>
+          <if test="item.createTime != null">
+            create_time,
+          </if>
+          <if test="item.teamId != null">
+            team_id,
+          </if>
+          <if test="item.teamName != null">
+            team_name,
+          </if>
+          <if test="item.hasMes != null">
+            has_mes,
+          </if>
+          <if test="item.planName != null">
+            plan_name,
+          </if>
+          <if test="item.eventType != null">
+            event_type,
+          </if>
+          <if test="item.eventTypeId != null">
+            event_type_id,
+          </if>
+          <if test="item.cycle != null">
+            cycle,
+          </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+          <if test="item.plantId != null">
+            #{item.plantId},
+          </if>
+          <if test="item.roleId != null">
+            #{item.roleId},
+          </if>
+          <if test="item.roleName != null">
+            #{item.roleName},
+          </if>
+          <if test="item.factoryId != null">
+            #{item.factoryId},
+          </if>
+          <if test="item.beginDate != null">
+            #{item.beginDate},
+          </if>
+          <if test="item.endDate != null">
+            #{item.endDate},
+          </if>
+          <if test="item.createTime != null">
+            #{item.createTime},
+          </if>
+          <if test="item.teamId != null">
+            #{item.teamId},
+          </if>
+          <if test="item.teamName != null">
+            #{item.teamName},
+          </if>
+          <if test="item.hasMes != null">
+            #{item.hasMes},
+          </if>
+          <if test="item.planName != null">
+            #{item.planName},
+          </if>
+          <if test="item.eventType != null">
+            #{item.eventType},
+          </if>
+          <if test="item.eventTypeId != null">
+            #{item.eventTypeId},
+          </if>
+          <if test="item.cycle != null">
+            #{item.cycle},
+          </if>
+        </trim>
+      </foreach>
+    </if>
+  </insert>
+
+  <update id="updateSelectiveBiz" parameterType="java.util.List">
+    <if test="paramList != null">
+      <foreach collection="paramList" separator=";" item="item">
+        update safety_patrol_position_valid_quest set
+        has_mes = #{item.hasMes}
+        where id = #{item.id}
+      </foreach>
+    </if>
+  </update>
+
+  <select id="getQuestList" parameterType="java.util.Map" resultType="com.yutong.safety.core.db.entity.spot.SafetyPatrolPositionValidQuestDO">
+    SELECT t1.*
+    FROM safety_patrol_position_valid_quest t1
+    inner JOIN (
+      SELECT plant_id, max(id) as max_id
+      FROM safety_patrol_position_valid_quest
+      GROUP BY plant_id
+    ) t2 ON t1.id = t2.max_id
+    where
+      end_date >= #{paramMap.endDate}
+  </select>
+
+  <select id="getTaskList" parameterType="com.yutong.safety.core.dto.spot.SafetyPatrolPositionValidQuestDTO" resultType="com.yutong.safety.core.dto.spot.SafetyPatrolPositionValidQuestDTO">
+    select a.*,b.cycle as pcycle,b.frequency,b.remark as detailInfo
+    from safety_patrol_position_valid_quest a
+    left join safety_patrol_plan b on a.plant_id = b.id
+    WHERE
+    <![CDATA[
+        a.begin_date <= #{beginDate}
+      and a.end_date >= #{endDate}
+      and a.has_mes = 0
+    ]]>
+    order by a.end_date asc
+  </select>
+</mapper>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.hksync.mapper.safety.SafetyTbMapper">
+
+    <select id="selectBlackMessageList" resultType="com.yutong.hksync.vo.HkMiddleTableVO">
+        select 'HDM00001'                                                                                as orgId,
+               card_no                                                                                   as jobNo,
+               id_card_no                                                                                as certificateNo,
+               emp_name                                                                                  as name,
+               1                                                                                         as personType,
+               111                                                                                       as certType,
+               0                                                                                         as sex,
+               phone_no                                                                                  as mobile,
+               case when (life_photo is not null and life_photo != '') then life_photo else id_photo end as faceUrl,
+               case when (delete_falg = 1 or state = '2') then '-1' else '0' end                         as status
+        from safety.safety_black_message
+        where update_time between #{start} and #{end}
+    </select>
+
+    <select id="selectEmployeeMessageList" resultType="com.yutong.hksync.vo.HkMiddleTableVO">
+        select 'ZZRY0001'                                                                                            as orgId,
+               emp_no                                                                                                as jobNo,
+               emp_no                                                                                                as certificateNo,
+               emp_name                                                                                              as name,
+               1                                                                                                     as personType,
+               131                                                                                                   as certType,
+               case when (sex is null or sex = '') then 0 when (sex = '0') then 1 when (sex = '1') then 2 else 0 end as sex,
+               phone_no                                                                                              as mobile,
+               photo                                                                                                 as faceUrl,
+               0                                                                                                     as status
+        from safety.safety_employee_message
+        where update_time between #{start} and #{end}
+    </select>
+
+    <select id="selectEnterRegisterList" resultType="com.yutong.hksync.vo.HkMiddleTableVO">
+        select 'BA000003' as orgId,
+               fd_phone   as jobNo,
+               fd_phone   as certificateNo,
+               fd_name    as name,
+               1          as personType,
+               990        as certType,
+               0          as sex,
+               fd_phone   as mobile,
+               fd_img     as faceUrl,
+               0          as status
+        from safety.safety_enter_register
+        where update_time between #{start} and #{end}
+    </select>
+
+    <select id="selectVisitorHairpinList" resultType="com.yutong.hksync.vo.HkMiddleTableVO">
+        select 'FK000002'    as orgId,
+               visitor_phone as jobNo,
+               visitor_phone as certificateNo,
+               visited_name  as name,
+               1             as personType,
+               990           as certType,
+               0             as sex,
+               visitor_phone as mobile,
+               photo         as faceUrl,
+               0             as status
+        from safety.safety_visitor_hairpin
+        where delete_falg = 0
+          and vendor_state in (1, 5, 8, 9, 10, 11)
+          and update_time between #{start} and #{end}
+    </select>
+
+</mapper>

@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.park.SafetyParkPowerRuleDOBizMapper">
+  <resultMap id="BaseResultMap" type="com.yutong.safety.core.db.entity.park.vo.ParkPowerRuleVO">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="POST_NAME" jdbcType="VARCHAR" property="postName" />
+    <result column="ORG_CODE" jdbcType="VARCHAR" property="orgCode" />
+    <result column="ORG_NAME" jdbcType="VARCHAR" property="orgName" />
+    <result column="ORG_CODE_PATH" jdbcType="VARCHAR" property="orgCodePath" />
+    <result column="ORG_NAME_PATH" jdbcType="VARCHAR" property="orgNamePath" />
+    <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+    <result column="PRIORITY" jdbcType="INTEGER" property="priority" />
+    <result column="FACTORY_POWER" jdbcType="VARCHAR" property="factoryPower" />
+    <result column="FACTORY_NAME_POWER" jdbcType="VARCHAR" property="factoryNamePower" />
+    <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="UPDATE_TIME" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="IS_DELETE" jdbcType="SMALLINT" property="isDelete" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    sppr.id, sppr.POST_NAME, sppr.ORG_CODE, sppr.REMARK, sppr.PRIORITY, sppr.FACTORY_POWER,
+    sppr.CREATE_TIME,DATE_FORMAT(sppr.create_time,'%Y-%m-%d %H:%i:%s') create_time_str,
+    sppr.UPDATE_TIME,DATE_FORMAT(sppr.UPDATE_TIME,'%Y-%m-%d %H:%i:%s') UPDATE_TIME_str,
+    sppr.IS_DELETE,sgi.name ORG_NAME,sgi.ORG_CODE_PATH,sgi.ORG_NAME_PATH,sppr.FACTORY_NAME_POWER
+  </sql>
+
+  <sql id="Base_Where">
+    <if test="orgCode != null and orgCode != ''">
+      and sppr.ORG_CODE = #{orgCode}
+    </if>
+    <if test="orgName != null and orgName != ''">
+      and sgi.name = #{orgName}
+    </if>
+    <if test="orgNamePath != null and orgNamePath != ''">
+      and sgi.ORG_NAME_PATH like CONCAT('%',#{orgNamePath},'%')
+    </if>
+    <if test="postName != null and postName != ''">
+      and sppr.POST_NAME = #{postName}
+    </if>
+    <if test="factoryName != null and factoryName !='' ">
+      and FIND_IN_SET(#{factoryName},sppr.FACTORY_NAME_POWER)
+    </if>
+    <if test="factoryCode != null and factoryCode !='' ">
+      and FIND_IN_SET(#{factoryCode},sppr.FACTORY_POWER)
+    </if>
+  </sql>
+
+  <select id="selectList" parameterType="com.yutong.safety.core.db.entity.park.param.ParkPowerRuleListParam" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from safety.safety_park_power_rule sppr
+    left join safety.safety_group_info sgi on sgi.code = sppr.ORG_CODE and SGI.status = 'Y'
+    where 1 = 1 and sppr.is_delete = 0 and (coalesce(sppr.POST_NAME, '') != '' or coalesce(sppr.ORG_CODE, '') != '')
+    <include refid="Base_Where"/>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="pageFlag != null and pageFlag">
+      <if test="limit != null">
+        <if test="offset != null">
+          limit ${offset}, ${limit}
+        </if>
+        <if test="offset == null">
+          limit ${limit}
+        </if>
+      </if>
+    </if>
+  </select>
+
+  <select id="selectCount" parameterType="com.yutong.safety.core.db.entity.park.param.ParkPowerRuleListParam" resultType="java.lang.Long">
+    select count(1)
+    from safety.safety_park_power_rule sppr
+    left join safety.safety_group_info sgi on sgi.code = sppr.ORG_CODE and SGI.status = 'Y'
+    where 1 = 1 and sppr.is_delete = 0 and (coalesce(sppr.POST_NAME, '') != '' or coalesce(sppr.ORG_CODE, '') != '')
+    <include refid="Base_Where"/>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from safety.safety_park_power_rule sppr
+    left join safety.safety_group_info sgi on sgi.code = sppr.ORG_CODE and SGI.status = 'Y'
+    where sppr.id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from safety_park_power_rule
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.yutong.safety.core.db.entity.park.SafetyParkPowerRuleDO">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into safety_park_power_rule (POST_NAME, ORG_CODE, REMARK,
+      PRIORITY, FACTORY_POWER,FACTORY_NAME_POWER, CREATE_TIME,
+      UPDATE_TIME, IS_DELETE)
+    values (#{postName,jdbcType=VARCHAR}, #{orgCode,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR},
+      #{priority,jdbcType=INTEGER}, #{factoryPower,jdbcType=VARCHAR},#{factoryNamePower,jdbcType=VARCHAR},
+        #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP},0)
+  </insert>
+  <insert id="insertSelective" parameterType="com.yutong.safety.core.db.entity.park.SafetyParkPowerRuleDO">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into safety_park_power_rule
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="postName != null">
+        POST_NAME,
+      </if>
+      <if test="orgCode != null">
+        ORG_CODE,
+      </if>
+      <if test="remark != null">
+        REMARK,
+      </if>
+      <if test="priority != null">
+        PRIORITY,
+      </if>
+      <if test="factoryPower != null">
+        FACTORY_POWER,
+      </if>
+      <if test="factoryNamePower != null">
+        FACTORY_NAME_POWER,
+      </if>
+        <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME,
+      </if>
+      <if test="isDelete != null">
+        IS_DELETE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="postName != null">
+        #{postName,jdbcType=VARCHAR},
+      </if>
+      <if test="orgCode != null">
+        #{orgCode,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="priority != null">
+        #{priority,jdbcType=INTEGER},
+      </if>
+      <if test="factoryPower != null">
+        #{factoryPower,jdbcType=VARCHAR},
+      </if>
+      <if test="factoryNamePower != null">
+        #{factoryNamePower,jdbcType=VARCHAR},
+      </if>
+        <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDelete != null">
+        #{isDelete,jdbcType=SMALLINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.yutong.safety.core.db.entity.park.SafetyParkPowerRuleDO">
+    update safety_park_power_rule
+    <set>
+      <if test="postName != null">
+        POST_NAME = #{postName,jdbcType=VARCHAR},
+      </if>
+      <if test="orgCode != null">
+        ORG_CODE = #{orgCode,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="priority != null">
+        PRIORITY = #{priority,jdbcType=INTEGER},
+      </if>
+      <if test="factoryPower != null">
+        FACTORY_POWER = #{factoryPower,jdbcType=VARCHAR},
+      </if>
+      <if test="factoryNamePower != null">
+        FACTORY_NAME_POWER = #{factoryNamePower,jdbcType=VARCHAR},
+      </if>
+        <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isDelete != null">
+        IS_DELETE = #{isDelete,jdbcType=SMALLINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateBatchByIdList">
+    update safety_park_power_rule
+    <set>
+      <if test="record.postName != null">
+        POST_NAME = #{record.postName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.orgCode != null">
+        ORG_CODE = #{record.orgCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.remark != null">
+        REMARK = #{record.remark,jdbcType=VARCHAR},
+      </if>
+      <if test="record.priority != null">
+        PRIORITY = #{priority,jdbcType=INTEGER},
+      </if>
+      <if test="record.factoryPower != null">
+        FACTORY_POWER = #{record.factoryPower,jdbcType=VARCHAR},
+      </if>
+      <if test="record.factoryNamePower != null">
+        FACTORY_NAME_POWER = #{record.factoryNamePower,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null">
+        CREATE_TIME = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.updateTime != null">
+        UPDATE_TIME = #{record.updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.isDelete != null">
+        IS_DELETE = #{record.isDelete,jdbcType=SMALLINT},
+      </if>
+    </set>
+    where id in
+    <foreach collection="idList" close=")" open="(" separator="," item="cid" >
+        #{cid}
+    </foreach>
+  </update>
+
+  <update id="updateByPrimaryKey" parameterType="com.yutong.safety.core.db.entity.park.SafetyParkPowerRuleDO">
+    update safety_park_power_rule
+    set POST_NAME = #{postName,jdbcType=VARCHAR},
+      ORG_CODE = #{orgCode,jdbcType=VARCHAR},
+      REMARK = #{remark,jdbcType=VARCHAR},
+      PRIORITY = #{priority,jdbcType=INTEGER},
+      FACTORY_POWER = #{factoryPower,jdbcType=VARCHAR},
+        FACTORY_NAME_POWER = #{factoryNamePower,jdbcType=VARCHAR},
+      CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      UPDATE_TIME = #{updateTime,jdbcType=TIMESTAMP},
+      IS_DELETE = #{isDelete,jdbcType=SMALLINT}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <!-- 历史规则-记录上一个版本 -->
+  <insert id="batchInsertHistory"  parameterType="java.util.List" useGeneratedKeys="true" keyColumn="TARGET_ID">
+    insert into safety_park_power_rule_history(POST_NAME,ORG_CODE,FACTORY_POWER,PRIORITY,REMARK,TARGET_ID,CREATE_TIME,UPDATE_TIME)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.postName},
+      #{item.orgCode},
+      #{item.factoryPower},
+      #{item.priority},
+      #{item.remark},
+      #{item.targetId},
+      CURRENT_TIMESTAMP,
+      CURRENT_TIMESTAMP)
+    </foreach>
+    ON DUPLICATE KEY UPDATE
+    POST_NAME = VALUES(POST_NAME),
+    ORG_CODE = VALUES(ORG_CODE),
+    FACTORY_POWER = VALUES(FACTORY_POWER),
+    PRIORITY = VALUES(PRIORITY),
+    REMARK = VALUES(REMARK),
+    UPDATE_TIME = CURRENT_TIMESTAMP
+  </insert>
+
+  <!-- 获取变更规则列表 -->
+  <select id="selectChangedRule" resultType="com.yutong.safety.core.db.entity.park.vo.ParkPowerRuleChangeVO">
+    select n.id,n.is_delete, n.post_name, n.ORG_CODE, n.FACTORY_POWER,n.PRIORITY,
+           h.post_name his_post_name,h.ORG_CODE HIS_ORG_CODE,h.FACTORY_POWER HIS_FACTORY_POWER
+     from safety_park_power_rule n
+     left join safety_park_power_rule_history h on n.id = h.target_id
+    where (n.update_time > date_format(concat(date_sub(curdate(),interval 1 day),' 23:00:00'),'%Y-%m-%d %H:%i:%s') or H.UPDATE_TIME is null)
+  </select>
+
+  <select id="selectEmpByRule" resultType="java.lang.String" parameterType="java.util.List">
+    <foreach collection="list" item="rule" separator="union all">
+      select r.emp_no from safety_employee_message r where r.status = 'NORMAL'
+      <if test="rule.postName != null and rule.postName != '空'.toString() ">
+        and r.position_name like concat('%',#{rule.postName},'%')
+      </if>
+      <if test="rule.postName == '空'.toString() ">
+        and (r.position_name = '' or r.position_name is null)
+      </if>
+      <if test="rule.orgCode != null and rule.orgCode != ''">
+        and r.org_code_path like concat('%',#{rule.orgCode},'%')
+      </if>
+      <if test="rule.hisPostName != null and rule.hisPostName != ''">
+        union all select r.emp_no from safety_employee_message r where r.status = 'NORMAL' and r.position_name like concat('%',#{rule.hpostName},'%')
+      </if>
+      <if test="rule.hisOrgCode != null and rule.hisOrgCode != ''">
+        union all select r.emp_no from safety_employee_message r where r.status = 'NORMAL' and r.org_code_path like concat('%',#{rule.horganCode},'%')
+      </if>
+    </foreach>
+  </select>
+
+  <select id="selectRuleByEmpNo" resultType="com.yutong.safety.core.db.entity.park.SafetyParkPowerRuleDO">
+    select sppr.*
+    from safety.safety_park_power_rule sppr ,safety.safety_employee_message sem
+    where sem.emp_no = #{empNo} and sem.status = 'NORMAL' and sppr.IS_DELETE = 0
+      and ((INSTR(SEM.position_name,sppr.POST_NAME) >0 and (sppr.org_code is null or sppr.org_code = ''))
+      or (INSTR(SEM.org_code_path ,sppr.ORG_CODE) >0 and (sppr.POST_NAME is null or sppr.POST_NAME = ''))
+      or (INSTR(SEM.position_name,sppr.POST_NAME) >0 and INSTR(SEM.org_code_path ,sppr.ORG_CODE) >0))
+    order by sppr.PRIORITY asc
+  </select>
+
+  <select id="selectRulesForEmp" resultType="com.yutong.safety.core.db.entity.park.vo.ParkPowerRuleVO">
+    select * from(
+    select M.emp_no,R.ID,R.FACTORY_POWER,R.PRIORITY,R.POST_NAME,R.ORG_CODE
+    from safety_employee_message m ,safety_park_power_rule r
+    where m.`status` = 'NORMAL' and r.IS_DELETE = 0 AND M.user_type = 'ZS'
+      and m.position_name like CONCAT('%', r.POST_NAME, '%')
+      and r.POST_NAME !=''
+    <if test="list != null">
+      and m.emp_no in
+      <foreach collection="list" item="item" open="(" close=")" separator=",">
+        #{item}
+      </foreach>
+    </if>
+    UNION ALL
+    SELECT M.emp_no,R.ID,R.FACTORY_POWER,R.PRIORITY,R.POST_NAME,R.ORG_CODE
+    FROM safety_employee_message m ,safety_park_power_rule r
+    where m.`status` = 'NORMAL' and r.IS_DELETE = 0 AND M.user_type = 'ZS'
+      and FIND_IN_SET(R.ORG_CODE, M.org_code_path)
+      and r.ORG_CODE != ''
+    <if test="list != null">
+      and m.emp_no in
+      <foreach collection="list" item="item" open="(" close=")" separator=",">
+        #{item}
+      </foreach>
+    </if>
+    )tmp order by emp_no,PRIORITY
+  </select>
+</mapper>

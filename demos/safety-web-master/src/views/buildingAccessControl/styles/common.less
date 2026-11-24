@@ -1,0 +1,33 @@
+// 前缀类名
+@prefix-cls: 'building-access-control';
+
+// 颜色变量
+@primary-color: #1890ff;
+@warning-color: #faad14;
+@danger-color: #ff4d4f;
+@success-color: #52c41a;
+
+// 链接样式 Mixin
+.link-style() {
+  color: @primary-color;
+  cursor: pointer;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+
+// 提示文本样式 Mixin
+.tips-style() {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+// 页面容器样式 Mixin
+.page-container() {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 2px;
+} 

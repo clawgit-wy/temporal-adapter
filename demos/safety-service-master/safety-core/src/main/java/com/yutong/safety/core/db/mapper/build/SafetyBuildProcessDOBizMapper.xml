@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.build.SafetyBuildProcessDOBizMapper">
+
+    <sql id="whereProcessQuery">
+        <if test="status != null and status != '' ">
+            and status = #{status}
+        </if>
+        <if test="filterDutyDept != null and filterDutyDept != ''">
+            and (
+            <foreach item="item" index="index" collection="filterDutyDept.split(';')" separator=" or ">
+                CREATE_DEPT_CODE like CONCAT(#{item},'%')
+            </foreach>
+            <if test="createEmpLogin != null and createEmpLogin != ''">
+                or CREATE_EMPLOYEE_LOGIN = #{createEmpLogin}
+            </if>
+            )
+        </if>
+        <if test="filterDutyDept == null or filterDutyDept== '' ">
+            <if test="createEmpLogin != null and createEmpLogin != ''">
+                and CREATE_EMPLOYEE_LOGIN = #{createEmpLogin}
+            </if>
+        </if>
+        <if test="creator != null and creator != '' ">
+            and (CREATE_EMPLOYEE_NO = #{creator} or CREATE_EMPLOYEE_NAME=#{creator})
+        </if>
+        <if test="createDept != null and createDept != '' ">
+            and CREATE_DEPT_NAME like CONCAT(#{createDept},'%')
+        </if>
+        <if test="acrossDept != null and acrossDept != '' ">
+            and CAST(MONTAGE_DEPT AS CHAR CHARACTER SET utf8) LIKE CONCAT('%',#{acrossDept},'%')
+        </if>
+        <if test="deviceName != null and deviceName != '' ">
+            and CAST(MONTAGE_DEVICE_NAME AS CHAR CHARACTER SET utf8) LIKE CONCAT('%',#{deviceName},'%')
+        </if>
+        <if test="deviceName == null or deviceName == '' ">
+            <if test="buildingName != null and buildingName != '' ">
+                and CAST(MONTAGE_BUILD_NAME AS CHAR CHARACTER SET utf8) LIKE CONCAT('%',#{buildingName},'%')
+            </if>
+            <if test="buildingName == null or buildingName== ''">
+                <if test="factoryName != null and factoryName != '' ">
+                    and CAST(MONTAGE_FACTORY_NAME AS CHAR CHARACTER SET utf8) LIKE CONCAT('%',#{factoryName},'%')
+                </if>
+            </if>
+        </if>
+
+        <if test="createTimeEnd != null and createTimeEnd != ''">
+            <![CDATA[and CREATE_TIME < #{createTimeEnd}]]>
+        </if>
+        <if test="createTimeBegin != null and createTimeBegin != ''">
+            <![CDATA[and CREATE_TIME >= #{createTimeBegin}]]>
+        </if>
+        <if test="bpmFlowId !=null and bpmFlowId !=''">
+            and BPM_FLOW_ID = #{bpmFlowId}
+        </if>
+    </sql>
+
+    <sql id="Process_Base_Column_List">
+        ID, BPM_FLOW_ID, PROCESS_CODE, PROCESS_SUBJECT, CREATE_EMPLOYEE_NO, CREATE_EMPLOYEE_LOGIN,
+        CREATE_EMPLOYEE_NAME, CREATE_DEPT_CODE, CREATE_DEPT_NAME, ROLE_TYPE, STATUS, DEPART_EMPLOYEE_LOGIN,
+        DEPART_EMPLOYEE_NAME, ACROSS_FLAG, ACROSS_EMPLOYEE_LOGIN, ACROSS_EMPLOYEE_NAME, TOP_SECRET_FLAG,
+        TOP_SECRET_EMPLOYEE_LOGIN, TOP_SECRET_EMPLOYEE_NAME, CHIEF_EMPLOYEE_LOGIN, CHIEF_EMPLOYEE_NAME,
+        APPLY_REASON, CREATE_TIME, cur_node_handler, cur_handler_name, cur_node_id, cur_node_name,
+        NODE_FLAG, POWER_TYPE, UPDATE_TIME,DUTY_DEPT_CODE,DUTY_DEPT_NAME,
+        case ROLE_TYPE when '1' then '员工' when '2' then '管理员' when '3' then '保密负责人'else ROLE_TYPE END ROLE_TYPE_STR,
+		case STATUS when '10' then '草稿' when '20' then '待审' when '30' then '发布' else STATUS END STATUS_STR
+    </sql>
+    <sql id="Blob_Column_List">
+        CAST(MONTAGE_DEVICE_NAME AS CHAR CHARACTER SET utf8) MONTAGE_DEVICE_NAME_STR,
+        CAST(MONTAGE_BUILD_NAME AS CHAR CHARACTER SET utf8) MONTAGE_BUILD_NAME_STR,
+        CAST(MONTAGE_TIME AS CHAR CHARACTER SET utf8) MONTAGE_TIME_STR,
+        CAST(MONTAGE_FACTORY_NAME AS CHAR CHARACTER SET utf8) MONTAGE_FACTORY_NAME_STR,
+        CAST(MONTAGE_DEPT AS CHAR CHARACTER SET utf8) MONTAGE_DEPT_STR
+        <if test="bpmPreUrl != null and bpmPreUrl != ''">
+        <![CDATA[
+            ,CONCAT(#{bpmPreUrl},'&formInstanceId=',id,'&processId=',BPM_FLOW_ID) flow_url
+        ]]>
+        </if>
+    </sql>
+    <select id="selectByExampleWithBLOBs" parameterType="com.yutong.safety.core.db.entity.build.param.BuildProcessListParam"
+            resultType="com.yutong.safety.core.db.entity.build.vo.BuildProcessListVO">
+        select
+        <include refid="Process_Base_Column_List" />
+        ,
+        <include refid="Blob_Column_List" />
+        from safety_build_process
+        where 1 = 1
+        <include refid="whereProcessQuery" />
+        <if test="orderByClause != null">
+            order by ${orderByClause}
+        </if>
+        <if test="pageFlag != null and pageFlag">
+            <if test="limit != null">
+                <if test="offset != null">
+                    limit ${offset}, ${limit}
+                </if>
+                <if test="offset == null">
+                    limit ${limit}
+                </if>
+            </if>
+        </if>
+    </select>
+
+    <select id="countByExampleWithBLOBs" parameterType="com.yutong.safety.core.db.entity.build.param.BuildProcessListParam" resultType="java.lang.Long">
+        select count(1) from safety_build_process
+        where 1 = 1
+        <include refid="whereProcessQuery" />
+    </select>
+
+  <update id="modifyFlowId" parameterType="com.yutong.safety.core.db.entity.build.param.BuildProcessAddParam">
+    update safety_build_process
+    set bpm_flow_id = #{bpmFlowId}
+    where id = #{id}
+  </update>
+
+  <insert id="batchInsertBuildOpen">
+    insert into safety_build_process_open (PROCESS_ID,EMPOWER_TYPE,EMPOWER_AREA_CODE,EMPOWER_AREA_NAME,DEVICE_CODE,DEVICE_NAME,
+        DOCKING_DEPT_CODE,DOCKING_DEPT_NAME,ACROSS_EMPLOYEE_LOGIN,ACROSS_EMPLOYEE_NAME,TOP_SECRET_EMPLOYEE_LOGIN,
+        TOP_SECRET_EMPLOYEE_NAME,PUBLIC_DEVICE_CODE,PUBLIC_DEVICE_NAME,AN_FACTORY_CODE,AN_FACTORY_NAME,AN_BUILDING_CODE,
+        AN_BUILDING,POWER_BEGIN_TIME,POWER_END_TIME,CREATE_TIME,build_sys_manager_role)
+    values
+   <foreach collection="list" item="item" separator=",">
+     (#{item.processId}, #{item.empowerType},#{item.empowerAreaCode}, #{item.empowerAreaName},#{item.deviceCode}, #{item.deviceName}
+     , #{item.dockingDeptCode},#{item.dockingDeptName}, #{item.acrossEmployeeLogin},#{item.acrossEmployeeName}
+     , #{item.topSecretEmployeeLogin}, #{item.topSecretEmployeeName},#{item.publicDeviceCode}, #{item.publicDeviceName}
+     , #{item.anFactoryCode}, #{item.anFactoryName},#{item.anBuildingCode}, #{item.anBuilding}, #{item.powerBeginTime}
+     , #{item.powerEndTime},#{item.createTime},#{item.buildSysManagerRole})
+   </foreach>
+  </insert>
+
+  <insert id="batchInsertBuildClose">
+    insert into safety_build_process_close (PROCESS_ID,EMPOWER_TYPE,EMPOWER_AREA_CODE,EMPOWER_AREA_NAME,DEVICE_CODE
+        ,DEVICE_NAME,AN_FACTORY_CODE,AN_FACTORY_NAME,AN_BUILDING_CODE,AN_BUILDING)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.processId}, #{item.empowerType},#{item.empowerAreaCode},#{item.empowerAreaName},#{item.deviceCode}
+       , #{item.deviceName}, #{item.anFactoryCode}, #{item.anFactoryName},#{item.anBuildingCode}, #{item.anBuilding})
+    </foreach>
+  </insert>
+
+    <update id="batchUpdateOpen">
+        <foreach collection="list" item="item" separator=";">
+            UPDATE safety_build_process_open
+            SET
+            apply_status =  #{item.applyStatus},
+            refuse_reason =  #{item.refuseReason},
+            apply_employee =  #{item.applyEmployee},
+            apply_role =  #{item.applyRole},
+            apply_time =  #{item.applyTime}
+            WHERE id = #{item.id}
+        </foreach>
+    </update>
+
+    <update id="batchUpdateClose">
+        <foreach collection="list" item="item" separator=";">
+            UPDATE safety_build_process_close
+            SET
+            apply_status =  #{item.applyStatus},
+            refuse_reason =  #{item.refuseReason},
+            apply_employee =  #{item.applyEmployee},
+            apply_role =  #{item.applyRole},
+            apply_time =  #{item.applyTime}
+            WHERE id = #{item.id}
+        </foreach>
+    </update>
+
+    <resultMap id="BaseResultMap" type="com.yutong.safety.core.db.entity.build.SafetyBuildProcessOpenDO">
+        <id column="ID" jdbcType="INTEGER" property="id" />
+        <result column="PROCESS_ID" jdbcType="VARCHAR" property="processId" />
+        <result column="EMPOWER_TYPE" jdbcType="VARCHAR" property="empowerType" />
+        <result column="EMPOWER_AREA_CODE" jdbcType="VARCHAR" property="empowerAreaCode" />
+        <result column="EMPOWER_AREA_NAME" jdbcType="VARCHAR" property="empowerAreaName" />
+        <result column="DEVICE_CODE" jdbcType="VARCHAR" property="deviceCode" />
+        <result column="DEVICE_NAME" jdbcType="VARCHAR" property="deviceName" />
+        <result column="DOCKING_DEPT_CODE" jdbcType="VARCHAR" property="dockingDeptCode" />
+        <result column="DOCKING_DEPT_NAME" jdbcType="VARCHAR" property="dockingDeptName" />
+        <result column="ACROSS_EMPLOYEE_LOGIN" jdbcType="VARCHAR" property="acrossEmployeeLogin" />
+        <result column="ACROSS_EMPLOYEE_NAME" jdbcType="VARCHAR" property="acrossEmployeeName" />
+        <result column="TOP_SECRET_EMPLOYEE_LOGIN" jdbcType="VARCHAR" property="topSecretEmployeeLogin" />
+        <result column="TOP_SECRET_EMPLOYEE_NAME" jdbcType="VARCHAR" property="topSecretEmployeeName" />
+        <result column="APPLY_STATUS" jdbcType="VARCHAR" property="applyStatus" />
+        <result column="REFUSE_REASON" jdbcType="VARCHAR" property="refuseReason" />
+        <result column="APPLY_EMPLOYEE" jdbcType="VARCHAR" property="applyEmployee" />
+        <result column="APPLY_ROLE" jdbcType="VARCHAR" property="applyRole" />
+        <result column="APPLY_TIME" jdbcType="VARCHAR" property="applyTime" />
+        <result column="PUBLIC_DEVICE_CODE" jdbcType="VARCHAR" property="publicDeviceCode" />
+        <result column="PUBLIC_DEVICE_NAME" jdbcType="VARCHAR" property="publicDeviceName" />
+        <result column="AN_FACTORY_CODE" jdbcType="VARCHAR" property="anFactoryCode" />
+        <result column="AN_FACTORY_NAME" jdbcType="VARCHAR" property="anFactoryName" />
+        <result column="AN_BUILDING_CODE" jdbcType="VARCHAR" property="anBuildingCode" />
+        <result column="AN_BUILDING" jdbcType="VARCHAR" property="anBuilding" />
+        <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+        <result column="POWER_BEGIN_TIME" jdbcType="VARCHAR" property="powerBeginTime" />
+        <result column="POWER_END_TIME" jdbcType="VARCHAR" property="powerEndTime" />
+        <result column="build_sys_manager_role" jdbcType="VARCHAR" property="buildSysManagerRole" />
+    </resultMap>
+
+    <sql id="whereQuery">
+        <if test="acrossDept != null and acrossDept != '' ">
+            and DOCKING_DEPT_CODE like CONCAT('%',#{acrossDept},'%')
+        </if>
+        <if test="factoryCode != null and factoryCode != '' ">
+            and AN_FACTORY_CODE = #{factoryCode}
+        </if>
+        <if test="buildingCode != null and buildingCode != '' ">
+            and AN_BUILDING_CODE = #{buildingCode}
+        </if>
+        <if test="deviceName != null and deviceName != '' ">
+            and AN_BUILDING = #{deviceName}
+        </if>
+        <if test="applyStatus != null and applyStatus !=''">
+            and APPLY_STATUS = #{applyStatus}
+        </if>
+        <if test="createTimeBegin != null and createTimeBegin != ''">
+            <![CDATA[and CREATE_TIME >= #{createTimeBegin}]]>
+        </if>
+        <if test="createTimeEnd != null and createTimeEnd != ''">
+            <![CDATA[and CREATE_TIME < #{createTimeEnd}]]>
+        </if>
+        <if test="curAuditLogin != null and curAuditLogin != '' ">
+            and (ACROSS_EMPLOYEE_LOGIN like CONCAT('%',#{curAuditLogin},'%') or TOP_SECRET_EMPLOYEE_LOGIN like CONCAT('%',#{curAuditLogin},'%') )
+        </if>
+    </sql>
+
+    <sql id="Base_Column_List">
+        ID, PROCESS_ID, EMPOWER_TYPE, EMPOWER_AREA_CODE, EMPOWER_AREA_NAME, DEVICE_CODE,
+    DEVICE_NAME, DOCKING_DEPT_CODE, DOCKING_DEPT_NAME, ACROSS_EMPLOYEE_LOGIN, ACROSS_EMPLOYEE_NAME,
+    TOP_SECRET_EMPLOYEE_LOGIN, TOP_SECRET_EMPLOYEE_NAME, APPLY_STATUS, REFUSE_REASON,
+    APPLY_EMPLOYEE, APPLY_ROLE, APPLY_TIME, PUBLIC_DEVICE_CODE, PUBLIC_DEVICE_NAME, AN_FACTORY_CODE,
+    AN_FACTORY_NAME, AN_BUILDING_CODE, AN_BUILDING,POWER_BEGIN_TIME,POWER_END_TIME,build_sys_manager_role
+    </sql>
+    <select id="selectOpenByExampleBiz" parameterType="com.yutong.safety.core.db.entity.build.param.BuildProcessOpenListParam"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from (select sbpo.ID, sbpo.PROCESS_ID, sbpo.EMPOWER_TYPE, sbpo.EMPOWER_AREA_CODE, sbpo.EMPOWER_AREA_NAME, sbpo.DEVICE_CODE,
+        sbd.AN_DEVICE_NAME DEVICE_NAME, sbpo.DOCKING_DEPT_CODE, sbpo.DOCKING_DEPT_NAME, sbpo.ACROSS_EMPLOYEE_LOGIN, sbpo.ACROSS_EMPLOYEE_NAME,
+        sbpo.TOP_SECRET_EMPLOYEE_LOGIN, sbpo.TOP_SECRET_EMPLOYEE_NAME, sbpo.APPLY_STATUS, sbpo.REFUSE_REASON,
+        sbpo.APPLY_EMPLOYEE, sbpo.APPLY_ROLE, sbpo.APPLY_TIME, sbpo.PUBLIC_DEVICE_CODE, sbpo.PUBLIC_DEVICE_NAME, sbd.AN_FACTORY_CODE,
+        sbd.AN_FACTORY_NAME, sbd.AN_BUILDING_CODE, sbd.AN_BUILDING,sbpo.CREATE_TIME,sbpo.POWER_BEGIN_TIME,sbpo.POWER_END_TIME,
+        sbpo.build_sys_manager_role
+        from safety_build_process_open sbpo
+        left join safety_build_device sbd
+        on sbpo.DEVICE_CODE  = sbd.DEVICE_CODE
+        where 1 = 1
+        <if test="processId != null and processId != ''">
+            and sbpo.PROCESS_ID = #{processId}
+        </if>
+        ) TMP_T
+        where 1 = 1
+        <include refid="whereQuery"/>
+        <if test="orderByClause != null">
+            order by ${orderByClause}
+        </if>
+        <if test="pageFlag != null and pageFlag">
+            <if test="limit != null">
+                <if test="offset != null">
+                    limit ${offset}, ${limit}
+                </if>
+                <if test="offset == null">
+                    limit ${limit}
+                </if>
+            </if>
+        </if>
+    </select>
+
+    <select id="countOpenByExampleBiz" parameterType="com.yutong.safety.core.db.entity.build.param.BuildProcessOpenListParam" resultType="java.lang.Long">
+        select count(*)
+        from (select sbpo.ID, sbpo.PROCESS_ID, sbpo.EMPOWER_TYPE, sbpo.EMPOWER_AREA_CODE, sbpo.EMPOWER_AREA_NAME, sbpo.DEVICE_CODE,
+        sbd.AN_DEVICE_NAME DEVICE_NAME, sbpo.DOCKING_DEPT_CODE, sbpo.DOCKING_DEPT_NAME, sbpo.ACROSS_EMPLOYEE_LOGIN, sbpo.ACROSS_EMPLOYEE_NAME,
+        sbpo.TOP_SECRET_EMPLOYEE_LOGIN, sbpo.TOP_SECRET_EMPLOYEE_NAME, sbpo.APPLY_STATUS, sbpo.REFUSE_REASON,
+        sbpo.APPLY_EMPLOYEE, sbpo.APPLY_ROLE, sbpo.APPLY_TIME, sbpo.PUBLIC_DEVICE_CODE, sbpo.PUBLIC_DEVICE_NAME, sbd.AN_FACTORY_CODE,
+        sbd.AN_FACTORY_NAME, sbd.AN_BUILDING_CODE, sbd.AN_BUILDING,sbpo.build_sys_manager_role
+        from safety_build_process_open sbpo
+        left join safety_build_device sbd  on sbpo.DEVICE_CODE  = sbd.DEVICE_CODE
+        where 1 = 1
+        <if test="processId != null and processId != ''">
+            and sbpo.PROCESS_ID = #{processId}
+        </if>
+        ) TMP_T
+        where 1 = 1
+        <include refid="whereQuery"/>
+    </select>
+
+    <select id="selectCloseList" parameterType="java.lang.String" resultMap="com.yutong.safety.core.db.mapper.build.SafetyBuildProcessCloseDOMapper.BaseResultMap">
+        SELECT ID, PROCESS_ID, EMPOWER_TYPE, EMPOWER_AREA_CODE, EMPOWER_AREA_NAME, DEVICE_CODE,
+        DEVICE_NAME, APPLY_STATUS, REFUSE_REASON, APPLY_EMPLOYEE, APPLY_ROLE, APPLY_TIME,
+        AN_FACTORY_CODE, AN_FACTORY_NAME, AN_BUILDING_CODE, AN_BUILDING
+        FROM (select sbpc.ID, sbpc.PROCESS_ID, sbpc.EMPOWER_TYPE, sbpc.EMPOWER_AREA_CODE, sbpc.EMPOWER_AREA_NAME, sbpc.DEVICE_CODE,
+        sbpc.DEVICE_NAME, sbpc.APPLY_STATUS, sbpc.REFUSE_REASON, sbpc.APPLY_EMPLOYEE, sbpc.APPLY_ROLE, sbpc.APPLY_TIME,
+        sbd.AN_FACTORY_CODE, sbd.AN_FACTORY_NAME, sbd.AN_BUILDING_CODE, sbd.AN_BUILDING
+        from SAFETY.safety_build_process_close sbpc
+        left join safety.safety_build_device sbd on sbpc.DEVICE_CODE  = sbd.DEVICE_CODE
+        where 1 = 1
+        <if test="processId != null and processId != ''">
+            and sbpc.PROCESS_ID = #{processId}
+        </if>
+        ) TMP_T
+        WHERE 1 = 1
+        ORDER BY ID ASC
+    </select>
+
+    <update id="updateOpenStatusByProcessId" parameterType="java.lang.String">
+        update safety_build_process_open set APPLY_STATUS = '1'
+         where PROCESS_ID = #{processId} and (APPLY_STATUS is null or APPLY_STATUS!='2')
+    </update>
+
+    <select id="selectCloseListByProcessIds" parameterType="java.util.List" resultMap="com.yutong.safety.core.db.mapper.build.SafetyBuildProcessCloseDOMapper.BaseResultMap">
+        SELECT ID, PROCESS_ID, EMPOWER_TYPE, EMPOWER_AREA_CODE, EMPOWER_AREA_NAME, DEVICE_CODE,
+        DEVICE_NAME, APPLY_STATUS, REFUSE_REASON, APPLY_EMPLOYEE, APPLY_ROLE, APPLY_TIME,
+        AN_FACTORY_CODE, AN_FACTORY_NAME, AN_BUILDING_CODE, AN_BUILDING
+        FROM (select sbpc.ID, sbpc.PROCESS_ID, sbpc.EMPOWER_TYPE, sbpc.EMPOWER_AREA_CODE, sbpc.EMPOWER_AREA_NAME, sbpc.DEVICE_CODE,
+        sbpc.DEVICE_NAME, sbpc.APPLY_STATUS, sbpc.REFUSE_REASON, sbpc.APPLY_EMPLOYEE, sbpc.APPLY_ROLE, sbpc.APPLY_TIME,
+        sbd.AN_FACTORY_CODE, sbd.AN_FACTORY_NAME, sbd.AN_BUILDING_CODE, sbd.AN_BUILDING
+        from SAFETY.safety_build_process_close sbpc
+        left join safety.safety_build_device sbd on sbpc.DEVICE_CODE  = sbd.DEVICE_CODE
+        where 1 = 1
+            and sbpc.PROCESS_ID in
+            <foreach collection="list" close=")" open="(" separator="," item="item">
+                #{item}
+            </foreach>
+        ) TMP_T
+        WHERE 1 = 1
+        ORDER BY ID ASC
+    </select>
+</mapper>

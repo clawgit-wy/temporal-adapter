@@ -1,0 +1,13 @@
+# Created by .ignore support plugin (hsz.mobi)
+.idea/
+archetype-module.iml
+log/
+*.iml
+**/*.iml
+**/target/
+*.project
+**/*.project
+.setttings/
+**/.settings/
+**/.classpath
+**/nohup.out

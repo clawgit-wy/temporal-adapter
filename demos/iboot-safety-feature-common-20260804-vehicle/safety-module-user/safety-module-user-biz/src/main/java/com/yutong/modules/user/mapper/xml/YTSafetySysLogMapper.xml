@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.user.mapper.YTSafetySysLogMapper">
+
+    <select id="queryPage" resultType="com.yutong.modules.user.vo.YTSafetySysLogVO">
+        select * from ytsafety_sys_log
+        ${ew.customSqlSegment}
+    </select>
+</mapper>

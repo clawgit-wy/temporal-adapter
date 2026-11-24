@@ -1,0 +1,27 @@
+server:
+  port: 7001
+  
+spring:
+  application:
+    name: iboot-safety-system
+  cloud:
+    nacos:
+      username: safetytest
+      password: safetytest
+      server-addr: 10.66.228.170:8142,10.66.228.171:8142,10.66.228.172:8142
+      config:
+        server-addr: ${spring.cloud.nacos.server-addr}
+        namespace: safetytest
+        group: DEFAULT_GROUP
+      discovery:
+        server-addr: ${spring.cloud.nacos.server-addr}
+        namespace: mp
+        group: DEFAULT_GROUP
+  config:
+    import:
+      - optional:nacos:iboot-safety-uat.yaml
+
+# 宇信通机器人消息推送配置（如需启用请取消注释）
+#im:
+#  sendMsg:
+#    postUrl: https://mobile.yutong.com:9780/shake/admin/push/robot

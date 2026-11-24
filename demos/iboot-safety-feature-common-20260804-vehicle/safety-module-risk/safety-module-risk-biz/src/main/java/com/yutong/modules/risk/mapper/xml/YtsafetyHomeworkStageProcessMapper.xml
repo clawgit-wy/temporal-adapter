@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.risk.mapper.YtsafetyHomeworkStageProcessMapper">
+
+    <select id="getFactoryInfoList" resultType="com.yutong.modules.risk.vo.HomeworkStageParamVO">
+        select factory_id as recordId,
+               factory_code as recordCode,
+               factory_name as recordName
+        from ytsafety_location_info
+        group by factory_id, factory_code, factory_name
+    </select>
+
+    <select id="getAreaInfoList" resultType="com.yutong.modules.risk.vo.HomeworkStageParamVO">
+        select area_id as recordId,
+               area_code as recordCode,
+               area_name as recordName
+        from ytsafety_location_info
+        group by area_id,area_code, area_name
+    </select>
+
+    <select id="getOrgInfoByList" resultType="com.yutong.modules.risk.vo.HomeworkStageParamVO">
+        select org_id as recordId,
+               org_code as recordCode,
+               org_name as recordName
+        from ytsafety_location_info
+        group by org_id, org_code, org_name
+    </select>
+    <select id="selectIdsByNameAndIds" resultType="java.lang.Long">
+        select id
+        from ytsafety_location_info
+        <where>
+            <if test="locationNames != null and locationNames.size() > 0">
+                and location_name in
+                <foreach collection="locationNames" item="name" open="(" separator="," close=")">
+                    #{name}
+                </foreach>
+            </if>
+            <if test="factoryId != null">
+                and factory_id = #{factoryId}
+            </if>
+            <if test="areaId != null">
+                and area_id = #{areaId}
+            </if>
+            <if test="orgId != null">
+                and org_id = #{orgId}
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

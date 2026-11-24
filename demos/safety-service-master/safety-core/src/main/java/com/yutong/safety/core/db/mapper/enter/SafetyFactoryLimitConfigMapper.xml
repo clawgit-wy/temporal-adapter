@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.enter.SafetyFactoryLimitConfigMapper">
+    <insert id="save" parameterType="com.yutong.safety.core.db.entity.enter.SafetyFactoryLimitConfigEntity">
+        insert into safety_factory_limit_config(limit_number)
+        VALUES (#{limitNumber})
+    </insert>
+
+    <update id="update" parameterType="com.yutong.safety.core.db.entity.enter.SafetyFactoryLimitConfigEntity">
+        update safety_factory_limit_config
+        set
+            limit_number = #{limitNumber}
+        where id = #{id}
+    </update>
+
+    <select id="getData" resultType="com.yutong.safety.core.db.entity.enter.SafetyFactoryLimitConfigEntity">
+        select id,limit_number as limitNumber from safety_factory_limit_config limit 1
+    </select>
+
+    <select id="getLastDaysData" parameterType="java.lang.Integer" resultType="java.util.Map">
+        select f.fd_car_no as fdCarNo,fa.fd_filing_id as flowId
+        FROM safety_enter_filing_approve fa
+        INNER join safety_enter_filing f on fa.fd_filing_id = f.id
+        INNER JOIN (
+            SELECT max(fa.create_time) create_time,f.fd_car_no
+            FROM safety_enter_filing_approve fa
+            INNER JOIN safety_enter_filing f on fa.fd_filing_id = f.id
+            GROUP BY fd_car_no
+        ) ENTER1 ON fa.create_time = ENTER1.create_time AND f.fd_car_no = ENTER1.fd_car_no
+        where
+            <![CDATA[
+                  DATEDIFF(now(), fa.fd_filing_begin) >= #{limitNumber}
+              AND DATEDIFF(fa.fd_filing_end, now()) >= 0
+                and f.fd_state_code in('30','31')
+            ]]>
+    </select>
+
+    <select id="getCarNoListInLimitNumber" parameterType="java.lang.Integer" resultType="java.lang.String">
+        select distinct a.token_no as carNo
+        from safety_crk_car_out_history a
+        where <![CDATA[ DATEDIFF(now(), a.in_time) <= #{limitNumber} ]]>
+    </select>
+
+    <update id="cancelCarAccess" parameterType="java.util.List">
+        update safety_enter_filing_approve
+        set fd_filing_end = DATE_SUB(NOW(), INTERVAL 1 DAY)
+        where
+            fd_filing_id in
+        <foreach collection="flowList" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </update>
+</mapper>

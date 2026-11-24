@@ -1,0 +1,50 @@
+# Temporal Server 动态配置
+# 文档：https://docs.temporal.io/references/dynamic-config
+#
+# 此文件挂载到容器内 /etc/temporal/config/dynamicconfig/docker.yaml
+# 修改后需重启 Temporal Server 生效：docker compose restart temporal
+
+# 启用 Worker 心跳（Worker 在线检测）
+worker.heartbeatEnabled:
+  - value: true
+    constraints: {}
+
+frontend.workerHeartbeatsEnabled:
+  - value: true
+    constraints: {}
+
+system.enableWorkerHeartbeats:
+  - value: true
+    constraints: {}
+
+# 启用 Workflow Update API（发送更新功能所需）
+frontend.enableUpdateWorkflowExecution:
+  - value: true
+    constraints: {}
+
+frontend.enableUpdateWorkflowExecutionAsyncAccepted:
+  - value: true
+    constraints: {}
+
+# 启用 Worker 版本化（可选）
+frontend.workerVersioningDataAPIs:
+  - value: true
+    constraints: {}
+
+frontend.workerVersioningWorkflowAPIs:
+  - value: true
+    constraints: {}
+
+worker.buildIdScavengerEnabled:
+  - value: true
+    constraints: {}
+
+# 启用独立 Activity（可选）
+activity.enableStandalone:
+  - value: true
+    constraints: {}
+
+# 启用外部 Payload 存储（可选，用于大数据场景）
+history.externalPayloadsEnabled:
+  - value: true
+    constraints: {}

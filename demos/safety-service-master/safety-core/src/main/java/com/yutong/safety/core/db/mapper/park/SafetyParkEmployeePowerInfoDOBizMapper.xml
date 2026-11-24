@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.park.SafetyParkEmployeePowerInfoDOBizMapper">
+    <insert id="saveOrUpdate" parameterType="java.util.List">
+        INSERT INTO safety_park_employee_power_info
+        (
+        EMPLOYEE_CODE,
+        FACTORY_ID,
+        factory_name,
+        POWER_BEGIN_TIME,
+        POWER_END_TIME,
+        CREATE_TIME,
+        UPDATE_TIME,
+        IS_DELETE,
+        down_mark,
+        REMARK
+        )
+        VALUES
+        <foreach collection="list" item="ll" separator=",">
+            (
+            #{ll.employeeCode},
+            #{ll.factoryId},
+            #{ll.factoryName},
+            #{ll.powerBeginTime},
+            #{ll.powerEndTime},
+            NOW(),
+            NOW(),
+            #{ll.isDelete},
+            #{ll.downMark},
+            #{ll.remark}
+            )
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        IS_DELETE = VALUES(IS_DELETE),
+        POWER_BEGIN_TIME = VALUES(POWER_BEGIN_TIME),
+        POWER_END_TIME = VALUES(POWER_END_TIME),
+        UPDATE_TIME = NOW(),
+        factory_name = VALUES(factory_name),
+        down_mark = VALUES(down_mark)
+    </insert>
+
+    <insert id="saveOrUpdateTemp" parameterType="java.util.List">
+        INSERT INTO safety.safety_park_employee_power_info_temp
+        (
+        EMPLOYEE_CODE,
+        FACTORY_ID,
+        factory_name,
+        POWER_BEGIN_TIME,
+        POWER_END_TIME,
+        CREATE_TIME,
+        UPDATE_TIME,
+        IS_DELETE,
+        down_mark,
+        REMARK
+        )
+        VALUES
+        <foreach collection="list" item="ll" separator=",">
+            (
+            #{ll.employeeCode},
+            #{ll.factoryId},
+            #{ll.factoryName},
+            #{ll.powerBeginTime},
+            #{ll.powerEndTime},
+            NOW(),
+            NOW(),
+            #{ll.isDelete},
+            #{ll.downMark},
+            #{ll.remark}
+            )
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        IS_DELETE = VALUES(IS_DELETE),
+        POWER_BEGIN_TIME = VALUES(POWER_BEGIN_TIME),
+        POWER_END_TIME = VALUES(POWER_END_TIME),
+        UPDATE_TIME = NOW(),
+        factory_name = VALUES(factory_name),
+        down_mark = VALUES(down_mark)
+    </insert>
+
+  <select id="getList" parameterType="com.yutong.safety.core.db.entity.park.SafetyParkEmployeePowerInfoDO"
+          resultType="com.yutong.safety.core.db.entity.park.SafetyParkEmployeePowerInfoDO">
+        select EMPLOYEE_CODE,group_concat(FACTORY_ID) as FACTORY_ID
+        from safety_park_employee_power_info
+        where IS_DELETE = 0
+          and POWER_end_TIME >= #{powerBeginTime}
+          <![CDATA[
+          and POWER_end_TIME < #{powerEndTime}
+          ]]>
+        group by EMPLOYEE_CODE
+  </select>
+
+  <select id="getUserList" parameterType="java.util.List" resultType="com.yutong.safety.core.dto.ParamDTO">
+    select m.emp_no,m.emp_name,m.phone_no,group_concat(ei.FACTORY_ID) as factory_id,max(ei.POWER_END_TIME) as power_end_time
+    from safety_employee_message m
+           left join safety_park_employee_power_info ei on m.emp_no = ei.EMPLOYEE_CODE and ei.IS_DELETE = '0'
+    where m.status = 'NORMAL'
+      and m.emp_no in
+    <foreach collection="list" item="ll" open="(" close=")" separator=",">
+      #{ll}
+    </foreach>
+      and ei.POWER_END_TIME > now()
+    group by m.emp_no, m.emp_name, m.phone_no
+  </select>
+
+    <select id="getDetailByCon" parameterType="com.yutong.safety.core.db.entity.park.param.ParkEmployeePowerListParam"
+            resultType="com.yutong.safety.core.db.entity.park.SafetyParkEmployeePowerInfoDO">
+        select
+        pi.id, pi.EMPLOYEE_CODE, pi.FACTORY_ID, pi.POWER_BEGIN_TIME, pi.POWER_END_TIME, pi.REMARK, pi.CREATE_TIME,
+        pi.UPDATE_TIME, pi.IS_DELETE, m.field_name as factory_name, pi.down_mark
+            from safety_park_employee_power_info pi
+        left join safety_field_manage m on pi.FACTORY_ID = m.id and m.delete_falg = '0'
+        where pi.IS_DELETE = '0'
+        <if test="empNo != null and empNo != ''">
+            and pi.EMPLOYEE_CODE = #{empNo}
+        </if>
+        <if test="empNoList != null">
+        and pi.EMPLOYEE_CODE in
+            <foreach collection="empNoList" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="selectListByEmpNo" parameterType="com.yutong.safety.core.db.entity.park.SafetyParkEmployeePowerInfoDO"
+            resultType="com.yutong.safety.core.dto.park.SafetyParkEmployeePowerInfoDTO">
+        select
+        pi.id, pi.EMPLOYEE_CODE, pi.FACTORY_ID, pi.POWER_BEGIN_TIME, pi.POWER_END_TIME, pi.REMARK, pi.CREATE_TIME,
+        pi.UPDATE_TIME, pi.IS_DELETE, m.emp_name as employee_name, pi.down_mark
+            from safety_park_employee_power_info pi
+        left join safety_employee_message m on pi.EMPLOYEE_CODE = m.emp_no and m.status = 'NORMAL'
+        where pi.IS_DELETE = '0'
+          and pi.EMPLOYEE_CODE = #{empNo}
+        order by pi.POWER_END_TIME
+    </select>
+</mapper>

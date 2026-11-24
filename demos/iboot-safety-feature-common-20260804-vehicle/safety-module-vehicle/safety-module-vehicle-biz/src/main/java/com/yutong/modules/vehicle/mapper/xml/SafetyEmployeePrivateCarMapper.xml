@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.vehicle.mapper.SafetyEmployeePrivateCarMapper">
+
+    <select id="listPage" resultType="com.yutong.modules.vehicle.vo.SafetyEmployeePrivateCarQueryVO">
+        select
+        id,
+        car_no,
+        car_color,
+        vehicle_type,
+        driving_license_url,
+        driver_card,
+        employee_name,
+        employee_no,
+        phone_no,
+        dept_no,
+        myself_car,
+        publish_time,
+        lock_flag,
+        img_url1,
+        img_url2,
+        img_url3,
+        relationship,
+        server_end_date,
+        car_type,
+        car_model,
+        auth_factory,
+        section_chief_name,
+        section_chief_no,
+        car_affiliation_personnel,
+        driver_personnel_name,
+        driver_license_start_date,
+        driver_license_end_date,
+        other_remark
+        from safety_employee_private_car
+        where delete_flag = '0'
+        <where>
+            <if test="query.carNo != null and query.carNo != ''">
+                AND car_no LIKE CONCAT('%', #{query.carNo}, '%')
+            </if>
+            <if test="query.carColor != null and query.carColor != ''">
+                AND car_color = #{query.carColor}
+            </if>
+            <if test="query.vehicleType != null and query.vehicleType != ''">
+                AND vehicle_type = #{query.vehicleType}
+            </if>
+            <if test="query.employeeName != null and query.employeeName != ''">
+                and employee_name = #{query.employeeName}
+            </if>
+            <if test="query.employeeNo != null and query.employeeNo != ''">
+                and employee_no = #{query.employeeNo}
+            </if>
+            <if test="query.phoneNo != null and query.phoneNo != ''">
+                and phone_no = #{query.phoneNo}
+            </if>
+            <if test="query.deptNo != null and query.deptNo != ''">
+                and dept_no = #{query.deptNo}
+            </if>
+            <if test="query.myselfCar != null and query.myselfCar != ''">
+                and myself_car = #{query.myselfCar}
+            </if>
+        </where>
+        order by publish_time desc
+    </select>
+</mapper>

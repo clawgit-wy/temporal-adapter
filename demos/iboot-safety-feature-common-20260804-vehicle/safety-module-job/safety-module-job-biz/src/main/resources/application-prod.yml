@@ -1,0 +1,21 @@
+server:
+  port: 7003
+spring:
+  application:
+    name: iboot-safety-job
+  cloud:
+    nacos:
+      username: nacos
+      password: S.2022-07
+      server-addr: 10.66.18.130:8142,10.66.18.131:8142,10.66.18.132:8142
+      config:
+        server-addr: ${spring.cloud.nacos.server-addr}
+        namespace: mp
+        group: DEFAULT_GROUP
+      discovery:
+        server-addr: ${spring.cloud.nacos.server-addr}
+        namespace: mp
+        group: DEFAULT_GROUP
+  config:
+    import:
+      - optional:nacos:iboot-safety-job.yaml

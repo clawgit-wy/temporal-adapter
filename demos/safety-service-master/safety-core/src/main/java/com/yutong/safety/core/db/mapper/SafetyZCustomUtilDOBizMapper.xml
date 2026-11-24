@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.SafetyZCustomUtilDOBizMapper">
+  <insert id="insertHistory">
+    insert into safety_car_out_rule_history (post_name,post_category,organ_code,organ_name,remark,priority,check_flag,create_time,update_time,target_id)
+    values (#{ruleDO.postName},#{ruleDO.postCategory},#{ruleDO.organCode},#{ruleDO.organName},#{ruleDO.remark},#{ruleDO.priority},#{ruleDO.checkFlag},#{ruleDO.createTime},now(),#{ruleDO.id})
+  </insert>
+  <update id="updateHistory">
+    update safety_car_out_rule_history
+    set post_name = #{ruleDO.postName,jdbcType=VARCHAR},
+        post_category = #{ruleDO.postCategory,jdbcType=VARCHAR},
+        organ_code = #{ruleDO.organCode,jdbcType=VARCHAR},
+        organ_name = #{ruleDO.organName,jdbcType=VARCHAR},
+        remark = #{ruleDO.remark,jdbcType=VARCHAR},
+        priority = #{ruleDO.priority,jdbcType=INTEGER},
+        check_flag = #{ruleDO.checkFlag,jdbcType=VARCHAR},
+        create_time = #{ruleDO.createTime,jdbcType=TIMESTAMP},
+        update_time = now()
+    where target_id = #{ruleDO.id,jdbcType=INTEGER}
+  </update>
+  <delete id="deleteRule">
+    delete from safety_car_out_rule where is_delete = '1'
+  </delete>
+
+  <select id="getPost" resultType="java.util.Map">
+    select distinct t.post_name postCode, t.post_name postName from safety_car_out_rule t where t.is_delete = '0' and length(t.post_name) > 0 order by t.post_name
+  </select>
+
+  <select id="findChangedRule" resultType="java.util.Map">
+    select n.id,n.is_delete isDelete,
+           n.post_name postName, n.post_category postCategory, n.organ_code organCode,
+           h.post_name hpostName,h.post_category hpostCategory,h.organ_code horganCode
+    from safety_car_out_rule n left join safety_car_out_rule_history h on n.id = h.target_id
+    where n.update_time > date_format(concat(date_sub(curdate(),interval 1 day),' 23:00:00'),'%Y-%m-%d %H:%i:%s')
+      and ((h.post_category is null and n.is_delete='0') or h.post_category is not null)
+  </select>
+
+  <select id="findChangedRuleAll" resultType="java.util.Map">
+    select n.id,n.is_delete isDelete,
+           n.post_name postName, n.post_category postCategory, n.organ_code organCode,
+           h.post_name hpostName,h.post_category hpostCategory,h.organ_code horganCode
+    from safety_car_out_rule n left join safety_car_out_rule_history h on n.id = h.target_id
+    where n.is_delete='0'
+  </select>
+
+  <select id="findEmpByRule" resultType="java.lang.String" parameterType="java.util.List">
+    <foreach collection="list" item="rule" separator="union all">
+      select r.emp_no from safety_employee_message r where r.status = 'NORMAL'
+      <if test="rule.postCategory == '空'.toString() ">
+        and r.position_type is null
+      </if>
+      <if test="rule.postCategory != '空'.toString() ">
+        and r.position_type = #{rule.postCategory}
+      </if>
+      <if test="rule.postName != null and rule.postName != '空'.toString() ">
+        and r.position_name like concat('%',#{rule.postName},'%')
+      </if>
+      <if test="rule.postName == '空'.toString() ">
+        and (r.position_name = '' or r.position_name is null)
+      </if>
+      <if test="rule.organCode != null and rule.organCode != ''">
+        and r.org_code_path like concat('%',#{rule.organCode},'%')
+      </if>
+      <if test="rule.hpostName != null and rule.hpostName != ''">
+        union all select r.emp_no from safety_employee_message r where r.status = 'NORMAL' and r.position_name like concat('%',#{rule.hpostName},'%')
+        <if test="rule.hpostCategory == '空'.toString() ">
+          and r.position_type is null
+        </if>
+        <if test="rule.hpostCategory != '空'.toString() ">
+          and r.position_type = #{rule.hpostCategory}
+        </if>
+      </if>
+      <if test="rule.horganCode != null and rule.horganCode != ''">
+        union all select r.emp_no from safety_employee_message r where r.status = 'NORMAL' and r.org_code_path like concat('%',#{rule.horganCode},'%')
+        <if test="rule.hpostCategory == '空'.toString() ">
+          and r.position_type is null
+        </if>
+        <if test="rule.hpostCategory != '空'.toString() ">
+          and r.position_type = #{rule.hpostCategory}
+        </if>
+      </if>
+    </foreach>
+  </select>
+
+  <select id="findChangedEmp" resultType="java.lang.String">
+    select r.emp_no from safety_employee_message r where r.status = 'normal' and r.update_time > date_format(concat(date_sub(curdate(),interval 1 day),' 23:00:00'),'%Y-%m-%d %H:%i:%s')
+  </select>
+  <select id="findDefFlag" resultType="java.util.Map">
+    select cast(min(r.priority) as char) priority,min(r.check_flag) flag, e.position_type postType
+    from safety_car_out_rule r, safety_employee_message e
+    where r.is_delete = '0' and e.emp_no = #{empNo} and r.post_category = e.position_type and r.organ_code = '' and r.post_name = '' group by e.position_type
+  </select>
+  <select id="findDeptFlag" resultType="java.util.Map">
+    select cast(min(r.priority) as char) priority,min(r.check_flag) flag, e.position_type postType
+    from safety_car_out_rule r, safety_employee_message e
+    where r.is_delete = '0' and e.emp_no = #{empNo} and r.post_category = e.position_type and r.organ_code <![CDATA[<>]]> '' and instr(e.org_code_path,r.organ_code)>0 group by e.position_type
+  </select>
+  <select id="findPostFlag" resultType="java.util.Map">
+    select cast(min(r.priority) as char)  priority,min(r.check_flag) flag, e.position_type postType
+    from safety_car_out_rule r, safety_employee_message e
+    where r.is_delete = '0' and e.emp_no = #{empNo} and r.post_category = e.position_type and r.post_name <![CDATA[<>]]> '' and instr(e.position_name,r.post_name)>0  group by e.position_type
+  </select>
+  <select id="findEmpNums" resultType="java.lang.Integer">
+    select count(1) from safety_employee_message e where e.emp_no = #{empNo} and e.position_type = '间接岗位' and e.status = 'NORMAL'
+  </select>
+</mapper>

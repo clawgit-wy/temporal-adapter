@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.build.SafetyBuildInOutHistoryDOBizMapper">
+    <!-- 批量更新 -->
+    <insert id="batchUpdate" keyColumn="emp_no,device_code">
+        insert into safety_build_in_out_history
+            (emp_no, emp_name, device_code,oper_time, io_flag, type_name, update_time, history_id)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.empNo},#{item.empName},#{item.deviceCode},#{item.operTime},#{item.ioFlag},
+            #{item.typeName},#{item.updateTime},#{item.historyId})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        oper_time = case when VALUES(history_id)>safety_build_in_out_history.history_id then VALUES(oper_time) else safety_build_in_out_history.oper_time end,
+        io_flag = case when VALUES(history_id)>safety_build_in_out_history.history_id then VALUES(io_flag) else safety_build_in_out_history.io_flag end,
+        type_name = case when VALUES(history_id)>safety_build_in_out_history.history_id then VALUES(type_name) else safety_build_in_out_history.type_name end,
+        history_id = case when VALUES(history_id)>safety_build_in_out_history.history_id then VALUES(history_id) else safety_build_in_out_history.history_id end,
+        update_time = VALUES(update_time)
+    </insert>
+
+    <select id="getMaxHistoryId" resultType="java.lang.Long">
+        select max(history_id) from safety_build_in_out_history
+    </select>
+</mapper>

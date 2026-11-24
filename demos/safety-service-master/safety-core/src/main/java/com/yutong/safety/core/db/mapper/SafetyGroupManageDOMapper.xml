@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.SafetyGroupManageDOMapper">
+    <insert id="batchInsert">
+        INSERT INTO `safety_group_info` (`code`,`name`,`parent_code`,`status`,`level_code`,`level_name`,`org_code_path`,`org_name_path`,`dept_short`,`update_time`,`create_time`) VALUES
+        <foreach collection="groupList" item="item" separator=",">
+            (#{item.code}, #{item.name}, #{item.parentCode}, #{item.status}, #{item.levelCode}, #{item.levelName}, #{item.orgCodePath}, #{item.orgNamePath},#{item.deptShort}, now(), now())
+        </foreach>
+    </insert>
+</mapper>

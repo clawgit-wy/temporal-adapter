@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.base.mapper.BaseCommonMapper">
+
+    <!-- 保存日志11 -->
+    <insert id="saveLog" parameterType="Object">
+        insert into ytsafety_sys_log (id, log_type, log_content, method, operate_type, request_url, request_type, request_param, ip, userid, username, cost_time, create_time,create_by, tenant_id,result)
+        values(
+            #{dto.id,jdbcType=VARCHAR},
+            #{dto.logType,jdbcType=INTEGER},
+            #{dto.logContent,jdbcType=VARCHAR},
+            #{dto.method,jdbcType=VARCHAR},
+            #{dto.operateType,jdbcType=INTEGER},
+            #{dto.requestUrl,jdbcType=VARCHAR},
+            #{dto.requestType,jdbcType=VARCHAR},
+            #{dto.requestParam,jdbcType=VARCHAR},
+            #{dto.ip,jdbcType=VARCHAR},
+            #{dto.userid,jdbcType=VARCHAR},
+            #{dto.username,jdbcType=VARCHAR},
+            #{dto.costTime,jdbcType=BIGINT},
+            #{dto.createTime,jdbcType=TIMESTAMP},
+            #{dto.createBy,jdbcType=VARCHAR},
+            #{dto.tenantId,jdbcType=INTEGER},
+            #{dto.result,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <select id="getUserDataPermission" resultType="java.lang.String">
+        select max(sr.DATA_PERMISSION) DATA_PERMISSION
+        from SYS_USER_ROLE sur,
+             SYS_ROLE sr,
+             SYS_ROLE_ORG_PERMISSION sro
+        where sur.ROLE_ID = sro.ROLE_ID
+          and sr.ID = sur.ROLE_ID
+          and sro.ORG_CATEGORY = #{orgCategory,jdbcType=VARCHAR}
+          and sro.ORG_ID = #{orgId,jdbcType=VARCHAR}
+          and sur.USER_ID = #{userId,jdbcType=VARCHAR}
+    </select>
+
+</mapper>

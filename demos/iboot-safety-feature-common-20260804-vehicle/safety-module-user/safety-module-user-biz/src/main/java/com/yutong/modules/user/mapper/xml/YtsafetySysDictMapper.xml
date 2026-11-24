@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.user.mapper.YtsafetySysDictMapper">
+
+    <select id="queryPageList" resultType="com.yutong.modules.user.vo.SafetyDictSupperVO">
+        select t.* from (
+        SELECT
+        id,
+        supper_code,
+        supper_name,
+        supper_desc,
+        update_user,
+        update_time,
+        del,
+        supper_order,
+        'dict' as type
+        FROM
+        safety_dict_supper
+        UNION ALL
+        SELECT
+        id,
+        field_code AS supper_code,
+        field_name AS supper_name,
+        NULL AS supper_desc,
+        NULL AS update_user,
+        update_time,
+        delete_falg AS del,
+        null as supper_order,
+        'field' as type
+        FROM
+        safety_field_manage
+        where field_level = 1
+        UNION ALL
+        SELECT
+        1 AS id,
+        'factory' AS supper_code,
+        '厂区名称' AS supper_name,
+        NULL AS supper_desc,
+        NULL AS update_user,
+        null as update_time,
+        0 AS del,
+        NULL AS supper_order,
+        'field' AS type
+        UNION ALL SELECT
+        2 AS id,
+        'visit' AS supper_code,
+        '来访事由' AS supper_name,
+        NULL AS supper_desc,
+        NULL AS update_user,
+        null as update_time,
+        0 AS del,
+        NULL AS supper_order,
+        'field' AS type
+        UNION ALL SELECT
+        3 AS id,
+        'risk_region' AS supper_code,
+        '厂区隐患区域' AS supper_name,
+        NULL AS supper_desc,
+        NULL AS update_user,
+        null as update_time,
+        0 AS del,
+        NULL AS supper_order,
+        'field' AS type
+        ) t
+        <where>
+            t.del = "0"
+            <if test="query.supperCode != null and query.supperCode != ''">
+                AND t.supper_code  LIKE CONCAT('%', #{query.supperCode}, '%')
+            </if>
+            <if test="query.supperName != null and query.supperName != ''">
+                AND  t.supper_name LIKE CONCAT('%', #{query.supperName}, '%')
+            </if>
+            <if test="query.supperDesc != null and query.supperDesc != ''">
+                AND  t.supper_desc LIKE CONCAT('%', #{query.supperDesc}, '%')
+            </if>
+            <if test="query.type != null and query.type != ''">
+                AND  t.type = #{query.type}
+            </if>
+<!--            <if test="query.updateUser != null and query.updateUser != ''">
+                AND update_user = #{query.updateUser}
+            </if>-->
+            <!-- 只查未删除 -->
+<!--            order by  t.update_time desc-->
+        </where>
+        order by id asc
+    </select>
+
+    <select id="getById" resultType="com.yutong.modules.user.vo.SafetyDictSupperVO">
+        SELECT
+        id,
+        supper_code,
+        supper_name,
+        supper_desc,
+        update_user,
+        update_time,
+        del,
+        supper_order
+        FROM
+        safety_dict_supper
+            where id = #{id}
+        ORDER BY update_time desc
+    </select>
+
+
+</mapper>

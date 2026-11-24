@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.tree.TreeMapper">
+    <!--查询权限树-->
+    <select id="selectPermDTreeList" resultType="java.util.Map">
+        SELECT id, perm_name AS title, parent_id AS parentId
+        FROM safety_sys_perm
+        WHERE cate BETWEEN 1 AND 2 AND delete_falg='0'
+        ORDER BY sort,cate
+    </select>
+    <select id="selectPermDTreeAllList" resultType="java.util.Map">
+        SELECT id, perm_name AS title, parent_id AS parentId,'0' AS checkArr
+        FROM safety_sys_perm
+        WHERE delete_falg='0'
+        ORDER BY sort,cate
+    </select>
+    <select id="selectPermDTreeJson" resultType="com.yutong.safety.core.db.entity.dtree.DTreeBase">
+        SELECT id, perm_name AS title, parent_id AS parentId
+        FROM safety_sys_perm
+        WHERE cate BETWEEN 1 AND 2 AND delete_falg='0'
+        ORDER BY sort,cate
+    </select>
+    <select id="selectPermDTreeAllJson" resultType="com.yutong.safety.core.db.entity.dtree.DTreeBase">
+        SELECT id, perm_name AS title, parent_id AS parentId
+        FROM safety_sys_perm
+        WHERE delete_falg='0'
+        ORDER BY sort,cate
+    </select>
+
+    <select id="selectZTreeData" resultType="com.yutong.safety.core.db.entity.ztree.ZTreeBase">
+        SELECT id,perm_name AS `name`,parent_id AS pId
+        FROM safety_sys_perm
+    </select>
+    <!--查询权限树-->
+    <select id="selectPermZTreeList" resultType="java.util.Map">
+        SELECT id, perm_name AS `name`, parent_id AS pId
+        FROM safety_sys_perm
+        WHERE cate BETWEEN 1 AND 2 AND delete_falg='0'
+        ORDER BY sort,cate
+    </select>
+    <select id="selectPermZTreeAllList" resultType="java.util.Map">
+        SELECT id, perm_name AS `name`, parent_id AS pId,'0' AS checkArr
+        FROM safety_sys_perm
+        WHERE delete_falg='0'
+        ORDER BY sort,cate
+    </select>
+    <select id="selectPermZTreeJson" resultType="com.yutong.safety.core.db.entity.ztree.ZTreeBase">
+        SELECT id, perm_name AS `name`, parent_id AS pId
+        FROM safety_sys_perm
+        WHERE cate BETWEEN 1 AND 2 AND delete_falg='0'
+        ORDER BY sort,cate
+    </select>
+    <select id="selectPermZTreeAllJson" resultType="com.yutong.safety.core.db.entity.ztree.ZTreeBase">
+        SELECT id, perm_name AS `name`, parent_id AS pId
+        FROM safety_sys_perm
+        WHERE delete_falg='0'
+        ORDER BY sort,cate
+    </select>
+</mapper>

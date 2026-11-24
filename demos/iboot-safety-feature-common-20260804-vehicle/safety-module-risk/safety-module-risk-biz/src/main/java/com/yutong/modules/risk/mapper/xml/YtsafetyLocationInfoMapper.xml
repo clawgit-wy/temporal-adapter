@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.risk.mapper.YtsafetyLocationInfoMapper">
+    <select id="queryPageList" resultType="com.yutong.modules.risk.vo.YtsafetyLocationInfoVO">
+        SELECT tmp.*
+        FROM (
+            SELECT t.*,
+                t.risk_quantity hiddenDangerNum,
+                CONCAT(t.org_code, '_', t.safety_role_code) as depart_role_code
+            FROM ytsafety_location_info t
+            ${ew.customSqlSegment}
+        ) tmp
+        <!-- 安全员：原 IN(CONCAT(...)) 改为按 depart_code + role_code 原始列 JOIN，
+             子查询结果仅为该人员负责的部门+角色（行数很少），避免全表拼接字符串比较 -->
+        <if test="query.safetyNames != null and query.safetyNames != ''">
+            INNER JOIN (
+                SELECT DISTINCT depart_code, role_code
+                FROM ytsafety_sys_responsible_mapping
+                WHERE depart_code IS NOT NULL
+                AND role_code IS NOT NULL
+                AND (emp_name LIKE CONCAT('%', #{query.safetyNames}, '%')
+                OR emp_no LIKE CONCAT('%', #{query.safetyNames}, '%'))
+            ) staff_mapping
+            ON staff_mapping.depart_code = tmp.org_code
+            AND staff_mapping.role_code = tmp.safety_role_code
+        </if>
+    </select>
+
+    <select id="queryList" resultType="com.yutong.modules.risk.vo.YtsafetyLocationInfoVO">
+        SELECT tmp.*
+        FROM (
+        SELECT t.*,
+        t.risk_quantity hiddenDangerNum,
+        CONCAT(t.org_code, '_', t.safety_role_code) as depart_role_code
+        FROM ytsafety_location_info t
+        ${ew.customSqlSegment}
+        ) tmp
+        <!-- 安全员：同 queryPageList，改为按原始列 JOIN -->
+        <if test="query.safetyNames != null and query.safetyNames != ''">
+            INNER JOIN (
+                SELECT DISTINCT depart_code, role_code
+                FROM ytsafety_sys_responsible_mapping
+                WHERE depart_code IS NOT NULL
+                AND role_code IS NOT NULL
+                AND (emp_name LIKE CONCAT('%', #{query.safetyNames}, '%')
+                OR emp_no LIKE CONCAT('%', #{query.safetyNames}, '%'))
+            ) staff_mapping
+            ON staff_mapping.depart_code = tmp.org_code
+            AND staff_mapping.role_code = tmp.safety_role_code
+        </if>
+        <where>
+            <if test="query.selections != null and query.selections != ''">
+                AND tmp.id IN
+                <foreach collection="query.selections.split(',')" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="queryById" resultType="com.yutong.modules.risk.vo.YtsafetyLocationInfoVO">
+        SELECT tmp.* FROM (
+            SELECT
+            t.*,
+            t.risk_quantity hiddenDangerNum
+            FROM ytsafety_location_info t
+            WHERE t.id = #{id}
+        ) tmp
+        WHERE tmp.del_flag = 0
+    </select>
+
+    <!-- 当前组织查不到责任人时向上级组织递归：取组织路径上最近一级有责任人的部门的人员名称 -->
+    <select id="queryResponsibleNames" resultType="java.lang.String">
+        SELECT t.names FROM (
+            SELECT
+                GROUP_CONCAT(DISTINCT m.emp_name SEPARATOR ',') AS names,
+                FIND_IN_SET(m.depart_code, gi.org_code_path) AS depth
+            FROM safety_group_info gi
+            INNER JOIN ytsafety_sys_responsible_mapping m
+                ON FIND_IN_SET(m.depart_code, gi.org_code_path) > 0
+                AND m.role_code = #{roleCode}
+            WHERE gi.status = 'Y' AND gi.code = #{orgCode}
+            GROUP BY m.depart_code, gi.org_code_path
+        ) t
+        ORDER BY t.depth DESC
+        LIMIT 1
+    </select>
+
+    <update id="updateRiskLevel">
+        UPDATE ytsafety_location_info
+        <trim prefix="SET" suffixOverrides=",">
+            <trim prefix="risk_level = CASE id" suffix="END,">
+                <foreach collection="list" item="item">
+                    WHEN #{item.id} THEN #{item.riskLevel}
+                </foreach>
+            </trim>
+            <trim prefix="risk_color = CASE id" suffix="END,">
+                <foreach collection="list" item="item">
+                    WHEN #{item.id} THEN #{item.riskColor}
+                </foreach>
+            </trim>
+            <trim prefix="risk_quantity = CASE id" suffix="END,">
+                <foreach collection="list" item="item">
+                    WHEN #{item.id} THEN #{item.riskQuantity}
+                </foreach>
+            </trim>
+        </trim>
+        WHERE id IN
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item.id}
+        </foreach>
+    </update>
+
+</mapper>

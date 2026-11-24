@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.spot.SafetyPatrolPlanDOBizMapper">
+    <sql id="search">
+        <if test="param.status !=null">
+            and a.status = #{param.status}
+        </if>
+        <if test="param.planName !=null and param.planName != ''">
+            and a.plan_name like concat('%',#{param.planName},'%')
+        </if>
+        <if test="param.teamId !=null">
+            and a.teamId = #{param.teamId}
+        </if>
+        <if test="param.teamName != null and param.teamName != '' ">
+            and a.team_name = #{param.teamName}
+        </if>
+        <if test="param.factoryId != null">
+            and b.factory_id = #{param.factoryId}
+        </if>
+        <if test="param.idStr !=null and param.idStr !='' ">
+            and b.factory_id in
+            <foreach item="item" index="index" collection="param.idStr.split(',')"  open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="param.taskFlag != null and param.taskFlag == 1">
+            <if test="param.beginDate != null and param.endDate != null ">
+                <![CDATA[  and a.begin_date <= #{param.beginDate} and a.end_date > #{param.endDate} ]]>
+            </if>
+        </if>
+        <if test="param.beginDate != null and param.endDate != null">
+            <![CDATA[  and a.begin_date <= #{param.endDate} and a.end_date > #{param.beginDate} ]]>
+        </if>
+    </sql>
+
+  <select id="selectList" resultType="com.yutong.safety.common.vo.web.spot.PatrolPlanVO">
+    SELECT id,plan_name,cycle,frequency,type_id,type_name,team_id,team_name,begin_date,end_date,`status`,remark,
+          dormancy_begin,dormancy_end,factory_id,factory_name,update_time,update_emp,update_emp_no,plan_type,
+          cycle_role_id, cycle_role_name, event_role_id, event_role_name
+    FROM (SELECT  a.id,max(a.plan_name) plan_name,max(a.cycle) cycle,max(a.frequency) frequency,
+                  max(a.type_name) type_name,max(a.team_id) team_id,max(a.team_name) team_name,
+                  max(a.begin_date) begin_date,max(a.end_date) end_date,max(a.`status`) `status`,
+                  max(a.remark) remark,max(a.dormancy_begin) dormancy_begin,max(a.type_id) type_id,
+                  max(a.dormancy_end) dormancy_end,GROUP_CONCAT(b.factory_id) factory_id,
+                  GROUP_CONCAT(c.field_name) AS factory_name,max(a.update_time) update_time,
+                  max(a.update_emp) update_emp,max(a.update_emp_no) update_emp_no,max(a.plan_type) plan_type,
+                  max(a.cycle_role_id) cycle_role_id, max(a.cycle_role_name) cycle_role_name,
+                  max(a.event_role_id) event_role_id, max(a.event_role_name) event_role_name
+            FROM safety_patrol_plan A
+            LEFT JOIN safety_patrol_link_plan_factory B ON A.ID = B.PLAN_ID
+            LEFT JOIN safety_field_manage c ON b.factory_id = c.id
+           WHERE 1 = 1
+    <include refid="search"/>
+    group by a.id) tmp
+    where 1 = 1
+    ORDER BY update_time desc
+    <if test="param.begin != null">
+      <if test="param.offset != null">
+        limit ${param.offset}, ${param.limit}
+      </if>
+      <if test="param.offset == null">
+        limit ${param.limit}
+      </if>
+    </if>
+
+  </select>
+
+  <select id="selectCount" resultType="java.lang.Long">
+    select count(1)
+    from (SELECT  a.id,max(a.plan_name) plan_name,max(a.cycle) cycle,max(a.frequency) frequency,
+                  max(a.type_name) type_name,max(a.team_id) team_id,max(a.team_name) team_name,
+                  max(a.begin_date) begin_date,max(a.end_date) end_date,max(a.`status`) `status`,
+                  max(a.remark) remark,max(a.dormancy_begin) dormancy_begin,max(a.type_id) type_id,
+                  max(a.dormancy_end) dormancy_end,GROUP_CONCAT(b.factory_id) factory_id,
+                  GROUP_CONCAT(c.field_name) AS factory_name,max(a.update_time) update_time,
+                  max(a.update_emp) update_emp,max(a.update_emp_no) update_emp_no,max(a.plan_type) plan_type
+            FROM safety_patrol_plan A
+            LEFT JOIN safety_patrol_link_plan_factory B ON A.ID = B.PLAN_ID
+            LEFT JOIN safety_field_manage c ON b.factory_id = c.id
+           WHERE 1 = 1
+      <include refid="search"/>
+    group by a.id) tmp
+    where 1 = 1
+  </select>
+
+  <delete id="deleteByPlanId" parameterType="java.lang.Integer">
+        delete from safety_patrol_link_plan_factory where plan_id = #{planId}
+    </delete>
+
+  <insert id="batchInsert">
+    insert into safety_patrol_link_plan_factory(plan_id,factory_id) values
+    <foreach collection="linkList" item="item" separator=",">
+      (#{item.planId}, #{item.factoryId})
+    </foreach>
+  </insert>
+
+    <!-- 最新设备周期信息 -->
+    <select id="selectMaxTask" parameterType="com.yutong.safety.common.param.web.spot.PatrolTaskListParam"
+            resultType="com.yutong.safety.core.db.entity.spot.SafetyPatrolTaskDO">
+        select t.id,t.plan_id,t.plan_name,t.type_id,t.type_name,t.team_id,t.team_name,t.factory_id,
+        t.task_begin_date,t.task_end_date,t.`status`,t.remark,t.create_time,t.cur_order,t.user_code
+        from safety_patrol_task t
+        where 1 = 1
+        and t.id in (select max(id) from safety_patrol_task a group by a.plan_id,a.factory_id)
+        <if test="planId != null">
+            and t.plan_id = #{planId}
+        </if>
+        <if test="factoryId != null">
+            and t.factory_id = #{factoryId}
+        </if>
+    </select>
+
+
+    <!-- 批量新增周期任务 -->
+    <insert id="batchInsertTask" parameterType="com.yutong.safety.core.db.entity.spot.SafetyPatrolTaskDO">
+        insert into `safety_patrol_task`(`plan_id`,`plan_name`,`type_id`,`type_name`,`team_id`,`team_name`,`factory_id`,`task_begin_date`,`task_end_date`,`status`,`CREATE_time`,cur_order,user_code)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.planId}, #{item.planName},#{item.typeId},#{item.typeName},#{item.teamId},#{item.teamName},#{item.factoryId},
+            #{item.taskBeginDate},#{item.taskEndDate},#{item.status},#{item.createTime},#{item.curOrder},#{item.userCode})
+        </foreach>
+    </insert>
+
+    <select id="selectRoleUser" resultType="string">
+        select u.user_name
+        from safety_sys_user u
+        left join safety_sys_user_role ur on u.id=ur.user_id
+        left join safety_sys_role r on ur.role_id=r.id
+        where u.user_name=#{param.userName}
+        and r.role_name in
+        <foreach item="item" index="index" collection="param.roleName.split(',')"  open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and u.delete_falg='0'
+        and r.delete_falg='0'
+    </select>
+
+    <select id="getInUsePositionPlan" parameterType="java.util.Map" resultType="com.yutong.safety.common.vo.web.spot.PatrolPlanVO">
+        select a.id,
+               a.cycle_role_id,
+               a.cycle_role_name,
+               b.factory_id,
+               a.begin_date,
+               a.team_id,
+               a.team_name,
+               a.dormancy_begin,
+               a.dormancy_end,
+               a.cycle,
+               a.begin_date,
+               a.end_date,
+               a.plan_name,
+               a.cycle,
+               a.type_id,
+               a.type_name
+        FROM safety_patrol_plan a
+        LEFT JOIN safety_patrol_link_plan_factory b ON a.ID = b.PLAN_ID
+        where
+            a.plan_type = 3
+        and a.status = 0
+        and #{beginDate} >= a.begin_date
+        and a.end_date >= #{beginDate}
+    </select>
+</mapper>

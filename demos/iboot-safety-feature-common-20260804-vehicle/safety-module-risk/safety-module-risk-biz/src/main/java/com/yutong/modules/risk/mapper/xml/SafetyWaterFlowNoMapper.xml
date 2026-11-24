@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.risk.mapper.SafetyWaterFlowNoMapper">
+  <insert id="insertNew">
+    insert into ytsafety_water_flow_no (id, type, date, num) values (#{id}, #{type}, now(), #{next})
+  </insert>
+
+  <insert id="updateNew">
+    update ytsafety_water_flow_no set num = #{next} where type = #{type} and date = CURDATE()
+  </insert>
+
+    <insert id="updateTypeOrDate">
+        update ytsafety_water_flow_no set num = #{next} where type = #{type}
+        <if test="curDate!=null">
+            and date = #{curDate}
+        </if>
+    </insert>
+
+    <insert id="insertTypeOrDate">
+        insert into ytsafety_water_flow_no (id, type, date, num) values (#{id}, #{type}, #{curDate}, #{next})
+    </insert>
+
+  <select id="getNowByType" resultType="java.lang.Integer">
+    select IFNULL(MAX(num), 0) from ytsafety_water_flow_no where type = #{type} and date = CURDATE()
+  </select>
+
+  <select id="getNowByTypeNoDay" resultType="java.lang.Integer">
+    select IFNULL(MAX(num), 0) from ytsafety_water_flow_no where type = #{type}
+  </select>
+
+    <select id="getNowByTypeOrDate" resultType="java.lang.Integer">
+        select IFNULL(MAX(num), 0) from ytsafety_water_flow_no
+        where type = #{type}
+        <choose>
+            <when test="curDate != null">
+                and date = #{curDate}
+            </when>
+            <otherwise>
+                and date = CURDATE()
+            </otherwise>
+        </choose>
+    </select>
+</mapper>

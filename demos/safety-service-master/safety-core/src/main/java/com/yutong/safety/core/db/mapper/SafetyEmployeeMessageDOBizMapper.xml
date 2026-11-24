@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.SafetyEmployeeMessageDOBizMapper">
+  <insert id="batchInsert">
+    insert into `safety_employee_message` (`emp_no`, `emp_name`, `phone_no`, `user_type`, `position_code`, `position_name`,
+                                           `position_type`, `org_name_path`, `org_code_path`, `parent_code`, `org_code`,
+                                           `org_name`, `email`, `create_time`, `update_time`, `remark`, `status`,sex) values
+    <foreach collection="blackList" item="item" separator=",">
+      (#{item.empNo}, #{item.empName}, #{item.phoneNo}, #{item.userType}, #{item.positionCode},
+       #{item.positionName}, #{item.positionType}, #{item.orgNamePath}, #{item.orgCodePath},
+       #{item.parentCode},  #{item.orgCode}, #{item.orgName} , #{item.email},  now(), now(), #{item.remark}, #{item.status}, #{item.sex})
+    </foreach>
+  </insert>
+  <update id="batchUpdate">
+    <foreach collection="blackList" item="item" separator=",">
+      update safety_employee_message
+      <set>
+        <if test="item.empNo != null">
+          emp_no = #{item.empNo,jdbcType=VARCHAR},
+        </if>
+        <if test="item.empName != null">
+          emp_name = #{item.empName,jdbcType=VARCHAR},
+        </if>
+        <if test="item.phoneNo != null">
+          phone_no = #{item.phoneNo,jdbcType=VARCHAR},
+        </if>
+        <if test="item.userType != null">
+          user_type = #{item.userType,jdbcType=VARCHAR},
+        </if>
+        <if test="item.positionCode != null">
+          position_code = #{item.positionCode,jdbcType=VARCHAR},
+        </if>
+        <if test="item.positionName != null">
+          position_name = #{item.positionName,jdbcType=VARCHAR},
+        </if>
+        <if test="item.positionType != null">
+          position_type = #{item.positionType,jdbcType=VARCHAR},
+        </if>
+        <if test="item.orgNamePath != null">
+          org_name_path = #{item.orgNamePath,jdbcType=VARCHAR},
+        </if>
+        <if test="item.orgCodePath != null">
+          org_code_path = #{item.orgCodePath,jdbcType=VARCHAR},
+        </if>
+        <if test="item.parentCode != null">
+          parent_code = #{item.parentCode,jdbcType=VARCHAR},
+        </if>
+        <if test="item.orgCode != null">
+          org_code = #{item.orgCode,jdbcType=VARCHAR},
+        </if>
+        <if test="item.orgName != null">
+          org_name = #{item.orgName,jdbcType=VARCHAR},
+        </if>
+        <if test="item.email != null">
+          email = #{item.email,jdbcType=VARCHAR},
+        </if>
+        <if test="item.updateTime != null">
+          update_time = now(),
+        </if>
+        <if test="item.remark != null">
+          remark = #{item.remark,jdbcType=VARCHAR},
+        </if>
+        <if test="item.status != null">
+          status = #{item.status,jdbcType=VARCHAR},
+        </if>
+      </set>
+      where id = #{item.id}
+    </foreach>
+  </update>
+
+  <insert id="batchUpdateNew" parameterType="java.util.List" useGeneratedKeys="true" keyColumn="emp_no">
+    insert into safety.safety_employee_message
+    (emp_no,emp_name,phone_no,user_type,position_code,position_name,position_type,org_name_path,
+        org_code_path,parent_code,org_code,org_name,email,status,emp_login,create_time,update_time,
+    face_issue_flag,card_issue_flag,sex, emp_type, emp_type_code, photo, photo_update_time, job_type_name)
+    VALUES
+    <foreach collection="employeeList" item="item" index="index" separator=",">
+      (#{item.empNo},
+      #{item.empName},
+      #{item.phoneNo},
+      #{item.userType},
+      #{item.positionCode},
+      #{item.positionName},
+      #{item.positionType},
+      #{item.orgNamePath},
+      #{item.orgCodePath},
+      #{item.parentCode},
+      #{item.orgCode},
+      #{item.orgName},
+      #{item.email},
+      #{item.status},
+       #{item.empLogin},
+      CURRENT_TIMESTAMP,
+      CURRENT_TIMESTAMP,
+       0,0,#{item.sex},
+      #{item.empType},
+      #{item.empTypeCode},
+      #{item.photo},
+      <choose>
+        <when test="item.photo != null and item.photo != ''">
+            now()
+        </when>
+        <otherwise>
+               null
+        </otherwise>
+      </choose>,
+      #{item.jobTypeName}
+       )
+    </foreach>
+    ON DUPLICATE KEY UPDATE
+      emp_name = VALUES(emp_name),
+      phone_no = VALUES(phone_no),
+      user_type = VALUES(user_type),
+      position_code = VALUES(position_code),
+      position_name = VALUES(position_name),
+      position_type = VALUES(position_type),
+      org_name_path = VALUES(org_name_path),
+      org_code_path = VALUES(org_code_path),
+      parent_code = VALUES(parent_code),
+      org_code = VALUES(org_code),
+      org_name = VALUES(org_name),
+      email = VALUES(email),
+      status = VALUES(status),
+      emp_login = VALUES(emp_login),
+      sex = VALUES(sex),
+      emp_type = VALUES(emp_type),
+      emp_type_code = VALUES(emp_type_code),
+      photo = VALUES(photo),
+      photo_update_time = CASE
+          WHEN VALUES(photo) IS NULL OR VALUES(photo) = '' THEN NULL
+          WHEN VALUES(photo) != photo THEN CURRENT_TIMESTAMP
+          ELSE photo_update_time
+      END,
+      job_type_name = VALUES(job_type_name),
+      update_time = CURRENT_TIMESTAMP
+  </insert>
+
+  <sql id="Base_Column_List">
+    id, emp_no, emp_name, phone_no, user_type, position_code, position_name, position_type,
+    org_name_path, org_code_path, parent_code, org_code, org_name, email, create_time,
+    update_time, remark, status
+  </sql>
+
+  <select id="selectByEmpNo" resultType="com.yutong.safety.core.db.entity.SafetyEmployeeMessageDO">
+    select <include refid="Base_Column_List"/>
+     from safety_employee_message
+    where emp_no = #{empNo} and status = 'NORMAL'
+  </select>
+
+  <update id="modifyFaceIssueFlag">
+    update safety_employee_message
+      set face_issue_flag = 1
+    where emp_no in
+    <foreach collection="list" item="item" open="(" close=")" separator=",">
+      #{item}
+    </foreach>
+  </update>
+
+  <!-- 更新指定组织的路径信息 -->
+  <update id="updateEmpPathByOrg">
+    update safety.safety_employee_message sem
+      join safety.safety_group_info sgi on sem.org_code = sgi.code
+          and sgi.status = 'Y'
+          and sgi.code in
+        <foreach collection="orgCodeList" item="item" open="(" close=")" separator=",">
+            #{item}
+          </foreach>
+      set sem.org_name = sgi.`name`,
+        sem.org_code_path = sgi.org_code_path,
+        sem.org_name_path = sgi.org_name_path,
+        sem.parent_code = sgi.parent_code,
+        sem.update_time = NOW()
+    where sem.`status` = 'NORMAL'
+  </update>
+</mapper>

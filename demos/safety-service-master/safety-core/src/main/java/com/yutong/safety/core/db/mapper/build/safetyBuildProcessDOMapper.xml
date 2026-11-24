@@ -1,0 +1,849 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.build.SafetyBuildProcessDOMapper">
+  <resultMap id="BaseResultMap" type="com.yutong.safety.core.db.entity.build.SafetyBuildProcessDO">
+    <id column="ID" jdbcType="VARCHAR" property="id" />
+    <result column="BPM_FLOW_ID" jdbcType="VARCHAR" property="bpmFlowId" />
+    <result column="PROCESS_CODE" jdbcType="VARCHAR" property="processCode" />
+    <result column="PROCESS_SUBJECT" jdbcType="VARCHAR" property="processSubject" />
+    <result column="CREATE_EMPLOYEE_NO" jdbcType="VARCHAR" property="createEmployeeNo" />
+    <result column="CREATE_EMPLOYEE_LOGIN" jdbcType="VARCHAR" property="createEmployeeLogin" />
+    <result column="CREATE_EMPLOYEE_NAME" jdbcType="VARCHAR" property="createEmployeeName" />
+    <result column="CREATE_DEPT_CODE" jdbcType="VARCHAR" property="createDeptCode" />
+    <result column="CREATE_DEPT_NAME" jdbcType="VARCHAR" property="createDeptName" />
+    <result column="ROLE_TYPE" jdbcType="VARCHAR" property="roleType" />
+    <result column="STATUS" jdbcType="VARCHAR" property="status" />
+    <result column="DEPART_EMPLOYEE_LOGIN" jdbcType="VARCHAR" property="departEmployeeLogin" />
+    <result column="DEPART_EMPLOYEE_NAME" jdbcType="VARCHAR" property="departEmployeeName" />
+    <result column="ACROSS_FLAG" jdbcType="VARCHAR" property="acrossFlag" />
+    <result column="ACROSS_EMPLOYEE_LOGIN" jdbcType="VARCHAR" property="acrossEmployeeLogin" />
+    <result column="ACROSS_EMPLOYEE_NAME" jdbcType="VARCHAR" property="acrossEmployeeName" />
+    <result column="TOP_SECRET_FLAG" jdbcType="VARCHAR" property="topSecretFlag" />
+    <result column="TOP_SECRET_EMPLOYEE_LOGIN" jdbcType="VARCHAR" property="topSecretEmployeeLogin" />
+    <result column="TOP_SECRET_EMPLOYEE_NAME" jdbcType="VARCHAR" property="topSecretEmployeeName" />
+    <result column="CHIEF_EMPLOYEE_LOGIN" jdbcType="VARCHAR" property="chiefEmployeeLogin" />
+    <result column="CHIEF_EMPLOYEE_NAME" jdbcType="VARCHAR" property="chiefEmployeeName" />
+    <result column="APPLY_REASON" jdbcType="VARCHAR" property="applyReason" />
+    <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+    <result column="cur_node_handler" jdbcType="VARCHAR" property="curNodeHandler" />
+    <result column="cur_handler_name" jdbcType="VARCHAR" property="curHandlerName" />
+    <result column="cur_node_id" jdbcType="VARCHAR" property="curNodeId" />
+    <result column="cur_node_name" jdbcType="VARCHAR" property="curNodeName" />
+    <result column="NODE_FLAG" jdbcType="VARCHAR" property="nodeFlag" />
+    <result column="POWER_TYPE" jdbcType="VARCHAR" property="powerType" />
+    <result column="UPDATE_TIME" jdbcType="VARCHAR" property="updateTime" />
+    <result column="DUTY_DEPT_CODE" jdbcType="VARCHAR" property="dutyDeptCode" />
+    <result column="DUTY_DEPT_NAME" jdbcType="VARCHAR" property="dutyDeptName" />
+    <result column="refuse_flag" jdbcType="VARCHAR" property="refuseFlag" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.yutong.safety.core.db.entity.build.SafetyBuildProcessDOWithBLOBs">
+    <result column="MONTAGE_DEVICE_NAME" jdbcType="LONGVARBINARY" property="montageDeviceName" />
+    <result column="MONTAGE_BUILD_NAME" jdbcType="LONGVARBINARY" property="montageBuildName" />
+    <result column="MONTAGE_TIME" jdbcType="LONGVARBINARY" property="montageTime" />
+    <result column="MONTAGE_FACTORY_NAME" jdbcType="LONGVARBINARY" property="montageFactoryName" />
+    <result column="MONTAGE_DEPT" jdbcType="LONGVARBINARY" property="montageDept" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, BPM_FLOW_ID, PROCESS_CODE, PROCESS_SUBJECT, CREATE_EMPLOYEE_NO, CREATE_EMPLOYEE_LOGIN,
+    CREATE_EMPLOYEE_NAME, CREATE_DEPT_CODE, CREATE_DEPT_NAME, ROLE_TYPE, STATUS, DEPART_EMPLOYEE_LOGIN,
+    DEPART_EMPLOYEE_NAME, ACROSS_FLAG, ACROSS_EMPLOYEE_LOGIN, ACROSS_EMPLOYEE_NAME, TOP_SECRET_FLAG,
+    TOP_SECRET_EMPLOYEE_LOGIN, TOP_SECRET_EMPLOYEE_NAME, CHIEF_EMPLOYEE_LOGIN, CHIEF_EMPLOYEE_NAME,
+    APPLY_REASON, CREATE_TIME, cur_node_handler, cur_handler_name, cur_node_id, cur_node_name,
+    NODE_FLAG, POWER_TYPE, UPDATE_TIME,DUTY_DEPT_CODE,DUTY_DEPT_NAME
+  </sql>
+  <sql id="Blob_Column_List">
+    MONTAGE_DEVICE_NAME, MONTAGE_BUILD_NAME, MONTAGE_TIME, MONTAGE_FACTORY_NAME, MONTAGE_DEPT
+  </sql>
+  <select id="selectByExampleWithBLOBs" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildProcessDOExample" resultMap="ResultMapWithBLOBs">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from safety_build_process
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByExample" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildProcessDOExample" resultMap="BaseResultMap">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Mon Mar 31 17:11:31 CST 2025.
+    -->
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from safety_build_process
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from safety_build_process
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from safety_build_process
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildProcessDOExample">
+    delete from safety_build_process
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildProcessDOWithBLOBs">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.String">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into safety_build_process (ID,BPM_FLOW_ID, PROCESS_CODE, PROCESS_SUBJECT,
+      CREATE_EMPLOYEE_NO, CREATE_EMPLOYEE_LOGIN, 
+      CREATE_EMPLOYEE_NAME, CREATE_DEPT_CODE, CREATE_DEPT_NAME, 
+      ROLE_TYPE, STATUS, DEPART_EMPLOYEE_LOGIN, 
+      DEPART_EMPLOYEE_NAME, ACROSS_FLAG, ACROSS_EMPLOYEE_LOGIN, 
+      ACROSS_EMPLOYEE_NAME, TOP_SECRET_FLAG, TOP_SECRET_EMPLOYEE_LOGIN, 
+      TOP_SECRET_EMPLOYEE_NAME, CHIEF_EMPLOYEE_LOGIN, 
+      CHIEF_EMPLOYEE_NAME, APPLY_REASON, CREATE_TIME, 
+      cur_node_handler, cur_handler_name, cur_node_id, 
+      cur_node_name, NODE_FLAG, POWER_TYPE, 
+      UPDATE_TIME, MONTAGE_DEVICE_NAME, MONTAGE_BUILD_NAME, 
+      MONTAGE_TIME, MONTAGE_FACTORY_NAME, 
+      MONTAGE_DEPT,DUTY_DEPT_CODE,DUTY_DEPT_NAME,build_sys_manager_role,across_build_sys_manager_role, admin_approval_status, admin_approval_eip_role)
+    values (#{id,jdbcType=VARCHAR}, #{bpmFlowId,jdbcType=VARCHAR}, #{processCode,jdbcType=VARCHAR}, #{processSubject,jdbcType=VARCHAR},
+      #{createEmployeeNo,jdbcType=VARCHAR}, #{createEmployeeLogin,jdbcType=VARCHAR}, 
+      #{createEmployeeName,jdbcType=VARCHAR}, #{createDeptCode,jdbcType=VARCHAR}, #{createDeptName,jdbcType=VARCHAR}, 
+      #{roleType,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, #{departEmployeeLogin,jdbcType=VARCHAR}, 
+      #{departEmployeeName,jdbcType=VARCHAR}, #{acrossFlag,jdbcType=VARCHAR}, #{acrossEmployeeLogin,jdbcType=VARCHAR}, 
+      #{acrossEmployeeName,jdbcType=VARCHAR}, #{topSecretFlag,jdbcType=VARCHAR}, #{topSecretEmployeeLogin,jdbcType=VARCHAR}, 
+      #{topSecretEmployeeName,jdbcType=VARCHAR}, #{chiefEmployeeLogin,jdbcType=VARCHAR}, 
+      #{chiefEmployeeName,jdbcType=VARCHAR}, #{applyReason,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR}, 
+      #{curNodeHandler,jdbcType=VARCHAR}, #{curHandlerName,jdbcType=VARCHAR}, #{curNodeId,jdbcType=VARCHAR}, 
+      #{curNodeName,jdbcType=VARCHAR}, #{nodeFlag,jdbcType=VARCHAR}, #{powerType,jdbcType=VARCHAR}, 
+      #{updateTime,jdbcType=VARCHAR}, #{montageDeviceName,jdbcType=LONGVARBINARY}, #{montageBuildName,jdbcType=LONGVARBINARY}, 
+      #{montageTime,jdbcType=LONGVARBINARY}, #{montageFactoryName,jdbcType=LONGVARBINARY}, 
+      #{montageDept,jdbcType=LONGVARBINARY},#{dutyDeptCode,jdbcType=VARCHAR},#{dutyDeptName,jdbcType=VARCHAR},
+      #{buildSysManagerRole,jdbcType=VARCHAR},#{acrossBuildSysManagerRole,jdbcType=VARCHAR}, #{adminApprovalStatus,jdbcType=VARCHAR}, #{adminApprovalEipRole,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildProcessDOWithBLOBs">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.String">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into safety_build_process
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null and id != ''">
+        ID,
+      </if>
+      <if test="bpmFlowId != null">
+        BPM_FLOW_ID,
+      </if>
+      <if test="processCode != null">
+        PROCESS_CODE,
+      </if>
+      <if test="processSubject != null">
+        PROCESS_SUBJECT,
+      </if>
+      <if test="createEmployeeNo != null">
+        CREATE_EMPLOYEE_NO,
+      </if>
+      <if test="createEmployeeLogin != null">
+        CREATE_EMPLOYEE_LOGIN,
+      </if>
+      <if test="createEmployeeName != null">
+        CREATE_EMPLOYEE_NAME,
+      </if>
+      <if test="createDeptCode != null">
+        CREATE_DEPT_CODE,
+      </if>
+      <if test="createDeptName != null">
+        CREATE_DEPT_NAME,
+      </if>
+      <if test="roleType != null">
+        ROLE_TYPE,
+      </if>
+      <if test="status != null">
+        STATUS,
+      </if>
+      <if test="departEmployeeLogin != null">
+        DEPART_EMPLOYEE_LOGIN,
+      </if>
+      <if test="departEmployeeName != null">
+        DEPART_EMPLOYEE_NAME,
+      </if>
+      <if test="acrossFlag != null">
+        ACROSS_FLAG,
+      </if>
+      <if test="acrossEmployeeLogin != null">
+        ACROSS_EMPLOYEE_LOGIN,
+      </if>
+      <if test="acrossEmployeeName != null">
+        ACROSS_EMPLOYEE_NAME,
+      </if>
+      <if test="topSecretFlag != null">
+        TOP_SECRET_FLAG,
+      </if>
+      <if test="topSecretEmployeeLogin != null">
+        TOP_SECRET_EMPLOYEE_LOGIN,
+      </if>
+      <if test="topSecretEmployeeName != null">
+        TOP_SECRET_EMPLOYEE_NAME,
+      </if>
+      <if test="chiefEmployeeLogin != null">
+        CHIEF_EMPLOYEE_LOGIN,
+      </if>
+      <if test="chiefEmployeeName != null">
+        CHIEF_EMPLOYEE_NAME,
+      </if>
+      <if test="applyReason != null">
+        APPLY_REASON,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+      <if test="curNodeHandler != null">
+        cur_node_handler,
+      </if>
+      <if test="curHandlerName != null">
+        cur_handler_name,
+      </if>
+      <if test="curNodeId != null">
+        cur_node_id,
+      </if>
+      <if test="curNodeName != null">
+        cur_node_name,
+      </if>
+      <if test="nodeFlag != null">
+        NODE_FLAG,
+      </if>
+      <if test="powerType != null">
+        POWER_TYPE,
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME,
+      </if>
+      <if test="montageDeviceName != null">
+        MONTAGE_DEVICE_NAME,
+      </if>
+      <if test="montageBuildName != null">
+        MONTAGE_BUILD_NAME,
+      </if>
+      <if test="montageTime != null">
+        MONTAGE_TIME,
+      </if>
+      <if test="montageFactoryName != null">
+        MONTAGE_FACTORY_NAME,
+      </if>
+      <if test="montageDept != null">
+        MONTAGE_DEPT,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null and id != ''">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="bpmFlowId != null">
+        #{bpmFlowId,jdbcType=VARCHAR},
+      </if>
+      <if test="processCode != null">
+        #{processCode,jdbcType=VARCHAR},
+      </if>
+      <if test="processSubject != null">
+        #{processSubject,jdbcType=VARCHAR},
+      </if>
+      <if test="createEmployeeNo != null">
+        #{createEmployeeNo,jdbcType=VARCHAR},
+      </if>
+      <if test="createEmployeeLogin != null">
+        #{createEmployeeLogin,jdbcType=VARCHAR},
+      </if>
+      <if test="createEmployeeName != null">
+        #{createEmployeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="createDeptCode != null">
+        #{createDeptCode,jdbcType=VARCHAR},
+      </if>
+      <if test="createDeptName != null">
+        #{createDeptName,jdbcType=VARCHAR},
+      </if>
+      <if test="roleType != null">
+        #{roleType,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="departEmployeeLogin != null">
+        #{departEmployeeLogin,jdbcType=VARCHAR},
+      </if>
+      <if test="departEmployeeName != null">
+        #{departEmployeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="acrossFlag != null">
+        #{acrossFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="acrossEmployeeLogin != null">
+        #{acrossEmployeeLogin,jdbcType=VARCHAR},
+      </if>
+      <if test="acrossEmployeeName != null">
+        #{acrossEmployeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="topSecretFlag != null">
+        #{topSecretFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="topSecretEmployeeLogin != null">
+        #{topSecretEmployeeLogin,jdbcType=VARCHAR},
+      </if>
+      <if test="topSecretEmployeeName != null">
+        #{topSecretEmployeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="chiefEmployeeLogin != null">
+        #{chiefEmployeeLogin,jdbcType=VARCHAR},
+      </if>
+      <if test="chiefEmployeeName != null">
+        #{chiefEmployeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="applyReason != null">
+        #{applyReason,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="curNodeHandler != null">
+        #{curNodeHandler,jdbcType=VARCHAR},
+      </if>
+      <if test="curHandlerName != null">
+        #{curHandlerName,jdbcType=VARCHAR},
+      </if>
+      <if test="curNodeId != null">
+        #{curNodeId,jdbcType=VARCHAR},
+      </if>
+      <if test="curNodeName != null">
+        #{curNodeName,jdbcType=VARCHAR},
+      </if>
+      <if test="nodeFlag != null">
+        #{nodeFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="powerType != null">
+        #{powerType,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="montageDeviceName != null">
+        #{montageDeviceName,jdbcType=LONGVARBINARY},
+      </if>
+      <if test="montageBuildName != null">
+        #{montageBuildName,jdbcType=LONGVARBINARY},
+      </if>
+      <if test="montageTime != null">
+        #{montageTime,jdbcType=LONGVARBINARY},
+      </if>
+      <if test="montageFactoryName != null">
+        #{montageFactoryName,jdbcType=LONGVARBINARY},
+      </if>
+      <if test="montageDept != null">
+        #{montageDept,jdbcType=LONGVARBINARY},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildProcessDOExample" resultType="java.lang.Long">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Mon Mar 31 17:11:31 CST 2025.
+    -->
+    select count(*) from safety_build_process
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Mon Mar 31 17:11:31 CST 2025.
+    -->
+    update safety_build_process
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=VARCHAR},
+      </if>
+      <if test="record.bpmFlowId != null">
+        BPM_FLOW_ID = #{record.bpmFlowId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.processCode != null">
+        PROCESS_CODE = #{record.processCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.processSubject != null">
+        PROCESS_SUBJECT = #{record.processSubject,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createEmployeeNo != null">
+        CREATE_EMPLOYEE_NO = #{record.createEmployeeNo,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createEmployeeLogin != null">
+        CREATE_EMPLOYEE_LOGIN = #{record.createEmployeeLogin,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createEmployeeName != null">
+        CREATE_EMPLOYEE_NAME = #{record.createEmployeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createDeptCode != null">
+        CREATE_DEPT_CODE = #{record.createDeptCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createDeptName != null">
+        CREATE_DEPT_NAME = #{record.createDeptName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.roleType != null">
+        ROLE_TYPE = #{record.roleType,jdbcType=VARCHAR},
+      </if>
+      <if test="record.status != null">
+        STATUS = #{record.status,jdbcType=VARCHAR},
+      </if>
+      <if test="record.departEmployeeLogin != null">
+        DEPART_EMPLOYEE_LOGIN = #{record.departEmployeeLogin,jdbcType=VARCHAR},
+      </if>
+      <if test="record.departEmployeeName != null">
+        DEPART_EMPLOYEE_NAME = #{record.departEmployeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.acrossFlag != null">
+        ACROSS_FLAG = #{record.acrossFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="record.acrossEmployeeLogin != null">
+        ACROSS_EMPLOYEE_LOGIN = #{record.acrossEmployeeLogin,jdbcType=VARCHAR},
+      </if>
+      <if test="record.acrossEmployeeName != null">
+        ACROSS_EMPLOYEE_NAME = #{record.acrossEmployeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.topSecretFlag != null">
+        TOP_SECRET_FLAG = #{record.topSecretFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="record.topSecretEmployeeLogin != null">
+        TOP_SECRET_EMPLOYEE_LOGIN = #{record.topSecretEmployeeLogin,jdbcType=VARCHAR},
+      </if>
+      <if test="record.topSecretEmployeeName != null">
+        TOP_SECRET_EMPLOYEE_NAME = #{record.topSecretEmployeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.chiefEmployeeLogin != null">
+        CHIEF_EMPLOYEE_LOGIN = #{record.chiefEmployeeLogin,jdbcType=VARCHAR},
+      </if>
+      <if test="record.chiefEmployeeName != null">
+        CHIEF_EMPLOYEE_NAME = #{record.chiefEmployeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.applyReason != null">
+        APPLY_REASON = #{record.applyReason,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null">
+        CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.curNodeHandler != null">
+        cur_node_handler = #{record.curNodeHandler,jdbcType=VARCHAR},
+      </if>
+      <if test="record.curHandlerName != null">
+        cur_handler_name = #{record.curHandlerName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.curNodeId != null">
+        cur_node_id = #{record.curNodeId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.curNodeName != null">
+        cur_node_name = #{record.curNodeName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.nodeFlag != null">
+        NODE_FLAG = #{record.nodeFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="record.powerType != null">
+        POWER_TYPE = #{record.powerType,jdbcType=VARCHAR},
+      </if>
+      <if test="record.updateTime != null">
+        UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.montageDeviceName != null">
+        MONTAGE_DEVICE_NAME = #{record.montageDeviceName,jdbcType=LONGVARBINARY},
+      </if>
+      <if test="record.montageBuildName != null">
+        MONTAGE_BUILD_NAME = #{record.montageBuildName,jdbcType=LONGVARBINARY},
+      </if>
+      <if test="record.montageTime != null">
+        MONTAGE_TIME = #{record.montageTime,jdbcType=LONGVARBINARY},
+      </if>
+      <if test="record.montageFactoryName != null">
+        MONTAGE_FACTORY_NAME = #{record.montageFactoryName,jdbcType=LONGVARBINARY},
+      </if>
+      <if test="record.montageDept != null">
+        MONTAGE_DEPT = #{record.montageDept,jdbcType=LONGVARBINARY},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExampleWithBLOBs" parameterType="map">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Mon Mar 31 17:11:31 CST 2025.
+    -->
+    update safety_build_process
+    set ID = #{record.id,jdbcType=VARCHAR},
+      BPM_FLOW_ID = #{record.bpmFlowId,jdbcType=VARCHAR},
+      PROCESS_CODE = #{record.processCode,jdbcType=VARCHAR},
+      PROCESS_SUBJECT = #{record.processSubject,jdbcType=VARCHAR},
+      CREATE_EMPLOYEE_NO = #{record.createEmployeeNo,jdbcType=VARCHAR},
+      CREATE_EMPLOYEE_LOGIN = #{record.createEmployeeLogin,jdbcType=VARCHAR},
+      CREATE_EMPLOYEE_NAME = #{record.createEmployeeName,jdbcType=VARCHAR},
+      CREATE_DEPT_CODE = #{record.createDeptCode,jdbcType=VARCHAR},
+      CREATE_DEPT_NAME = #{record.createDeptName,jdbcType=VARCHAR},
+      ROLE_TYPE = #{record.roleType,jdbcType=VARCHAR},
+      STATUS = #{record.status,jdbcType=VARCHAR},
+      DEPART_EMPLOYEE_LOGIN = #{record.departEmployeeLogin,jdbcType=VARCHAR},
+      DEPART_EMPLOYEE_NAME = #{record.departEmployeeName,jdbcType=VARCHAR},
+      ACROSS_FLAG = #{record.acrossFlag,jdbcType=VARCHAR},
+      ACROSS_EMPLOYEE_LOGIN = #{record.acrossEmployeeLogin,jdbcType=VARCHAR},
+      ACROSS_EMPLOYEE_NAME = #{record.acrossEmployeeName,jdbcType=VARCHAR},
+      TOP_SECRET_FLAG = #{record.topSecretFlag,jdbcType=VARCHAR},
+      TOP_SECRET_EMPLOYEE_LOGIN = #{record.topSecretEmployeeLogin,jdbcType=VARCHAR},
+      TOP_SECRET_EMPLOYEE_NAME = #{record.topSecretEmployeeName,jdbcType=VARCHAR},
+      CHIEF_EMPLOYEE_LOGIN = #{record.chiefEmployeeLogin,jdbcType=VARCHAR},
+      CHIEF_EMPLOYEE_NAME = #{record.chiefEmployeeName,jdbcType=VARCHAR},
+      APPLY_REASON = #{record.applyReason,jdbcType=VARCHAR},
+      CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      cur_node_handler = #{record.curNodeHandler,jdbcType=VARCHAR},
+      cur_handler_name = #{record.curHandlerName,jdbcType=VARCHAR},
+      cur_node_id = #{record.curNodeId,jdbcType=VARCHAR},
+      cur_node_name = #{record.curNodeName,jdbcType=VARCHAR},
+      NODE_FLAG = #{record.nodeFlag,jdbcType=VARCHAR},
+      POWER_TYPE = #{record.powerType,jdbcType=VARCHAR},
+      UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      MONTAGE_DEVICE_NAME = #{record.montageDeviceName,jdbcType=LONGVARBINARY},
+      MONTAGE_BUILD_NAME = #{record.montageBuildName,jdbcType=LONGVARBINARY},
+      MONTAGE_TIME = #{record.montageTime,jdbcType=LONGVARBINARY},
+      MONTAGE_FACTORY_NAME = #{record.montageFactoryName,jdbcType=LONGVARBINARY},
+      MONTAGE_DEPT = #{record.montageDept,jdbcType=LONGVARBINARY}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Mon Mar 31 17:11:31 CST 2025.
+    -->
+    update safety_build_process
+    set ID = #{record.id,jdbcType=VARCHAR},
+      BPM_FLOW_ID = #{record.bpmFlowId,jdbcType=VARCHAR},
+      PROCESS_CODE = #{record.processCode,jdbcType=VARCHAR},
+      PROCESS_SUBJECT = #{record.processSubject,jdbcType=VARCHAR},
+      CREATE_EMPLOYEE_NO = #{record.createEmployeeNo,jdbcType=VARCHAR},
+      CREATE_EMPLOYEE_LOGIN = #{record.createEmployeeLogin,jdbcType=VARCHAR},
+      CREATE_EMPLOYEE_NAME = #{record.createEmployeeName,jdbcType=VARCHAR},
+      CREATE_DEPT_CODE = #{record.createDeptCode,jdbcType=VARCHAR},
+      CREATE_DEPT_NAME = #{record.createDeptName,jdbcType=VARCHAR},
+      ROLE_TYPE = #{record.roleType,jdbcType=VARCHAR},
+      STATUS = #{record.status,jdbcType=VARCHAR},
+      DEPART_EMPLOYEE_LOGIN = #{record.departEmployeeLogin,jdbcType=VARCHAR},
+      DEPART_EMPLOYEE_NAME = #{record.departEmployeeName,jdbcType=VARCHAR},
+      ACROSS_FLAG = #{record.acrossFlag,jdbcType=VARCHAR},
+      ACROSS_EMPLOYEE_LOGIN = #{record.acrossEmployeeLogin,jdbcType=VARCHAR},
+      ACROSS_EMPLOYEE_NAME = #{record.acrossEmployeeName,jdbcType=VARCHAR},
+      TOP_SECRET_FLAG = #{record.topSecretFlag,jdbcType=VARCHAR},
+      TOP_SECRET_EMPLOYEE_LOGIN = #{record.topSecretEmployeeLogin,jdbcType=VARCHAR},
+      TOP_SECRET_EMPLOYEE_NAME = #{record.topSecretEmployeeName,jdbcType=VARCHAR},
+      CHIEF_EMPLOYEE_LOGIN = #{record.chiefEmployeeLogin,jdbcType=VARCHAR},
+      CHIEF_EMPLOYEE_NAME = #{record.chiefEmployeeName,jdbcType=VARCHAR},
+      APPLY_REASON = #{record.applyReason,jdbcType=VARCHAR},
+      CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      cur_node_handler = #{record.curNodeHandler,jdbcType=VARCHAR},
+      cur_handler_name = #{record.curHandlerName,jdbcType=VARCHAR},
+      cur_node_id = #{record.curNodeId,jdbcType=VARCHAR},
+      cur_node_name = #{record.curNodeName,jdbcType=VARCHAR},
+      NODE_FLAG = #{record.nodeFlag,jdbcType=VARCHAR},
+      POWER_TYPE = #{record.powerType,jdbcType=VARCHAR},
+      UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildProcessDOWithBLOBs">
+    update safety_build_process
+    <set>
+      <if test="bpmFlowId != null">
+        BPM_FLOW_ID = #{bpmFlowId,jdbcType=VARCHAR},
+      </if>
+      <if test="processCode != null">
+        PROCESS_CODE = #{processCode,jdbcType=VARCHAR},
+      </if>
+      <if test="processSubject != null">
+        PROCESS_SUBJECT = #{processSubject,jdbcType=VARCHAR},
+      </if>
+      <if test="createEmployeeNo != null">
+        CREATE_EMPLOYEE_NO = #{createEmployeeNo,jdbcType=VARCHAR},
+      </if>
+      <if test="createEmployeeLogin != null">
+        CREATE_EMPLOYEE_LOGIN = #{createEmployeeLogin,jdbcType=VARCHAR},
+      </if>
+      <if test="createEmployeeName != null">
+        CREATE_EMPLOYEE_NAME = #{createEmployeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="createDeptCode != null">
+        CREATE_DEPT_CODE = #{createDeptCode,jdbcType=VARCHAR},
+      </if>
+      <if test="createDeptName != null">
+        CREATE_DEPT_NAME = #{createDeptName,jdbcType=VARCHAR},
+      </if>
+      <if test="roleType != null">
+        ROLE_TYPE = #{roleType,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        STATUS = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="departEmployeeLogin != null">
+        DEPART_EMPLOYEE_LOGIN = #{departEmployeeLogin,jdbcType=VARCHAR},
+      </if>
+      <if test="departEmployeeName != null">
+        DEPART_EMPLOYEE_NAME = #{departEmployeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="acrossFlag != null">
+        ACROSS_FLAG = #{acrossFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="acrossEmployeeLogin != null">
+        ACROSS_EMPLOYEE_LOGIN = #{acrossEmployeeLogin,jdbcType=VARCHAR},
+      </if>
+      <if test="acrossEmployeeName != null">
+        ACROSS_EMPLOYEE_NAME = #{acrossEmployeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="topSecretFlag != null">
+        TOP_SECRET_FLAG = #{topSecretFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="topSecretEmployeeLogin != null">
+        TOP_SECRET_EMPLOYEE_LOGIN = #{topSecretEmployeeLogin,jdbcType=VARCHAR},
+      </if>
+      <if test="topSecretEmployeeName != null">
+        TOP_SECRET_EMPLOYEE_NAME = #{topSecretEmployeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="chiefEmployeeLogin != null">
+        CHIEF_EMPLOYEE_LOGIN = #{chiefEmployeeLogin,jdbcType=VARCHAR},
+      </if>
+      <if test="chiefEmployeeName != null">
+        CHIEF_EMPLOYEE_NAME = #{chiefEmployeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="applyReason != null">
+        APPLY_REASON = #{applyReason,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="curNodeHandler != null">
+        cur_node_handler = #{curNodeHandler,jdbcType=VARCHAR},
+      </if>
+      <if test="curHandlerName != null">
+        cur_handler_name = #{curHandlerName,jdbcType=VARCHAR},
+      </if>
+      <if test="curNodeId != null">
+        cur_node_id = #{curNodeId,jdbcType=VARCHAR},
+      </if>
+      <if test="curNodeName != null">
+        cur_node_name = #{curNodeName,jdbcType=VARCHAR},
+      </if>
+      <if test="nodeFlag != null">
+        NODE_FLAG = #{nodeFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="powerType != null">
+        POWER_TYPE = #{powerType,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="montageDeviceName != null">
+        MONTAGE_DEVICE_NAME = #{montageDeviceName,jdbcType=LONGVARBINARY},
+      </if>
+      <if test="montageBuildName != null">
+        MONTAGE_BUILD_NAME = #{montageBuildName,jdbcType=LONGVARBINARY},
+      </if>
+      <if test="montageTime != null">
+        MONTAGE_TIME = #{montageTime,jdbcType=LONGVARBINARY},
+      </if>
+      <if test="montageFactoryName != null">
+        MONTAGE_FACTORY_NAME = #{montageFactoryName,jdbcType=LONGVARBINARY},
+      </if>
+      <if test="montageDept != null">
+        MONTAGE_DEPT = #{montageDept,jdbcType=LONGVARBINARY},
+      </if>
+      <if test="refuseFlag != null">
+        refuse_flag= #{refuseFlag,jdbcType=LONGVARBINARY},
+      </if>
+      <if test="acrossBuildSysManagerRole != null">
+        across_build_sys_manager_role= #{acrossBuildSysManagerRole,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildProcessDOWithBLOBs">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Mon Mar 31 17:11:31 CST 2025.
+    -->
+    update safety_build_process
+    set BPM_FLOW_ID = #{bpmFlowId,jdbcType=VARCHAR},
+      PROCESS_CODE = #{processCode,jdbcType=VARCHAR},
+      PROCESS_SUBJECT = #{processSubject,jdbcType=VARCHAR},
+      CREATE_EMPLOYEE_NO = #{createEmployeeNo,jdbcType=VARCHAR},
+      CREATE_EMPLOYEE_LOGIN = #{createEmployeeLogin,jdbcType=VARCHAR},
+      CREATE_EMPLOYEE_NAME = #{createEmployeeName,jdbcType=VARCHAR},
+      CREATE_DEPT_CODE = #{createDeptCode,jdbcType=VARCHAR},
+      CREATE_DEPT_NAME = #{createDeptName,jdbcType=VARCHAR},
+      ROLE_TYPE = #{roleType,jdbcType=VARCHAR},
+      STATUS = #{status,jdbcType=VARCHAR},
+      DEPART_EMPLOYEE_LOGIN = #{departEmployeeLogin,jdbcType=VARCHAR},
+      DEPART_EMPLOYEE_NAME = #{departEmployeeName,jdbcType=VARCHAR},
+      ACROSS_FLAG = #{acrossFlag,jdbcType=VARCHAR},
+      ACROSS_EMPLOYEE_LOGIN = #{acrossEmployeeLogin,jdbcType=VARCHAR},
+      ACROSS_EMPLOYEE_NAME = #{acrossEmployeeName,jdbcType=VARCHAR},
+      TOP_SECRET_FLAG = #{topSecretFlag,jdbcType=VARCHAR},
+      TOP_SECRET_EMPLOYEE_LOGIN = #{topSecretEmployeeLogin,jdbcType=VARCHAR},
+      TOP_SECRET_EMPLOYEE_NAME = #{topSecretEmployeeName,jdbcType=VARCHAR},
+      CHIEF_EMPLOYEE_LOGIN = #{chiefEmployeeLogin,jdbcType=VARCHAR},
+      CHIEF_EMPLOYEE_NAME = #{chiefEmployeeName,jdbcType=VARCHAR},
+      APPLY_REASON = #{applyReason,jdbcType=VARCHAR},
+      CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      cur_node_handler = #{curNodeHandler,jdbcType=VARCHAR},
+      cur_handler_name = #{curHandlerName,jdbcType=VARCHAR},
+      cur_node_id = #{curNodeId,jdbcType=VARCHAR},
+      cur_node_name = #{curNodeName,jdbcType=VARCHAR},
+      NODE_FLAG = #{nodeFlag,jdbcType=VARCHAR},
+      POWER_TYPE = #{powerType,jdbcType=VARCHAR},
+      UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      MONTAGE_DEVICE_NAME = #{montageDeviceName,jdbcType=LONGVARBINARY},
+      MONTAGE_BUILD_NAME = #{montageBuildName,jdbcType=LONGVARBINARY},
+      MONTAGE_TIME = #{montageTime,jdbcType=LONGVARBINARY},
+      MONTAGE_FACTORY_NAME = #{montageFactoryName,jdbcType=LONGVARBINARY},
+      MONTAGE_DEPT = #{montageDept,jdbcType=LONGVARBINARY}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildProcessDO">
+    <!--
+      WARNING - @mbg.generated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Mon Mar 31 17:11:31 CST 2025.
+    -->
+    update safety_build_process
+    set BPM_FLOW_ID = #{bpmFlowId,jdbcType=VARCHAR},
+      PROCESS_CODE = #{processCode,jdbcType=VARCHAR},
+      PROCESS_SUBJECT = #{processSubject,jdbcType=VARCHAR},
+      CREATE_EMPLOYEE_NO = #{createEmployeeNo,jdbcType=VARCHAR},
+      CREATE_EMPLOYEE_LOGIN = #{createEmployeeLogin,jdbcType=VARCHAR},
+      CREATE_EMPLOYEE_NAME = #{createEmployeeName,jdbcType=VARCHAR},
+      CREATE_DEPT_CODE = #{createDeptCode,jdbcType=VARCHAR},
+      CREATE_DEPT_NAME = #{createDeptName,jdbcType=VARCHAR},
+      ROLE_TYPE = #{roleType,jdbcType=VARCHAR},
+      STATUS = #{status,jdbcType=VARCHAR},
+      DEPART_EMPLOYEE_LOGIN = #{departEmployeeLogin,jdbcType=VARCHAR},
+      DEPART_EMPLOYEE_NAME = #{departEmployeeName,jdbcType=VARCHAR},
+      ACROSS_FLAG = #{acrossFlag,jdbcType=VARCHAR},
+      ACROSS_EMPLOYEE_LOGIN = #{acrossEmployeeLogin,jdbcType=VARCHAR},
+      ACROSS_EMPLOYEE_NAME = #{acrossEmployeeName,jdbcType=VARCHAR},
+      TOP_SECRET_FLAG = #{topSecretFlag,jdbcType=VARCHAR},
+      TOP_SECRET_EMPLOYEE_LOGIN = #{topSecretEmployeeLogin,jdbcType=VARCHAR},
+      TOP_SECRET_EMPLOYEE_NAME = #{topSecretEmployeeName,jdbcType=VARCHAR},
+      CHIEF_EMPLOYEE_LOGIN = #{chiefEmployeeLogin,jdbcType=VARCHAR},
+      CHIEF_EMPLOYEE_NAME = #{chiefEmployeeName,jdbcType=VARCHAR},
+      APPLY_REASON = #{applyReason,jdbcType=VARCHAR},
+      CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      cur_node_handler = #{curNodeHandler,jdbcType=VARCHAR},
+      cur_handler_name = #{curHandlerName,jdbcType=VARCHAR},
+      cur_node_id = #{curNodeId,jdbcType=VARCHAR},
+      cur_node_name = #{curNodeName,jdbcType=VARCHAR},
+      NODE_FLAG = #{nodeFlag,jdbcType=VARCHAR},
+      POWER_TYPE = #{powerType,jdbcType=VARCHAR},
+      UPDATE_TIME = #{updateTime,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

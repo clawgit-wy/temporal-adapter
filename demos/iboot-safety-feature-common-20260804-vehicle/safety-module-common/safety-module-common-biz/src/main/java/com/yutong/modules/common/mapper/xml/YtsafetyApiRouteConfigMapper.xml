@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.common.mapper.YtsafetyApiRouteConfigMapper">
+
+
+    <select id="getListByUserId" resultType="com.yutong.modules.common.entity.YtsafetySysUserDataRuleBO">
+        SELECT
+        id AS id,
+        user_id AS userId,
+        perm_id AS permId,
+        field_code AS fieldCode,
+        field_name AS fieldName,
+        relation AS relation,
+        rule_conditions AS ruleConditions,
+        rule_value AS ruleValue,
+        version AS version
+        FROM ytsafety_sys_user_data_rule
+        WHERE user_id = #{userId} AND del_flag = 0
+    </select>
+</mapper>

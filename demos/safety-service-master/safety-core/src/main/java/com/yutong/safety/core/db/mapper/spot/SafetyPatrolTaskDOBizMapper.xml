@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.spot.SafetyPatrolTaskDOBizMapper">
+
+    <!-- 批量更新任务 -->
+  <update id="batchUpdateTask" parameterType="java.util.List">
+    <foreach collection="list" item="item" separator=",">
+      update safety_spot_check_task
+      set task_end_date = #{item.taskEndDate}
+      <if test="taskBeginDate != null and taskBeginDate!=''">
+        , task_begin_date = #{taskBeginDate}
+      </if>
+      where id = #{item.id}
+    </foreach>
+  </update>
+
+    <sql id="reportWhere">
+        <if test="taskBeginDate != null and taskEndDate != null ">
+            <![CDATA[
+            and t.task_begin_date <= #{taskEndDate}
+            and t.task_end_date >= #{taskBeginDate}
+        ]]>
+        </if>
+        <if test="typeId != null">
+            and t.type_id = #{typeId}
+        </if>
+        <if test="teamId != null">
+            and t.team_id = #{teamId}
+        </if>
+        <if test = "planId != null">
+            and t.plan_id = #{planId}
+        </if>
+        <if test="factoryStr !=null and factoryStr !='' ">
+            and t.factory_id in
+            <foreach item="item" index="index" collection="factoryStr.split(',')"  open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="planIdList != null">
+            and t.plan_id in
+            <foreach item="item" index="index" collection="planIdList"  open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+
+        <if test="patrolEmpNo != null and patrolEmpNo != ''">
+            and t.user_code = #{patrolEmpNo}
+        </if>
+    </sql>
+
+    <sql id="reportDetailWhere">
+        <if test="taskBeginDate != null and taskEndDate != null ">
+            <![CDATA[
+            and t.task_begin_date = #{taskBeginDate}
+            and t.task_end_date = #{taskEndDate}
+        ]]>
+        </if>
+        <if test="typeId != null">
+            and t.type_id = #{typeId}
+        </if>
+        <if test="teamId != null">
+            and t.team_id = #{teamId}
+        </if>
+        <if test = "planId != null">
+            and t.plan_id = #{planId}
+        </if>
+        <if test="factoryStr !=null and factoryStr !='' ">
+            and t.factory_id in
+            <foreach item="item" index="index" collection="factoryStr.split(',')"  open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="planIdList != null">
+            and t.plan_id in
+            <foreach item="item" index="index" collection="planIdList"  open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+
+        <if test="patrolEmpNo != null and patrolEmpNo != ''">
+            and t.user_code = #{patrolEmpNo}
+        </if>
+    </sql>
+
+
+  <!-- 查询统计治安巡查任务 -->
+  <select id="selectPatrolTaskReport" parameterType="com.yutong.safety.common.param.web.spot.PatrolTaskListParam"
+          resultType="com.yutong.safety.common.vo.web.spot.PatrolTaskReportVO">
+    SELECT * FROM(
+    SELECT tmp.plan_id,plan_type,type_id,type_name,team_id,team_name,tmp.task_begin_date,task_end_date,
+            cur_order,factory_name,IFNULL(frequency,0) frequency,IFNULL(tmp1.check_num,0) check_num,
+            CASE WHEN IFNULL(frequency,0) - IFNULL(tmp1.check_num,0)>=0 THEN IFNULL(frequency,0) - IFNULL(tmp1.check_num,0) ELSE 0 END uncheck_num,
+            case when (frequency is null or frequency = 0 or tmp1.check_num is null) then 0
+                else round((tmp1.check_num*100/tmp.frequency)) end check_rate
+    FROM (SELECT t.plan_id,p.plan_type,t.type_id,max(t.type_name) type_name,
+                  t.team_id,max(t.team_name) team_name,t.task_begin_date,max(t.task_end_date) task_end_date,
+                  max(t.cur_order) cur_order,max(m.field_name) factory_name,sum(p.frequency) frequency
+            FROM safety_patrol_task t
+            LEFT JOIN safety_patrol_plan p ON t.plan_id = p.id
+            LEFT JOIN safety_field_manage m ON m.id = t.factory_id
+            WHERE	1 = 1
+              and p.plan_type = 1
+      <include refid="reportWhere"/>
+            group by p.plan_type,t.type_id,t.team_id,t.plan_id,t.task_begin_date) tmp
+     left join (select t.plan_id,t.task_begin_date,count(1) check_num from safety_process_patrol p,safety_patrol_task t
+                 where t.id = p.task_id GROUP BY t.plan_id,t.task_begin_date) tmp1
+                    on tmp.plan_id = tmp1.plan_id and tmp.task_begin_date = tmp1.task_begin_date
+    where 1 = 1
+    UNION ALL
+    SELECT tmp.plan_id,plan_type,type_id,type_name,team_id,team_name,tmp.task_begin_date,task_end_date,
+           cur_order,factory_name,IFNULL(frequency,0) frequency,IFNULL(tmp1.check_num,0) check_num,
+            CASE WHEN IFNULL(frequency,0) - IFNULL(tmp1.check_num,0)>=0 THEN IFNULL(frequency,0) - IFNULL(tmp1.check_num,0) ELSE 0 END uncheck_num,
+            case when (frequency is null or frequency = 0 or tmp1.check_num is null) then 0
+            else round((tmp1.check_num*100/tmp.frequency)) end check_rate
+      FROM (SELECT t.plan_id,p.plan_type,t.type_id,max(t.type_name) type_name,
+                    t.team_id,max(t.team_name) team_name,t.task_begin_date,max(t.task_end_date) task_end_date,
+                    max(t.cur_order) cur_order,max(m.field_name) factory_name,sum(p.frequency) frequency
+              FROM safety_patrol_task t
+              LEFT JOIN safety_patrol_plan p ON t.plan_id = p.id
+              LEFT JOIN safety_field_manage m ON m.id = t.factory_id
+             WHERE	1 = 1
+              and p.plan_type = 2
+            <include refid="reportWhere"/>
+             group by p.plan_type,t.type_id,t.team_id,t.plan_id,t.task_begin_date) tmp
+        left join (select t.plan_id,t.task_begin_date,count(1) check_num
+                     from safety_validate_environment p,safety_patrol_task t
+                    where t.id = p.task_id GROUP BY t.plan_id,t.task_begin_date) tmp1 on tmp.plan_id = tmp1.plan_id and tmp.task_begin_date = tmp1.task_begin_date
+      where 1 = 1
+      ) CUR_DATE
+      where  1 = 1
+      <if test="planType != null">
+          and plan_type = #{planType}
+      </if>
+  </select>
+
+  <!-- 查询统计治安巡查任务 -->
+  <select id="selectPatrolTODODetail" parameterType="com.yutong.safety.common.param.web.spot.PatrolTaskListParam"
+          resultType="com.yutong.safety.common.vo.web.spot.PatrolTaskReportVO">
+      select * from(
+    <![CDATA[
+    select plan_id,plan_name,plan_type,type_id,type_name,team_id,team_name,task_begin_date,task_end_date,cur_order,
+          factory_name,factory_id,tmp.task_id,IFNULL(frequency,0) frequency,IFNULL(tmp1.check_num,0) check_num,
+          CASE WHEN IFNULL(frequency,0)-IFNULL(tmp1.check_num,0)<0 THEN 0 ELSE IFNULL(frequency,0)-IFNULL(tmp1.check_num,0) END uncheck_num,
+          case when (frequency is null or frequency = 0 or tmp1.check_num is null) then 0
+          else round((tmp1.check_num*100/tmp.frequency)) end check_rate,plan_remark
+    from (select t.plan_id,p.plan_name,p.plan_type,t.type_id,max(t.type_name) type_name,t.team_id,max(t.team_name) team_name,
+                t.task_begin_date,max(t.task_end_date) task_end_date,max(t.cur_order) cur_order,
+                max(m.field_name) factory_name,sum(p.frequency) frequency,t.factory_id,t.id task_id,p.remark plan_remark
+          from safety_patrol_task t
+          left join safety_patrol_plan p on t.plan_id = p.id
+          left join safety_field_manage m on m.id = t.factory_id
+          where 1 = 1 and p.plan_type = 1
+    ]]>
+    <include refid="reportDetailWhere"/>
+        group by p.plan_type,t.type_id,t.team_id,t.plan_id,t.task_begin_date,t.factory_id,t.id) tmp
+    left join (select p.task_id,count(1) check_num from safety_process_patrol p where p.event_source = 1 group by p.task_id) tmp1 on tmp1.task_id = tmp.task_id
+    where 1 = 1
+    union all
+    <![CDATA[
+    select plan_id,plan_name,plan_type,type_id,type_name,team_id,team_name,task_begin_date,task_end_date,cur_order,
+           factory_name,factory_id,tmp.task_id,IFNULL(frequency,0) frequency,IFNULL(tmp1.check_num,0) check_num,
+           CASE WHEN IFNULL(frequency,0)-IFNULL(tmp1.check_num,0)<0 THEN 0 ELSE IFNULL(frequency,0)-IFNULL(tmp1.check_num,0) END uncheck_num,
+           case when (frequency is null or frequency = 0 or tmp1.check_num is null) then 0
+           else round((tmp1.check_num*100/tmp.frequency)) end check_rate,plan_remark     ]]>
+      from (select t.plan_id,p.plan_name,p.plan_type,t.type_id,max(t.type_name) type_name,t.team_id,max(t.team_name) team_name,
+                   t.task_begin_date,max(t.task_end_date) task_end_date,max(t.cur_order) cur_order,
+                   max(m.field_name) factory_name,sum(p.frequency) frequency,t.factory_id,t.id task_id,p.remark plan_remark
+              from safety_patrol_task t
+              left join safety_patrol_plan p on t.plan_id = p.id
+              left join safety_field_manage m on m.id = t.factory_id
+             where 1 = 1  and p.plan_type = 2
+      <include refid="reportDetailWhere"/>
+             group by p.plan_type,t.type_id,t.team_id,t.plan_id,t.task_begin_date,t.factory_id,t.id) tmp
+      left join (select p.task_id,count(1) check_num from safety_validate_environment p where p.event_source = 1 group by p.task_id) tmp1 on tmp1.task_id = tmp.task_id
+      where 1 = 1
+      )  cur_date
+      where 1 = 1
+      <if test="planType != null">
+          and plan_type = #{planType}
+      </if>
+
+  </select>
+
+    <select id="selectDetailSummary" parameterType="com.yutong.safety.common.param.web.spot.PatrolTaskListParam"
+            resultType="com.yutong.safety.common.vo.web.spot.PatrolTaskReportVO">
+        SELECT * FROM (
+        SELECT max(pp.plan_type) plan_type,max(event_type) type_name, p.plan_id,
+                p.task_id, max(pp.frequency) frequency,
+                case when count(1)> max(pp.frequency) then max(pp.frequency) else count(1) end check_num
+        FROM safety_validate_environment p ,safety_patrol_task t ,safety_patrol_plan pp
+        WHERE p.event_source = 1
+          and p.task_id = t.id and pp.id = t.plan_id
+        <include refid="reportWhere"/>
+        group by p.plan_id,p.task_id
+        UNION ALL
+        SELECT max(pp.plan_type) plan_type,max(event_type) type_name, p.plan_id,
+                p.task_id, max(pp.frequency) frequency,
+                case when count(1)> max(pp.frequency) then max(pp.frequency) else count(1) end check_num
+        from safety.safety_process_patrol p ,safety_patrol_task t ,safety_patrol_plan pp
+        where event_source = 1
+         and p.task_id = t.id and pp.id = t.plan_id
+        <include refid="reportWhere"/>
+        group by p.plan_id,p.task_id ) TMP
+        WHERE 1 = 1
+        <if test="planType != null">
+            and plan_type = #{planType}
+        </if>
+    </select>
+</mapper>

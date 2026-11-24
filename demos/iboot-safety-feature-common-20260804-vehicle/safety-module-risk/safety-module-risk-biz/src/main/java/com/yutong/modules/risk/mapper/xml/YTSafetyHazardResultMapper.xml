@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.risk.mapper.YTSafetyHazardResultMapper">
+
+    <select id="listBYHazardReportId" resultType="com.yutong.modules.risk.vo.YTSafetyHazardResultVO">
+        SELECT
+            id,
+            process_id as processId,
+            handler_user_emp_no AS handlerUserEmpNo,
+            handle_complete_time AS handleCompleteTime,
+            handle_measure AS handleMeasure,
+            attachment_ids AS attachmentIds,
+            handler_type AS handlerType,
+            approval_result AS approvalResult,
+            status AS status
+        FROM ytsafety_hazard_result
+        WHERE process_id = #{id}
+    </select>
+
+    <select id="listByReportIds" resultType="com.yutong.modules.risk.vo.YTSafetyHazardResultVO">
+        SELECT
+            id,
+            process_id AS processId,
+            handler_user_emp_no AS handlerUserEmpNo,
+            handle_complete_time AS handleCompleteTime,
+            handle_measure AS handleMeasure,
+            attachment_ids AS attachmentIds,
+            handler_type AS handlerType,
+            approval_result AS approvalResult
+        FROM ytsafety_hazard_result
+        WHERE process_id IN
+        <foreach collection="reportIds" item="reportId" open="(" separator="," close=")">
+            #{reportId}
+        </foreach>
+        ORDER BY process_id, id
+    </select>
+    <select id="getNewestByProcessId" resultType="com.yutong.modules.risk.entity.YTSafetyHazardResult">
+        SELECT *
+        FROM ytsafety_hazard_result
+        WHERE process_id = #{processId}
+        ORDER BY create_time DESC
+        LIMIT 1
+    </select>
+</mapper>

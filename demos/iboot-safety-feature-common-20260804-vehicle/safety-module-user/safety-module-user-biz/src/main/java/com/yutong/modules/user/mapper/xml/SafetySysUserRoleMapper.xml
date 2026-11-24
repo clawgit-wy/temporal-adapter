@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.user.mapper.SafetySysUserRoleMapper">
+
+    <select id="queryUserRoles" resultType="java.lang.String">
+        select distinct t.role_name from safety_sys_role t
+        left join safety_sys_user_role t1
+        on t.id = t1.role_id
+        left join safety_sys_user t2
+        on t2.id = t1.user_id
+        where t2.emp_no=#{username}
+                and t.delete_falg='0'
+                and t1.del_flag=0
+                and t2.delete_falg = 0
+                and t1.status = 0
+    </select>
+
+    <select id="queryUserRoleCodes" resultType="java.lang.String">
+        select distinct t1.role_code from safety_sys_user_role t1
+        left join safety_sys_user t2
+        on t2.id = t1.user_id
+        where t2.emp_no=#{username}
+                and t1.del_flag=0
+                and t2.delete_falg = 0
+                and t1.status = 0
+    </select>
+
+    <select id="queryUserAuths" resultType="java.lang.String">
+        select distinct t.code from safety_sys_perm t
+        left join safety_sys_role_perm t1
+        on t.id = t1.perm_id
+        left join safety_sys_role t2
+        on t2.id = t1.role_id
+        left join safety_sys_user_role t3
+        on t3.role_id = t2.id
+        left join safety_sys_user t4
+        on t4.id = t3.user_id
+        where t4.emp_no=#{username}
+        and t4.delete_falg = 0
+        and t3.del_flag=0
+        and t2.delete_falg='0'
+        and t1.del_flag = 0
+        and t.delete_falg = '0'
+        and t3.status = 0
+    </select>
+
+    <select id="queryVisitorAuths" resultType="java.lang.String">
+        select distinct t.code from safety_sys_perm t
+        left join safety_sys_role_perm t1
+        on t.id = t1.perm_id
+        left join safety_sys_role t2
+        on t2.id = t1.role_id
+        where t2.role_code=#{roleCode}
+        and t.delete_falg = '0'
+        and t1.del_flag = 0
+        and t2.delete_falg='0'
+    </select>
+
+    <select id="queryUserAdminAuths" resultType="java.lang.String">
+        select  t.code from safety_sys_perm t
+        where t.delete_falg = '0'
+    </select>
+</mapper>

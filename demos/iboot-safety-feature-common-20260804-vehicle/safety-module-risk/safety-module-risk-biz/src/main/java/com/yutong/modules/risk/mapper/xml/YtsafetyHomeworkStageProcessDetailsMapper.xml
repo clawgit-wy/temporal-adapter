@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.risk.mapper.YtsafetyHomeworkStageProcessDetailsMapper">
+
+    <insert id="batchInsert">
+        insert into ytsafety_homework_stage_process_details (
+            id, process_id, change_id, link_name, link_code, factory_id,
+            area_ids, org_id, org_name, location_ids, location_names,
+            safety_staff_id, safety_staff, safety_manager, safety_manager_id,
+            create_name, create_user, create_time, update_name, update_user,
+            update_time, del_flag
+        ) values
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.id}, #{item.processId}, #{item.changeId}, #{item.linkName}, #{item.linkCode}, #{item.factoryId},
+                #{item.areaIds}, #{item.orgId}, #{item.orgName}, #{item.locationIds}, #{item.locationNames},
+                #{item.safetyStaffId}, #{item.safetyStaff}, #{item.safetyManager}, #{item.safetyManagerId},
+                #{item.createName}, #{item.createUser}, #{item.createTime}, #{item.updateName}, #{item.updateUser},
+                #{item.updateTime}, #{item.delFlag}
+            )
+        </foreach>
+    </insert>
+
+    <update id="batchUpdate">
+        <foreach collection="list" item="item" separator=";">
+            update ytsafety_homework_stage_process_details
+            set process_id = #{item.processId},
+                change_id = #{item.changeId},
+                link_name = #{item.linkName},
+                link_code = #{item.linkCode},
+                factory_id = #{item.factoryId},
+                area_ids = #{item.areaIds},
+                org_id = #{item.orgId},
+                org_name = #{item.orgName},
+                location_ids = #{item.locationIds},
+                location_names = #{item.locationNames},
+                safety_staff_id = #{item.safetyStaffId},
+                safety_staff = #{item.safetyStaff},
+                safety_manager = #{item.safetyManager},
+                safety_manager_id = #{item.safetyManagerId},
+                update_name = #{item.updateName},
+                update_user = #{item.updateUser},
+                update_time = #{item.updateTime},
+                del_flag = #{item.delFlag}
+            where id = #{item.id}
+        </foreach>
+    </update>
+
+    <delete id="deleteByProcessId">
+        delete from ytsafety_homework_stage_process_details where process_id = #{processId}
+    </delete>
+
+</mapper>

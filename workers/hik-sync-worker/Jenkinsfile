@@ -1,0 +1,157 @@
+##############################################################################
+# hik-sync-worker Jenkins Pipeline
+#
+# 使用方式:
+#   1. Jenkins 新建 Pipeline 任务，命名为 hik-sync-worker
+#   2. Pipeline 定义选择 "Pipeline script from SCM"
+#   3. 指定 Git 仓库，Script Path 填写 hik-sync-worker/Jenkinsfile
+#   4. 构建时选择对应参数
+#
+# 支持的操作:
+#   - BUILD:   构建镜像（不部署）
+#   - DEPLOY:  构建镜像 + 部署 Worker
+#   - SCALE:   弹性扩缩容
+#   - START:   启动 Worker
+#   - STOP:    停止 Worker
+#   - RESTART: 重启 Worker
+#   - STATUS:  查看状态
+##############################################################################
+
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = 'hik-sync-worker'
+        // docker-compose.yml 所在目录（workers/ 根目录）
+        COMPOSE_DIR = "${env.WORKSPACE}"
+    }
+
+    parameters {
+        choice(
+            name: 'OPERATION',
+            choices: ['BUILD', 'DEPLOY', 'SCALE', 'START', 'STOP', 'RESTART', 'STATUS'],
+            description: '''操作类型:
+ BUILD   - 只构建镜像（不部署）
+ DEPLOY  - 构建镜像并部署
+ SCALE   - 弹性扩缩容
+ START   - 启动Worker
+ STOP    - 停止Worker
+ RESTART - 重启Worker
+ STATUS  - 查看状态'''
+        )
+
+        string(
+            name: 'REPLICA_COUNT',
+            defaultValue: '1',
+            description: '扩缩容目标实例数（仅SCALE操作使用）'
+        )
+
+        string(
+            name: 'IMAGE_TAG',
+            defaultValue: 'latest',
+            description: 'Docker镜像Tag'
+        )
+
+        string(
+            name: 'GIT_BRANCH',
+            defaultValue: 'main',
+            description: 'Git分支名'
+        )
+    }
+
+    stages {
+        stage('Checkout') {
+            when { expression { params.OPERATION != 'STATUS' } }
+            steps {
+                checkout scm
+                script {
+                    env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    echo "Git Commit: ${env.GIT_COMMIT_SHORT}"
+                }
+            }
+        }
+
+        stage('Build Image') {
+            when {
+                anyOf {
+                    expression { params.OPERATION == 'BUILD' }
+                    expression { params.OPERATION == 'DEPLOY' }
+                }
+            }
+            steps {
+                script {
+                    echo ">>> 构建镜像: ${IMAGE_NAME}:${params.IMAGE_TAG}"
+                    sh "docker build -t ${IMAGE_NAME}:${params.IMAGE_TAG} ./hik-sync-worker"
+                }
+            }
+        }
+
+        stage('Execute') {
+            steps {
+                script {
+                    def op = params.OPERATION
+
+                    switch(op) {
+                        case 'BUILD':
+                            echo ">>> 镜像构建完成: ${IMAGE_NAME}:${params.IMAGE_TAG}"
+                            break
+
+                        case 'DEPLOY':
+                            echo ">>> 部署 hik-sync-worker"
+                            sh "docker-compose up -d worker-hik-sync"
+                            break
+
+                        case 'SCALE':
+                            echo ">>> 扩缩容: worker-hik-sync -> ${params.REPLICA_COUNT} 实例"
+                            sh "docker-compose up -d --scale worker-hik-sync=${params.REPLICA_COUNT} worker-hik-sync"
+                            break
+
+                        case 'START':
+                            sh "docker-compose start worker-hik-sync"
+                            break
+
+                        case 'STOP':
+                            sh "docker-compose stop worker-hik-sync"
+                            break
+
+                        case 'RESTART':
+                            sh "docker-compose restart worker-hik-sync"
+                            break
+
+                        case 'STATUS':
+                            sh "docker-compose ps"
+                            break
+                    }
+                }
+            }
+        }
+
+        stage('Verify') {
+            when {
+                anyOf {
+                    expression { params.OPERATION == 'DEPLOY' }
+                    expression { params.OPERATION == 'SCALE' }
+                    expression { params.OPERATION == 'START' }
+                    expression { params.OPERATION == 'RESTART' }
+                }
+            }
+            steps {
+                echo ">>> 等待10秒后验证..."
+                sleep 10
+                sh "docker-compose ps"
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ 操作成功: ${params.OPERATION}"
+        }
+        failure {
+            echo "❌ 操作失败: ${params.OPERATION}"
+        }
+        always {
+            cleanWs()
+        }
+    }
+}

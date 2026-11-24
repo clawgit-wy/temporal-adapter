@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.SafetyMonitorPostMapper">
+  <resultMap id="BaseResultMap" type="com.yutong.safety.core.dto.SafetyMonitorPostProcessDTO">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="flow_id" jdbcType="VARCHAR" property="flowId" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="creator" jdbcType="VARCHAR" property="creator" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="publish_time" jdbcType="TIMESTAMP" property="publishTime" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="flow_no" jdbcType="VARCHAR" property="flowNo" />
+    <result column="submit_name" jdbcType="VARCHAR" property="submitName" />
+    <result column="submit_no" jdbcType="VARCHAR" property="submitNo" />
+    <result column="submit_dept" jdbcType="VARCHAR" property="submitDept" />
+    <result column="factory" jdbcType="VARCHAR" property="factory" />
+    <result column="position_post" jdbcType="VARCHAR" property="positionPost" />
+    <result column="lens_name" jdbcType="VARCHAR" property="lensName" />
+    <result column="ways_means" jdbcType="VARCHAR" property="waysMeans" />
+    <result column="check_time_start" jdbcType="VARCHAR" property="checkTimeStart" />
+    <result column="check_time_end" jdbcType="VARCHAR" property="checkTimeEnd" />
+    <result column="abnormal_type" jdbcType="VARCHAR" property="abnormalType" />
+    <result column="abnormal_desc" jdbcType="VARCHAR" property="abnormalDesc" />
+    <result column="abnormal_creator" jdbcType="VARCHAR" property="abnormalCreator" />
+    <result column="abnormal_creator_no" jdbcType="VARCHAR" property="abnormalCreatorNo" />
+    <result column="abnormal_creator_eip" jdbcType="VARCHAR" property="abnormalCreatorEip" />
+    <result column="abnormal_dept" jdbcType="VARCHAR" property="abnormalDept" />
+    <result column="check_name" jdbcType="VARCHAR" property="checkName" />
+    <result column="check_userno" jdbcType="VARCHAR" property="checkUserno" />
+    <result column="check_dept" jdbcType="VARCHAR" property="checkDept" />
+    <result column="check_exception" jdbcType="VARCHAR" property="checkException" />
+    <result column="exam_fulfill" jdbcType="VARCHAR" property="examFulfill" />
+    <result column="improve_result" jdbcType="VARCHAR" property="improveResult" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="audit_time" jdbcType="DATE" property="auditTime" />
+  </resultMap>
+  <resultMap id="BaseResultMap1" type="com.yutong.safety.core.dto.SafetyMonitorPostProcessDTO">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="flow_id" jdbcType="VARCHAR" property="flowId" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="creator" jdbcType="VARCHAR" property="creator" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="publish_time" jdbcType="TIMESTAMP" property="publishTime" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="flow_no" jdbcType="VARCHAR" property="flowNo" />
+    <result column="submit_name" jdbcType="VARCHAR" property="submitName" />
+    <result column="submit_no" jdbcType="VARCHAR" property="submitNo" />
+    <result column="submit_dept" jdbcType="VARCHAR" property="submitDept" />
+    <result column="factory" jdbcType="VARCHAR" property="factory" />
+    <result column="position_post" jdbcType="VARCHAR" property="positionPost" />
+    <result column="lens_name" jdbcType="VARCHAR" property="lensName" />
+    <result column="ways_means" jdbcType="VARCHAR" property="waysMeans" />
+    <result column="check_time_start" jdbcType="VARCHAR" property="checkTimeStart" />
+    <result column="check_time_end" jdbcType="VARCHAR" property="checkTimeEnd" />
+    <result column="abnormal_type" jdbcType="VARCHAR" property="abnormalType" />
+    <result column="abnormal_desc" jdbcType="VARCHAR" property="abnormalDesc" />
+    <result column="abnormal_creator" jdbcType="VARCHAR" property="abnormalCreator" />
+    <result column="abnormal_creator_no" jdbcType="VARCHAR" property="abnormalCreatorNo" />
+    <result column="abnormal_creator_eip" jdbcType="VARCHAR" property="abnormalCreatorEip" />
+    <result column="abnormal_dept" jdbcType="VARCHAR" property="abnormalDept" />
+    <result column="check_name" jdbcType="VARCHAR" property="checkName" />
+    <result column="check_userno" jdbcType="VARCHAR" property="checkUserno" />
+    <result column="check_dept" jdbcType="VARCHAR" property="checkDept" />
+    <result column="check_exception" jdbcType="VARCHAR" property="checkException" />
+    <result column="exam_fulfill" jdbcType="VARCHAR" property="examFulfill" />
+    <result column="improve_result" jdbcType="VARCHAR" property="improveResult" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="audit_time" jdbcType="TIMESTAMP" property="auditTime" />
+    <result column="flow_url" jdbcType="VARCHAR" property="flowUrl" />
+  </resultMap>
+  <sql id="where_block">
+    <where>
+      <if test="dto.factory != null">
+        t.factory in
+        <foreach item="item" index="index" collection="dto.factory.split(',')"  open="(" separator="," close=")">
+          #{item}
+        </foreach>
+      </if>
+      <if test="dto.positionPost != null">
+        and t.position_post = #{dto.positionPost}
+      </if>
+      <if test="dto.abnormalType != null">
+        and t.abnormal_type = #{dto.abnormalType}
+      </if>
+      <if test="dto.checkTimeStart != null">
+        and str_to_date(t.check_time_start,'%Y-%m-%d') <![CDATA[<=]]> str_to_date(#{dto.checkTimeStart},'%Y-%m-%d')
+      </if>
+      <if test="dto.checkTimeEnd != null">
+        and str_to_date(t.check_time_end,'%Y-%m-%d') <![CDATA[>=]]> str_to_date(#{dto.checkTimeEnd},'%Y-%m-%d')
+      </if>
+      <if test="dto.abnormalCreator != null">
+        and t.abnormal_creator = #{dto.abnormalCreator}
+      </if>
+      <if test="dto.abnormalDept != null">
+        and t.abnormal_dept = #{dto.abnormalDept}
+      </if>
+      <if test="dto.checkUserno != null">
+        and c.check_no = #{dto.checkUserno}
+      </if>
+      <if test="dto.checkDept != null">
+        and e.org_code = #{dto.checkDept}
+      </if>
+      <if test="dto.waysMeans != null">
+        and t.ways_means = #{dto.waysMeans}
+      </if>
+      <if test="dto.checkException != null">
+        and t.check_exception = #{dto.checkException}
+      </if>
+      <if test="dto.examFulfill != null">
+        and t.exam_fulfill = #{dto.examFulfill}
+      </if>
+      <if test="dto.submitName != null">
+        and t.submit_name = #{dto.submitName}
+      </if>
+      <if test="dto.submitDept != null">
+        and t.submit_dept = #{dto.submitDept}
+      </if>
+      <if test="dto.improveResult != null">
+        and t.improve_result = #{dto.improveResult}
+      </if>
+      <if test="dto.createTimeStart != null">
+        and str_to_date(t.create_time,'%Y-%m-%d') <![CDATA[>=]]> str_to_date(#{dto.createTimeStart},'%Y-%m-%d')
+      </if>
+      <if test="dto.createTimeEnd != null">
+        and str_to_date(t.create_time,'%Y-%m-%d') <![CDATA[<=]]> str_to_date(#{dto.createTimeEnd},'%Y-%m-%d')
+      </if>
+      <if test="dto.flowNo != null">
+        and t.flow_no = #{dto.flowNo}
+      </if>
+      <if test="dto.auditTimeStart != null">
+        and str_to_date(t.publish_time,'%Y-%m-%d') <![CDATA[<=]]> str_to_date(#{dto.auditTimeStart},'%Y-%m-%d')
+      </if>
+      <if test="dto.auditTimeEnd != null">
+        and str_to_date(t.publish_time,'%Y-%m-%d') <![CDATA[>=]]> str_to_date(#{dto.auditTimeEnd},'%Y-%m-%d')
+      </if>
+    </where>
+  </sql>
+  <insert id="insert">
+    insert into safety_monitor_post_process (flow_id, title, creator, create_time, status, flow_no, submit_name, submit_no, submit_dept, factory, position_post,
+    lens_name, ways_means, check_time_start, check_time_end, abnormal_type, abnormal_desc,abnormal_creator, abnormal_dept,abnormal_creator_no,abnormal_creator_eip)
+    values (#{flowId}, #{title}, #{creator}, now(), #{status}, #{flowNo}, #{submitName}, #{submitNo}, #{submitDept}, #{factory}, #{positionPost},
+            #{lensName}, #{waysMeans}, #{checkTimeStart}, #{checkTimeEnd}, #{abnormalType}, #{abnormalDesc}, #{abnormalCreator}, #{abnormalDept},
+            #{abnormalCreatorNo},#{abnormalCreatorEip})
+  </insert>
+  <insert id="insertCheckor">
+    insert into safety.safety_monitor_post_checkor (mainId, check_no, `order`) values
+    <foreach collection="checkUserno" item="item" separator="," index="index">
+      (#{id}, #{item}, #{index}+1)
+    </foreach>
+  </insert>
+
+  <update id="updateData">
+    update safety.safety_monitor_post_process t set t.check_name = #{checkName}, t.check_userno = #{checkUserno}, t.check_dept = #{checkDept},
+    t.check_exception = #{checkException},t.exam_fulfill = #{examFulfill}, t.improve_result = #{improveResult}, t.remark = #{remark}
+    where t.flow_id = #{flowId}
+  </update>
+  <select id="queryById" resultMap="BaseResultMap">
+    select * from safety.safety_monitor_post_process t where t.id = #{id}
+  </select>
+  <select id="findPageList" resultMap="BaseResultMap1">
+    select t.id, t.flow_id, t.flow_no, m.field_name factory, t.position_post, t.abnormal_type,
+           t.abnormal_desc, t.abnormal_creator, t.abnormal_dept, e.emp_name check_name, e.emp_no check_userno, e.org_name check_dept, t.check_exception,
+           t.exam_fulfill, t.improve_result, t.lens_name, t.ways_means, t.submit_name, t.submit_dept, DATE_FORMAT(t.create_time,'%Y-%m-%d %H:%i:%m') create_time,
+           DATE_FORMAT(t.publish_time,'%Y-%m-%d %H:%i:%m') publish_time, t.remark,t.abnormal_creator_no,t.abnormal_creator_eip,
+           DATE_FORMAT(t.check_time_start,'%Y-%m-%d %H:%i') check_time_start,DATE_FORMAT(t.check_time_end,'%Y-%m-%d %H:%i') check_time_end,
+            DATE_FORMAT(t.audit_time,'%Y-%m-%d %H:%i:%m') audit_time,
+            <![CDATA[ CONCAT(#{dto.bpmUrlPre},'&formInstanceId=',t.id,'&processId=',t.flow_id) flow_url ]]>
+
+    from safety_monitor_post_process t
+           left join safety_monitor_post_checkor c on t.id = c.mainId
+           left join safety_employee_message e on e.emp_no = c.check_no
+           left join safety_employee_message s on s.emp_no = t.creator
+           left join safety_field_manage m on m.id = t.factory
+    <include refid="where_block" />
+     order by t.create_time desc limit #{start},15
+  </select>
+  <select id="findCount" resultType="java.lang.Integer">
+    select count(1)
+    from safety_monitor_post_process t
+    left join safety_monitor_post_checkor c on t.id = c.mainId
+    left join safety_employee_message e on e.emp_no = c.check_no
+    left join safety_employee_message s on s.emp_no = t.creator
+    left join safety_field_manage m on m.id = t.factory
+    <include refid="where_block" />
+  </select>
+  <select id="findList" resultType="com.yutong.safety.core.dto.SafetyMonitorPostProcessDTO">
+    select t.id, t.flow_id, t.flow_no, m.field_name factory, t.position_post, t.abnormal_type,
+          t.abnormal_desc, t.abnormal_creator, t.abnormal_dept, e.emp_name check_name, e.emp_no check_userno, e.org_name check_dept, t.check_exception,
+          t.exam_fulfill, t.improve_result, t.lens_name, t.ways_means, t.submit_name, t.submit_dept, DATE_FORMAT(t.create_time,'%Y-%m-%d %H:%i:%m') create_time,
+          DATE_FORMAT(t.publish_time,'%Y-%m-%d %H:%i:%m') publish_time, t.remark,t.abnormal_creator_no,t.abnormal_creator_eip,
+          DATE_FORMAT(t.check_time_start,'%Y-%m-%d %H:%i') check_time_start,DATE_FORMAT(t.check_time_end,'%Y-%m-%d %H:%i') check_time_end,
+          DATE_FORMAT(t.audit_time,'%Y-%m-%d %H:%i:%m') audit_time
+    from safety_monitor_post_process t
+    left join safety_monitor_post_checkor c on t.id = c.mainId
+    left join safety_employee_message e on e.emp_no = c.check_no
+    left join safety_employee_message s on s.emp_no = t.creator
+    left join safety_field_manage m on m.id = t.factory
+    <include refid="where_block" />
+    order by c.`order` asc, t.id desc
+  </select>
+
+</mapper>

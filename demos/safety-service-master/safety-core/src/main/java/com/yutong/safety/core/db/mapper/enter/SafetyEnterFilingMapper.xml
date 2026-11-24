@@ -1,0 +1,881 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.enter.SafetyEnterFilingMapper">
+    <resultMap id="EnterFilingMap" type="com.yutong.safety.core.db.entity.enter.result.SafetyEnterFilingRt">
+        <id column="id" jdbcType="VARCHAR" property="id" />
+        <result column="fd_state" jdbcType="VARCHAR" property="fdState" />
+        <result column="fd_state_code" jdbcType="VARCHAR" property="fdStateCode" />
+        <result column="fd_filing_type_code" jdbcType="VARCHAR" property="fdFilingTypeCode" />
+        <result column="fd_filing_type" jdbcType="VARCHAR" property="fdFilingType" />
+        <result column="fd_enter_type_code" jdbcType="VARCHAR" property="fdEnterTypeCode" />
+        <result column="fd_enter_type" jdbcType="VARCHAR" property="fdEnterType" />
+        <result column="fd_filing_factory_code" jdbcType="VARCHAR" property="fdFilingFactoryCode" />
+        <result column="fd_filing_factory" jdbcType="VARCHAR" property="fdFilingFactory" />
+        <result column="fd_filing_begin" jdbcType="VARCHAR" property="fdFilingBegin" />
+        <result column="fd_filing_end" jdbcType="VARCHAR" property="fdFilingEnd" />
+        <result column="fd_supplier_name" jdbcType="VARCHAR" property="fdSupplierName" />
+        <result column="fd_supplier_code" jdbcType="VARCHAR" property="fdSupplierCode" />
+        <result column="fd_goods_name" jdbcType="VARCHAR" property="fdGoodsName" />
+        <result column="fd_goods_weight" jdbcType="VARCHAR" property="fdGoodsWeight" />
+        <result column="fd_dock_no" jdbcType="VARCHAR" property="fdDockNo" />
+        <result column="fd_dock_name" jdbcType="VARCHAR" property="fdDockName" />
+        <result column="fd_dock_department" jdbcType="VARCHAR" property="fdDockDepartment" />
+        <result column="fd_dock_phone" jdbcType="VARCHAR" property="fdDockPhone" />
+        <result column="fd_remark" jdbcType="VARCHAR" property="fdRemark" />
+        <result column="create_time" jdbcType="VARCHAR" property="createTime" />
+        <result column="create_user" jdbcType="VARCHAR" property="createUser" />
+        <result column="fd_goods_update_time" jdbcType="VARCHAR" property="goodsUpdateTime" />
+        <result column="create_time" jdbcType="VARCHAR" property="createTime" />
+        <result column="create_user" jdbcType="VARCHAR" property="createUser" />
+        <result column="fd_key" jdbcType="VARCHAR" property="fdKey" />
+
+        <result column="fd_car_no" jdbcType="VARCHAR" property="fdCarNo" />
+        <result column="fd_car_belong" jdbcType="VARCHAR" property="fdCarBelong" />
+        <result column="fd_driver_name" jdbcType="VARCHAR" property="fdDriverName" />
+        <result column="fd_protect_grade" jdbcType="VARCHAR" property="fdProtectGrade" />
+        <result column="fd_detailed_img" jdbcType="VARCHAR" property="fdDetailedImg" />
+        <result column="fd_vin" jdbcType="VARCHAR" property="fdVin" />
+        <result column="fd_engine" jdbcType="VARCHAR" property="fdEngine" />
+        <result column="fd_car_img" jdbcType="VARCHAR" property="fdCarImg" />
+        <result column="fd_car_date" jdbcType="VARCHAR" property="fdCarDate" />
+        <result column="fd_in_factory" jdbcType="VARCHAR" property="fdInFactory" />
+        <result column="approve_name" jdbcType="VARCHAR" property="handler" />
+        <result column="approve_code" jdbcType="VARCHAR" property="handlerCode" />
+
+        <result column="approve_filing_factory_code" jdbcType="VARCHAR" property="approveFilingFactoryCode" />
+        <result column="approve_filing_factory" jdbcType="VARCHAR" property="approveFilingFactory" />
+        <result column="approve_filing_begin" jdbcType="VARCHAR" property="approveFilingBegin" />
+        <result column="approve_filing_end" jdbcType="VARCHAR" property="approveFilingEnd" />
+        <result column="approve_time" jdbcType="VARCHAR" property="approveTime"/>
+        <result column="fd_filing_car_type" jdbcType="VARCHAR" property="fdFilingCarType"/>
+        <result column="fd_filing_car_type_name" jdbcType="VARCHAR" property="fdFilingCarTypeName"/>
+        <result column="time_out_deal" jdbcType="VARCHAR" property="timeOutDeal"/>
+        <result column="fd_delivery_type" jdbcType="INTEGER" property="fdDeliveryType"/>
+        <result column="flow_id" jdbcType="VARCHAR" property="flowId"/>
+
+        <collection column="id" property="perList" ofType="com.yutong.safety.core.db.entity.enter.SafetyEnterFilingPer"
+                    select="selectEnterFilingPerList"></collection>
+    </resultMap>
+
+    <resultMap id="EnterFilingInfoMap" type="com.yutong.safety.core.db.entity.enter.result.SafetyEnterFilingInfoRt">
+        <id column="id" jdbcType="VARCHAR" property="id" />
+        <result column="fd_key" jdbcType="VARCHAR" property="fdKey" />
+        <result column="fd_state" jdbcType="VARCHAR" property="fdState" />
+        <result column="fd_state_code" jdbcType="VARCHAR" property="fdStateCode" />
+        <result column="fd_filing_type_code" jdbcType="VARCHAR" property="fdFilingTypeCode" />
+        <result column="fd_filing_type" jdbcType="VARCHAR" property="fdFilingType" />
+        <result column="fd_enter_type_code" jdbcType="VARCHAR" property="fdEnterTypeCode" />
+        <result column="fd_enter_type" jdbcType="VARCHAR" property="fdEnterType" />
+        <result column="fd_filing_factory_code" jdbcType="VARCHAR" property="fdFilingFactoryCode" />
+        <result column="fd_filing_factory" jdbcType="VARCHAR" property="fdFilingFactory" />
+        <result column="fd_filing_begin" jdbcType="VARCHAR" property="fdFilingBegin" />
+        <result column="fd_filing_end" jdbcType="VARCHAR" property="fdFilingEnd" />
+        <result column="fd_supplier_name" jdbcType="VARCHAR" property="fdSupplierName" />
+        <result column="fd_supplier_code" jdbcType="VARCHAR" property="fdSupplierCode" />
+        <result column="fd_goods_name" jdbcType="VARCHAR" property="fdGoodsName" />
+        <result column="fd_goods_weight" jdbcType="VARCHAR" property="fdGoodsWeight" />
+        <result column="fd_remark" jdbcType="VARCHAR" property="fdRemark" />
+        <result column="fd_goods_update_time" jdbcType="VARCHAR" property="goodsUpdateTime" />
+
+        <result column="fd_car_no" jdbcType="VARCHAR" property="fdCarNo" />
+        <result column="fd_filing_car_type" jdbcType="VARCHAR" property="fdFilingCarType"/>
+        <result column="fd_car_belong" jdbcType="VARCHAR" property="fdCarBelong" />
+        <result column="fd_driver_name" jdbcType="VARCHAR" property="fdDriverName" />
+        <result column="fd_protect_grade" jdbcType="VARCHAR" property="fdProtectGrade" />
+        <result column="fd_detailed_img" jdbcType="VARCHAR" property="fdDetailedImg" />
+        <result column="fd_vin" jdbcType="VARCHAR" property="fdVin" />
+        <result column="fd_engine" jdbcType="VARCHAR" property="fdEngine" />
+        <result column="fd_car_img" jdbcType="VARCHAR" property="fdCarImg" />
+        <result column="fd_car_date" jdbcType="VARCHAR" property="fdCarDate" />
+        <result column="fd_in_factory" jdbcType="VARCHAR" property="fdInFactory" />
+
+        <result column="approve_filing_factory_code" jdbcType="VARCHAR" property="approveFilingFactoryCode" />
+        <result column="approve_filing_factory" jdbcType="VARCHAR" property="approveFilingFactory" />
+        <result column="approve_filing_begin" jdbcType="VARCHAR" property="approveFilingBegin" />
+        <result column="approve_filing_end" jdbcType="VARCHAR" property="approveFilingEnd" />
+        <result column="fd_filing_car_type_name" jdbcType="VARCHAR" property="fdFilingCarTypeName" />
+
+        <collection column="fd_key" property="dockList" ofType="com.yutong.safety.core.db.entity.enter.SafetyEnterFilingDock"
+                    select="selectDockListByKey"></collection>
+        <collection column="id" property="perList" ofType="com.yutong.safety.core.db.entity.enter.SafetyEnterFilingPer"
+                    select="selectEnterFilingPerList"></collection>
+    </resultMap>
+
+    <resultMap id="EnterFilingPerMap" type="com.yutong.safety.core.db.entity.enter.SafetyEnterFilingPer">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="filing_id" jdbcType="VARCHAR" property="filingId" />
+        <result column="fd_per_type_code" jdbcType="VARCHAR" property="fdPerTypeCode" />
+        <result column="fd_per_type" jdbcType="VARCHAR" property="fdPerType" />
+        <result column="fd_per_name" jdbcType="VARCHAR" property="fdPerName" />
+        <result column="fd_per_card" jdbcType="VARCHAR" property="fdPerCard" />
+        <result column="fd_per_phone" jdbcType="VARCHAR" property="fdPerPhone" />
+        <result column="fd_per_img" jdbcType="VARCHAR" property="fdPerImg" />
+        <result column="fd_filing_factory_code" jdbcType="VARCHAR" property="mergeFactoryCode" />
+    </resultMap>
+    <resultMap id="EnterFilingDockMap" type="com.yutong.safety.core.db.entity.enter.SafetyEnterFilingDock">
+        <result column="fd_dock_no" jdbcType="VARCHAR" property="fdDockNo" />
+        <result column="fd_dock_name" jdbcType="VARCHAR" property="fdDockName" />
+        <result column="fd_dock_department" jdbcType="VARCHAR" property="fdDockDepartment" />
+        <result column="fd_dock_phone" jdbcType="VARCHAR" property="fdDockPhone" />
+    </resultMap>
+
+    <select id="selectEnterFilingById" resultMap="EnterFilingInfoMap">
+        select t.id,t.fd_state,t.fd_state_code,t.fd_filing_type_code,t.fd_filing_type,
+        t.fd_enter_type_code,t.fd_enter_type,t.fd_car_no,t.fd_filing_car_type,
+        t.fd_filing_factory_code,t.fd_filing_factory,fd_key,
+        date_format(t.fd_filing_begin,'%Y-%m-%d') fd_filing_begin,
+        date_format(t.fd_filing_end,'%Y-%m-%d') fd_filing_end,
+        t.fd_supplier_name,t.fd_supplier_code,t.fd_goods_name,t.fd_goods_weight,t.fd_remark,
+        date_format(t.create_time,'%Y-%m-%d %H:%i:%s') create_time,t.create_user,
+
+        IFNULL(p.fd_car_belong,t.fd_car_belong) fd_car_belong,
+        IFNULL(p.fd_driver_name,T.fd_driver_name) fd_driver_name,
+        IFNULL(p.fd_protect_grade,T.fd_protect_grade) fd_protect_grade,
+        IFNULL(p.fd_detailed_img,T.fd_detailed_img) fd_detailed_img,
+        IFNULL(p.fd_vin,T.fd_vin) fd_vin,
+        IFNULL(p.fd_engine,T.fd_engine) fd_engine,
+        IFNULL(p.fd_car_img,T.fd_car_img) fd_car_img,
+        IFNULL(p.fd_car_date,T.fd_car_date) fd_car_date,p.fd_in_factory,
+
+        a.fd_filing_factory_code as approve_filing_factory_code,
+        a.fd_filing_factory as approve_filing_factory,
+        date_format(a.fd_filing_begin,'%Y-%m-%d') approve_filing_begin,
+        date_format(a.fd_filing_end,'%Y-%m-%d') approve_filing_end,
+        date_format(t.fd_goods_update_time,'%Y-%m-%d %H:%i:%s') fd_goods_update_time,
+        t.fd_filing_car_type_name
+        from safety_enter_filing t
+        left join safety_enter_protect p on t.fd_car_no=p.fd_car_no
+        left join safety_enter_filing_approve a on t.id=a.fd_filing_id
+        where t.id=#{id}
+    </select>
+
+    <sql id="EnterFilingSh">
+        1=1
+        and t.fd_filing_end >= date_format(now(),'%Y-%m-%d')
+        <if test="fdDockNo!=null and fdDockNo!=''">
+            AND t.fd_dock_no like concat('%',#{fdDockNo},'%')
+        </if>
+        <if test="fdDockName!=null and fdDockName!=''">
+            AND t.fd_dock_name like concat('%',#{fdDockName},'%')
+        </if>
+        <if test="fdPerName!=null and fdPerName!=''">
+            and exists (select 1 from safety_enter_filing_per p where p.filing_id=t.id and p.fd_per_name like concat('%',#{fdPerName},'%'))
+        </if>
+        <if test="fdPerCard!=null and fdPerCard!=''">
+            and exists (select 1 from safety_enter_filing_per p where p.filing_id=t.id and p.fd_per_card like concat('%',#{fdPerCard},'%') )
+        </if>
+        <if test="fdPerPhone!=null and fdPerPhone!=''">
+            and exists (select 1 from safety_enter_filing_per p where p.filing_id=t.id and p.fd_per_phone like concat('%',#{fdPerPhone},'%'))
+        </if>
+        <if test="fdPerType!=null and fdPerType!=''">
+            and exists (select 1 from safety_enter_filing_per p where p.filing_id=t.id and p.fd_per_type_code=#{fdPerType})
+        </if>
+        <if test="fdCarNo!=null and fdCarNo!=''">
+            AND t.fd_car_no like concat('%',#{fdCarNo},'%')
+        </if>
+        <if test="fdFilingFactory!=null and fdFilingFactory!=''">
+            AND t.fd_filing_factory_code LIKE CONCAT(CONCAT('%', #{fdFilingFactory}),'%')
+        </if>
+        <if test="fdFilingType!=null and fdFilingType!=''">
+            AND t.fd_filing_type_code = #{fdFilingType}
+        </if>
+        <if test="fdEnterType!=null and fdEnterType!=''">
+            AND t.fd_enter_type_code = #{fdEnterType}
+        </if>
+        <if test="fdState!=null and fdState!=''">
+            AND t.fd_state_code = #{fdState}
+        </if>
+        <if test="fdSupplierName!=null and fdSupplierName!=''">
+            AND t.fd_supplier_name like concat('%',#{fdSupplierName},'%')
+        </if>
+        <if test="fdGoodsName!=null and fdGoodsName!=''">
+            AND t.fd_goods_name like concat('%',#{fdGoodsName},'%')
+        </if>
+        <if test="fdDriverName!=null and fdDriverName!=''">
+            AND p.fd_driver_name like concat('%',#{fdDriverName},'%')
+        </if>
+        <if test="fdFilingBegin!=null and fdFilingBegin!=''">
+            AND t.fd_filing_begin &lt;= #{fdFilingBegin}
+        </if>
+        <if test="fdFilingEnd!=null and fdFilingEnd!=''">
+            AND t.fd_filing_end &gt;= #{fdFilingEnd}
+        </if>
+        <if test="createTimeBegin!=null and createTimeBegin!=''">
+            AND t.create_time &gt;= #{createTimeBegin}
+        </if>
+        <if test="createTimeEnd!=null and createTimeEnd!=''">
+            AND t.create_time &lt;= #{createTimeEnd}
+        </if>
+        <if test="handler!=null and handler!=''">
+            AND ps.creator like concat('%',#{handler},'%')
+        </if>
+        <if test='isAdmin!="T"'>
+            AND t.fd_dock_no = #{isAdmin}
+        </if>
+
+        <if test="fdFilingCarTypeName!=null and fdFilingCarTypeName!=''">
+            AND t.fd_filing_car_type_name = #{fdFilingCarTypeName}
+        </if>
+    </sql>
+    <select id="selectEnterFilingList" resultMap="EnterFilingMap"
+            parameterType="com.yutong.safety.core.db.entity.enter.search.SafetyEnterFilingSh">
+        select t.id,t.fd_state,t.fd_state_code,t.fd_filing_type_code,t.fd_filing_type,
+                t.fd_enter_type_code,t.fd_enter_type,t.fd_car_no,
+                t.fd_filing_factory_code,t.fd_filing_factory,fd_key,
+                date_format(t.fd_filing_begin,'%Y-%m-%d') fd_filing_begin,
+                date_format(t.fd_filing_end,'%Y-%m-%d') fd_filing_end,
+                t.fd_supplier_name,t.fd_supplier_code,t.fd_goods_name,t.fd_goods_weight,
+                t.fd_dock_no,t.fd_dock_name,t.fd_dock_department,t.fd_dock_phone,t.fd_remark,
+                t.create_time create_time,t.create_user,
+                IFNULL(p.fd_car_belong,t.fd_car_belong) fd_car_belong,
+                IFNULL(p.fd_driver_name,T.fd_driver_name) fd_driver_name,
+                IFNULL(p.fd_protect_grade,T.fd_protect_grade) fd_protect_grade,
+                IFNULL(p.fd_detailed_img,T.fd_detailed_img) fd_detailed_img,
+                IFNULL(p.fd_vin,T.fd_vin) fd_vin,
+                IFNULL(p.fd_engine,T.fd_engine) fd_engine,
+                IFNULL(p.fd_car_img,T.fd_car_img) fd_car_img,
+                IFNULL(p.fd_car_date,T.fd_car_date) fd_car_date,p.fd_in_factory,
+                ps.creator,
+                a.fd_filing_factory_code as approve_filing_factory_code,a.fd_filing_factory as approve_filing_factory,
+                date_format(a.fd_filing_begin,'%Y-%m-%d') approve_filing_begin,
+                CONCAT(CONCAT(date_format(a.fd_filing_begin,'%Y-%m-%d'), ' ~ '),date_format(a.fd_filing_end,'%Y-%m-%d'))
+                approve_filing_end,
+                a.create_time approve_time,
+                t.fd_filing_car_type_name,t.fd_filing_car_type
+        from safety_enter_filing t
+        left join safety_enter_protect p on t.fd_car_no=p.fd_car_no
+        left join safety_enter_process ps on t.id=ps.form_instance_id
+        left join safety_enter_filing_approve a on t.id=a.fd_filing_id
+        where
+        <include refid="EnterFilingSh"/>
+        order by t.fd_state_code,t.create_time desc
+        <if test="export == null">
+            <if test="limit != null">
+                <if test="offset != null">
+                    limit #{offset}, #{limit}
+                </if>
+                <if test="offset == null">
+                    limit #{limit}
+                </if>
+            </if>
+        </if>
+        <if test="export != null">
+            limit 5000
+        </if>
+
+
+    </select>
+    <select id="selectEnterFilingCount" resultType="integer"
+            parameterType="com.yutong.safety.core.db.entity.enter.search.SafetyEnterFilingSh">
+        select count(1)  from safety_enter_filing t
+        left join safety_enter_protect p on t.fd_car_no=p.fd_car_no
+        left join safety_enter_process ps on t.id=ps.form_instance_id
+        left join safety_enter_filing_approve a on t.id=a.fd_filing_id
+        where <include refid="EnterFilingSh"/>
+
+    </select>
+
+    <select id="selectEnterFilingPerList" resultMap="EnterFilingPerMap">
+        select id,filing_id,fd_per_type_code,fd_per_type,fd_per_name,fd_per_card,fd_per_phone,fd_per_img
+        from safety_enter_filing_per
+        where filing_id=#{filingId}
+    </select>
+
+    <insert id="insertEnterFiling" useGeneratedKeys="true" keyProperty="id"
+            parameterType="com.yutong.safety.core.db.entity.enter.SafetyEnterFiling">
+        insert into safety_enter_filing(
+        id,fd_state,fd_state_code,fd_filing_type_code,fd_filing_type,fd_enter_type_code,fd_enter_type,
+        fd_car_no,fd_filing_factory_code,fd_filing_factory,fd_filing_begin,fd_filing_end,
+        fd_supplier_name,fd_supplier_code,fd_goods_name,fd_goods_weight,
+        fd_dock_no,fd_dock_name,fd_dock_department,fd_dock_phone,fd_remark,
+        create_time,create_user,update_time,update_user,fd_goods_update_time,fd_key,
+        fd_car_belong,fd_driver_name,fd_protect_grade,fd_detailed_img,fd_vin,fd_engine,fd_car_img,fd_car_date,
+        fd_filing_car_type,fd_filing_car_type_name,fd_delivery_type
+        )
+        values (
+        #{id},#{fdState},#{fdStateCode},#{fdFilingTypeCode},#{fdFilingType},#{fdEnterTypeCode},#{fdEnterType},
+        #{fdCarNo},#{fdFilingFactoryCode},#{fdFilingFactory},#{fdFilingBegin},#{fdFilingEnd},
+        #{fdSupplierName},#{fdSupplierCode},#{fdGoodsName},#{fdGoodsWeight},
+        #{fdDockNo},#{fdDockName},#{fdDockDepartment},#{fdDockPhone},#{fdRemark},
+        #{createTime},#{createUser},#{updateTime},#{updateUser},#{fdGoodsUpdateTime},#{fdKey},
+        #{fdCarBelong},#{fdDriverName},#{fdProtectGrade},#{fdDetailedImg},#{fdVin},
+        #{fdEngine},#{fdCarImg},#{fdCarDate},#{fdFilingCarType},#{fdFilingCarTypeName},
+        #{fdDeliveryType}
+        )
+    </insert>
+
+
+    <insert id="insertEnterFilingBatch" parameterType="list">
+        insert into safety_enter_filing(
+        id,fd_state,fd_state_code,fd_filing_type_code,fd_filing_type,fd_enter_type_code,fd_enter_type,
+        fd_car_no,fd_filing_factory_code,fd_filing_factory,fd_filing_begin,fd_filing_end,
+        fd_supplier_name,fd_supplier_code,fd_goods_name,fd_goods_weight,
+        fd_dock_no,fd_dock_name,fd_dock_department,fd_dock_phone,fd_remark,
+        create_time,create_user,update_time,update_user,fd_goods_update_time,fd_key,fd_filing_car_type
+        )
+        values
+        <foreach collection="list" item="d" index="index" separator=",">
+           (#{d.id},#{d.fdState},#{d.fdStateCode},#{d.fdFilingTypeCode},#{d.fdFilingType},#{d.fdEnterTypeCode},#{d.fdEnterType},
+            #{d.fdCarNo},#{d.fdFilingFactoryCode},#{d.fdFilingFactory},#{d.fdFilingBegin},#{d.fdFilingEnd},
+            #{d.fdSupplierName},#{d.fdSupplierCode},#{d.fdGoodsName},#{d.fdGoodsWeight},
+            #{d.fdDockNo},#{d.fdDockName},#{d.fdDockDepartment},#{d.fdDockPhone},#{d.fdRemark},
+            #{d.createTime},#{d.createUser},#{d.updateTime},#{d.updateUser},#{d.fdGoodsUpdateTime},#{d.fdKey},#{fdFilingCarType})
+        </foreach>
+
+    </insert>
+
+    <insert id="insertEnterFilingPerBatch" parameterType="list">
+        insert into safety_enter_filing_per(
+        filing_id,fd_per_type_code,fd_per_type,fd_per_name,fd_per_card,fd_per_phone,fd_per_img
+        )
+        values
+        <foreach collection="list" item="d" index="index" separator=",">
+            (#{d.filingId},#{d.fdPerTypeCode},#{d.fdPerType},#{d.fdPerName},#{d.fdPerCard},#{d.fdPerPhone},#{d.fdPerImg})
+        </foreach>
+    </insert>
+
+    <update id="updateEnterFiling" parameterType="com.yutong.safety.core.db.entity.enter.SafetyEnterFiling">
+        update safety_enter_filing
+        <set>
+            <if test="fdState!=null and fdState!=''">
+                fd_state=#{fdState},
+            </if>
+            <if test="fdStateCode!=null and fdStateCode!=''">
+                fd_state_code=#{fdStateCode},
+            </if>
+            <if test="fdFilingType!=null and fdFilingType!=''">
+                fd_filing_type=#{fdFilingType},
+            </if>
+            <if test="fdFilingTypeCode!=null and fdFilingTypeCode!=''">
+                fd_filing_type_code=#{fdFilingTypeCode},
+            </if>
+            <if test="fdEnterType!=null and fdEnterType!=''">
+                fd_enter_type=#{fdEnterType},
+            </if>
+            <if test="fdEnterTypeCode!=null and fdEnterTypeCode!=''">
+                fd_enter_type_code=#{fdEnterTypeCode},
+            </if>
+            <if test="fdCarNo!=null and fdCarNo!=''">
+                fd_car_no=#{fdCarNo},
+            </if>
+            <if test="fdFilingCarType!=null and fdFilingCarType!=''">
+                fd_filing_car_type=#{fdFilingCarType},
+            </if>
+            <if test="fdFilingFactory!=null and fdFilingFactory!=''">
+                fd_filing_factory=#{fdFilingFactory},
+            </if>
+            <if test="fdFilingFactoryCode!=null and fdFilingFactoryCode!=''">
+                fd_filing_factory_code=#{fdFilingFactoryCode},
+            </if>
+            <if test="fdFilingBegin!=null">
+                fd_filing_begin=#{fdFilingBegin},
+            </if>
+            <if test="fdFilingEnd!=null">
+                fd_filing_end=#{fdFilingEnd},
+            </if>
+            <if test="fdSupplierName!=null and fdSupplierName!=''">
+                fd_supplier_name=#{fdSupplierName},
+            </if>
+            <if test="fdSupplierCode!=null and fdSupplierCode!=''">
+                fd_supplier_code=#{fdSupplierCode},
+            </if>
+            <if test="fdGoodsName!=null and fdGoodsName!=''">
+                fd_goods_name=#{fdGoodsName},
+            </if>
+            <if test="fdGoodsWeight!=null and fdGoodsWeight!=''">
+                fd_goods_weight=#{fdGoodsWeight},
+            </if>
+            <if test="fdDockNo!=null and fdDockNo!=''">
+                fd_dock_no=#{fdDockNo},
+            </if>
+            <if test="fdDockName!=null and fdDockName!=''">
+                fd_dock_name=#{fdDockName},
+            </if>
+            <if test="fdDockDepartment!=null and fdDockDepartment!=''">
+                fd_dock_department=#{fdDockDepartment},
+            </if>
+            <if test="fdDockPhone!=null and fdDockPhone!=''">
+                fd_dock_phone=#{fdDockPhone},
+            </if>
+            <if test="fdGoodsUpdateTime != null">
+                fd_goods_update_time=#{fdGoodsUpdateTime},
+            </if>
+            <if test="fdRemark!=null and fdRemark!=''">
+                fd_remark=#{fdRemark},
+            </if>
+            <if test="updateTime!=null">
+                update_time=#{updateTime},
+            </if>
+            <if test="updateUser!=null and updateUser!=''">
+                update_user=#{updateUser},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+    <update id="updateEnterFilingState" parameterType="com.yutong.safety.core.db.entity.enter.SafetyEnterFiling">
+        update safety_enter_filing set fd_state=#{fdState},fd_state_code=#{fdStateCode},approve_time=now(),time_out_deal=#{timeOutDeal} where id=#{id}
+    </update>
+    <select id="selectEnterFilingState" resultType="string">
+        select fd_state_code from safety_enter_filing where id=#{id}
+    </select>
+
+    <select id="selectEnterTimeOut" resultType="string">
+        select id
+        from safety_enter_filing
+        where fd_state_code in('20','21') and fd_filing_end &lt; now()
+    </select>
+    <update id="updateEnterTimeOut" parameterType="map">
+        update safety_enter_filing
+        set fd_state=#{fdState},fd_state_code=#{fdStateCode}
+        where id in
+        <foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </update>
+
+    <delete id="deleteEnterFiling">
+        delete from safety_enter_filing where id=#{id}
+    </delete>
+
+    <delete id="deleteEnterFilingPerAll">
+        delete from safety_enter_filing_per where filing_id=#{filingId}
+    </delete>
+
+    <select id="selectDockList" resultType="map">
+        select t.id, t.fd_car_no as carNo, t.fd_filing_factory_code as factoryCode,
+		        t.fd_filing_factory as factorName,t.fd_dock_no as dockNo,t.fd_dock_name as dockName,
+                t.fd_dock_department as dockDepartment,t.fd_dock_phone as dockPhone,
+                date_format(t.fd_filing_begin,'%Y-%m-%d') as filingBegin,
+                date_format(t.fd_filing_end,'%Y-%m-%d') as filingEnd,t.fd_key as fdKey
+         from safety_enter_filing t
+        where t.fd_state_code='20'
+        and t.fd_key=(select mt.fd_key from safety_enter_filing mt where mt.id=#{id})
+    </select>
+
+    <select id="selectDockListByKey" resultMap="EnterFilingDockMap">
+        select t.fd_dock_no,t.fd_dock_name,t.fd_dock_department,t.fd_dock_phone
+        from safety_enter_filing t
+        where t.fd_key=#{fdKey}
+    </select>
+
+    <select id="selectCarList" resultType="map">
+        select f.id,f.fd_car_no as carNo,f.fd_enter_type as enterType
+        from safety_enter_filing f
+        left join safety_enter_filing_approve a on f.id=a.fd_filing_id
+        where fd_car_no=#{fdCarNo} and f.fd_state_code in ('30','31')
+        and now() between a.fd_filing_begin and a.fd_filing_end
+    </select>
+
+    <select id="selectFilingFactory" resultType="string">
+        select fd_filing_factory
+        from safety_enter_filing
+        where id=#{id}
+    </select>
+
+    <insert id="insertEnterFilingPer" useGeneratedKeys="true" keyProperty="id"
+            parameterType="com.yutong.safety.core.db.entity.enter.SafetyEnterFilingPer">
+        insert into safety_enter_filing_per(
+        filing_id,fd_per_type_code,fd_per_type,fd_per_name,fd_per_card,fd_per_phone,fd_per_img
+        )
+        values (
+        #{filingId},#{fdPerTypeCode},#{fdPerType},#{fdPerName},#{fdPerCard},#{fdPerPhone},#{fdPerImg}
+        )
+    </insert>
+    <update id="updateEnterFilingPer" parameterType="com.yutong.safety.core.db.entity.enter.SafetyEnterFilingPer">
+        update safety_enter_filing_per
+        set fd_per_name=#{fdPerName},fd_per_card=#{fdPerCard},fd_per_phone=#{fdPerPhone}
+        where filing_id=#{filingId} and id=#{id}
+    </update>
+    <delete id="deleteEnterFilingPer" parameterType="map">
+        delete from safety_enter_filing_per
+        where filing_id=#{filingId}
+        and id not in
+        <foreach collection="list" item="id" index="index" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <select id="checkEnterFilingPerChange" resultType="integer">
+        select count(*) from safety_enter_filing_per
+        where filing_id=#{filingId}
+          and fd_per_name=#{fdPerName}
+          and fd_per_card=#{fdPerCard}
+          and fd_per_phone=#{fdPerPhone}
+    </select>
+
+    <resultMap id="EnterFilingAppMap" type="com.yutong.safety.core.db.entity.enter.result.SafetyEnterFilingAppRt">
+        <id column="id" jdbcType="VARCHAR" property="id" />
+        <result column="fd_state" jdbcType="VARCHAR" property="fdState" />
+        <result column="fd_state_code" jdbcType="VARCHAR" property="fdStateCode" />
+        <result column="fd_filing_type_code" jdbcType="VARCHAR" property="fdFilingTypeCode" />
+        <result column="fd_filing_type" jdbcType="VARCHAR" property="fdFilingType" />
+        <result column="fd_enter_type_code" jdbcType="VARCHAR" property="fdEnterTypeCode" />
+        <result column="fd_enter_type" jdbcType="VARCHAR" property="fdEnterType" />
+        <result column="fd_car_no" jdbcType="VARCHAR" property="fdCarNo" />
+        <result column="fd_filing_car_type" jdbcType="VARCHAR" property="fdFilingCarType"/>
+        <result column="fd_driver_name" jdbcType="VARCHAR" property="fdDriverName" />
+        <result column="fd_filing_factory_code" jdbcType="VARCHAR" property="fdFilingFactoryCode" />
+        <result column="fd_filing_factory" jdbcType="VARCHAR" property="fdFilingFactory" />
+        <result column="fd_filing_begin" jdbcType="VARCHAR" property="fdFilingBegin" />
+        <result column="fd_filing_end" jdbcType="VARCHAR" property="fdFilingEnd" />
+        <result column="fd_dock_no" jdbcType="VARCHAR" property="fdDockNo" />
+        <result column="fd_dock_name" jdbcType="VARCHAR" property="fdDockName" />
+        <result column="fd_dock_department" jdbcType="VARCHAR" property="fdDockDepartment" />
+        <result column="fd_dock_phone" jdbcType="VARCHAR" property="fdDockPhone" />
+    </resultMap>
+    <select id="selectEnterFilingAppList" resultMap="EnterFilingAppMap"
+            parameterType="com.yutong.safety.core.db.entity.enter.search.SafetyEnterFilingAppSh">
+        select t.id,t.fd_state,t.fd_state_code,t.fd_filing_type_code,t.fd_filing_type,
+        t.fd_enter_type_code,t.fd_enter_type,t.fd_car_no,p.fd_driver_name,t.fd_filing_car_type,
+        t.fd_filing_factory_code,t.fd_filing_factory,t.fd_dock_no,t.fd_dock_name,t.fd_dock_department,t.fd_dock_phone,
+        date_format(t.fd_filing_begin,'%Y-%m-%d') fd_filing_begin,
+        date_format(t.fd_filing_end,'%Y-%m-%d') fd_filing_end
+        from safety_enter_filing t
+        left join safety_enter_protect p on t.fd_car_no=p.fd_car_no
+        where t.create_user = #{phoneNo}
+        order by t.fd_state_code,t.create_time desc
+        <if test="export == null">
+            <if test="limit != null">
+                <if test="offset != null">
+                    limit #{offset}, #{limit}
+                </if>
+                <if test="offset == null">
+                    limit #{limit}
+                </if>
+            </if>
+        </if>
+    </select>
+    <select id="selectEnterFilingAppCount" resultType="integer"
+            parameterType="com.yutong.safety.core.db.entity.enter.search.SafetyEnterFilingAppSh">
+        select count(*)
+        from safety_enter_filing t
+        where create_user = #{phoneNo}
+    </select>
+
+    <select id="selectFilingFactoryList" resultType="com.yutong.safety.core.db.entity.result.DictItemRt">
+        select id as itemCode,field_name as itemName
+        from safety_field_manage t
+        where delete_falg=0 and field_type='factory'
+            and t.remark is null
+        order by field_sort
+    </select>
+
+    <select id="selectFilingFactoryByCode" parameterType="java.lang.String" resultType="java.lang.String">
+        select field_name as itemName
+        from safety_field_manage t
+        where delete_falg=0 and field_type='factory'
+        and id = #{code}
+    </select>
+
+    <select id="selectByPrimary" resultType="com.yutong.safety.core.db.entity.enter.SafetyEnterFiling">
+        select * from safety_enter_filing
+        where id=#{id}
+    </select>
+
+    <select id="selectAdministrator" parameterType="string" resultType="string">
+        select u.user_name
+        from safety_sys_user u
+        left join safety_sys_user_role ur on u.id=ur.user_id
+        left join safety_sys_role r on ur.role_id=r.id
+        where u.user_name=#{userName}
+        and r.role_name='超级管理员'
+        and u.delete_falg='0'
+        and r.delete_falg='0'
+    </select>
+
+    <select id="selectTodayEnterList" parameterType="map" resultType="string">
+        select f.id
+        from safety_enter_filing f
+        left join safety_enter_filing_approve a on f.id=a.fd_filing_id
+        where 1=1
+        <if test="dockNo != null and dockNo != ''">
+            and f.fd_dock_no = #{dockNo}
+        </if>
+        <if test="carNo != null and carNo != ''">
+            and f.fd_car_no = #{carNo}
+        </if>
+        <if test="date != null and date != ''">
+            and a.fd_filing_end > #{date}
+        </if>
+        and f.fd_state_code in('30','31')
+    </select>
+
+    <select id="selectTodayEnterMaxList" parameterType="map" resultType="string">
+        SELECT ef.id from safety_enter_filing ef
+        INNER JOIN safety_enter_filing_approve fa on ef.id = fa.fd_filing_id
+        INNER JOIN (select f.fd_car_no,max(a.create_time) create_time
+                      from safety_enter_filing f,safety_enter_filing_approve a
+                     where f.id=a.fd_filing_id
+                <if test="dockNo != null and dockNo != ''">
+                    and f.fd_dock_no = #{dockNo}
+                </if>
+                <if test="carNo != null and carNo != ''">
+                    and f.fd_car_no = #{carNo}
+                </if>
+                <if test="date != null and date != ''">
+                <![CDATA[
+                    and a.fd_filing_end > #{date}
+                    and a.fd_filing_begin <= #{date}
+                ]]>
+                </if>
+                and f.fd_state_code in('30','31')
+                group by f.fd_car_no) as el
+        on ef.fd_car_no =el.fd_car_no and  fa.create_time = el.create_time
+    </select>
+
+    <select id="verifyBeforeInsert" resultType="java.util.Map" parameterType="java.util.Map">
+        select * from (
+            select
+                t.fd_filing_factory_code as factoryCode,
+                date_format(a.fd_filing_begin,'%Y-%m-%d') as beginTime,
+                date_format(a.fd_filing_end,'%Y-%m-%d') as endTime,
+                t.fd_filing_factory as factory,
+                t.create_time
+            from safety_enter_filing t
+            left join safety_enter_filing_per per on t.id = per.filing_id and per.fd_per_type_code = '10'
+            left join safety_enter_filing_approve a on t.id=a.fd_filing_id
+            where
+                t.fd_state_code in ('30','31')
+                <if test="paramMap.fdCarNo!=null and paramMap.fdCarNo!=''">
+                    AND t.fd_car_no = #{paramMap.fdCarNo}
+                </if>
+                <if test="paramMap.fdPerCard!=null and paramMap.fdPerCard!=''">
+                    AND per.fd_per_card = #{paramMap.fdPerCard}
+                </if>
+                <if test="paramMap.fdFilingBegin != null and paramMap.fdFilingBegin != '' and paramMap.fdFilingEnd != null and paramMap.fdFilingEnd != ''">
+                    <![CDATA[
+                        and (
+                                (a.fd_filing_begin <= concat(#{paramMap.fdFilingBegin},' 23:59:59') and a.fd_filing_end >=  concat(#{paramMap.fdFilingBegin},' 00:00:00'))
+                                or
+                                (a.fd_filing_begin <= concat(#{paramMap.fdFilingEnd},' 23:59:59') and a.fd_filing_end >= concat(#{paramMap.fdFilingEnd},' 00:00:00'))
+                            )
+                    ]]>
+                </if>
+            union all
+            select
+                t.fd_filing_factory_code as factoryCode,
+                date_format(t.fd_filing_begin,'%Y-%m-%d') as beginTime,
+                date_format(t.fd_filing_end,'%Y-%m-%d') as endTime,
+                t.fd_filing_factory as factory,
+                t.create_time
+            from safety_enter_filing t
+            left join safety_enter_filing_per per on t.id = per.filing_id and per.fd_per_type_code = '10'
+            where
+                t.fd_state_code = '20'
+                <if test="paramMap.fdCarNo!=null and paramMap.fdCarNo!=''">
+                    AND t.fd_car_no = #{paramMap.fdCarNo}
+                </if>
+                <if test="paramMap.fdPerCard!=null and paramMap.fdPerCard!=''">
+                    AND per.fd_per_card = #{paramMap.fdPerCard}
+                </if>
+                <if test="paramMap.fdFilingBegin != null and paramMap.fdFilingBegin != '' and paramMap.fdFilingEnd != null and paramMap.fdFilingEnd != ''">
+                    <![CDATA[
+                        and (
+                                (t.fd_filing_begin <= concat(#{paramMap.fdFilingBegin},' 23:59:59') and t.fd_filing_end >=  concat(#{paramMap.fdFilingBegin},' 00:00:00'))
+                                or
+                                (t.fd_filing_begin <= concat(#{paramMap.fdFilingEnd},' 23:59:59') and t.fd_filing_end >= concat(#{paramMap.fdFilingEnd},' 00:00:00'))
+                            )
+                    ]]>
+                </if>
+        )c
+        order by c.create_time desc
+    </select>
+
+    <select id="verifyBeforeApprove" resultType="java.util.Map" parameterType="java.util.Map">
+        select
+            t.fd_filing_factory_code as factoryCode,
+            date_format(a.fd_filing_begin,'%Y-%m-%d') as beginTime,
+            date_format(a.fd_filing_end,'%Y-%m-%d') as endTime,
+            t.fd_filing_factory as factory
+        from safety_enter_filing t
+        left join safety_enter_filing_per per on t.id = per.filing_id and per.fd_per_type_code = '10'
+        left join safety_enter_filing_approve a on t.id=a.fd_filing_id
+        where
+                t.fd_state_code in ('30','31')
+            <if test="paramMap.fdCarNo!=null and paramMap.fdCarNo!=''">
+                AND t.fd_car_no = #{paramMap.fdCarNo}
+            </if>
+            <if test="paramMap.fdPerCard!=null and paramMap.fdPerCard!=''">
+                AND per.fd_per_card = #{paramMap.fdPerCard}
+            </if>
+            <if test="paramMap.fdFilingBegin != null and paramMap.fdFilingBegin != '' and paramMap.fdFilingEnd != null and paramMap.fdFilingEnd != ''">
+                <![CDATA[
+                    and (
+                                (a.fd_filing_begin <= concat(#{paramMap.fdFilingBegin},' 23:59:59') and a.fd_filing_end >=  concat(#{paramMap.fdFilingBegin},' 00:00:00'))
+                                or
+                                (a.fd_filing_begin <= concat(#{paramMap.fdFilingEnd},' 23:59:59') and a.fd_filing_end >= concat(#{paramMap.fdFilingEnd},' 00:00:00'))
+                            )
+                ]]>
+            </if>
+        order by a.create_time desc
+    </select>
+
+    <select id="getPersonByProcessId" parameterType="java.lang.String" resultType="java.util.Map">
+        select fd_per_card as perCard from safety_enter_filing_per where fd_per_type_code = '10' and filing_id = #{processId}
+    </select>
+
+
+    <select id="getOverlapDataList" parameterType="com.yutong.safety.core.db.entity.enter.SafetyEnterFiling" resultType="java.util.Map">
+        select t.id,
+               t.fd_filing_factory_code as factoryCode
+        from safety_enter_filing t
+        left join safety_enter_filing_approve a on t.id=a.fd_filing_id
+        where
+            t.fd_state_code in ('30','31')
+        and t.id != #{id}
+        and a.fd_filing_end > now()
+        <if test="fdCarNo != null and fdCarNo != ''">
+            and t.fd_car_no = #{fdCarNo}
+        </if>
+        <if test="fdFilingBegin != null and fdFilingEnd != null">
+            <![CDATA[
+                and (
+                            a.fd_filing_begin < #{fdFilingEnd}
+                        and a.fd_filing_end > #{fdFilingBegin}
+                    )
+            ]]>
+        </if>
+    </select>
+
+    <delete id="deleteByProcessIdList" parameterType="java.util.List">
+        update safety_enter_filing_approve
+        set fd_filing_end = DATE_SUB(NOW(), INTERVAL 1 DAY)
+        where fd_filing_id in
+        <foreach collection="processIdList" close=")" open="(" separator="," item="processId">
+            #{processId}
+        </foreach>
+    </delete>
+
+    <select id="getAlertMes" parameterType="java.lang.String" resultType="java.util.Map">
+        select
+            case
+            when a.is_show = '1' or b.general_show = '1' then 'false'
+            else 'true' end isShow,
+            b.id as mesId,
+            b.content
+        from safety_small_program_dialog a
+        right join safety_general_config b on a.mes_id = b.id and a.phone_number = #{phoneNo}
+        where b.general_type = 'smallPro'
+    </select>
+
+    <insert id="setAlertMesHidden" parameterType="java.lang.String">
+        INSERT INTO safety_small_program_dialog (phone_number, mes_id, is_show) VALUES (#{phoneNo}, #{mesId}, '1')
+    </insert>
+
+    <delete id="deleteByPhoneNo" parameterType="java.lang.String">
+        delete from safety_small_program_dialog where phone_number = #{phoneNo}
+    </delete>
+
+    <select id="selectEnterList" parameterType="java.lang.String" resultMap="EnterFilingMap">
+        select t.id, t.fd_state, t.time_out_deal
+        from safety_enter_filing t
+                 left join safety_enter_process ps on t.id = ps.form_instance_id
+        where ps.flow_id = #{processId} and t.time_out_deal is null
+    </select>
+
+    <select id="selectEnterThirdList" parameterType="java.lang.String" resultMap="EnterFilingMap">
+        select t.id, t.fd_state, t.fd_filing_type, fd_enter_type, t.fd_car_no, t.fd_delivery_type, t.fd_filing_factory_code,
+            t.fd_supplier_name, t.fd_supplier_code, t.fd_driver_name, t.create_user,
+            date_format(t.fd_filing_begin,'%Y-%m-%d %H:%i:%s') fd_filing_begin,
+            date_format(t.fd_filing_end,'%Y-%m-%d %H:%i:%s') fd_filing_end
+        from safety_enter_filing t
+                 left join safety_enter_process ps on t.id = ps.form_instance_id
+        where ps.flow_id = #{processId}
+    </select>
+
+    <select id="selectCountByCarNo" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT
+          COUNT(*)
+        FROM
+          safety.safety_enter_filing t
+        WHERE t.id != #{id}
+          AND t.fd_car_no = #{fdCarNo}
+          AND t.create_time >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
+    </select>
+
+    <update id="updateStatusByList" parameterType="java.util.List">
+        <foreach collection="enList" item="l" separator=";" >
+            update safety_enter_filing set
+            fd_state = #{l.fdState},
+            fd_state_code = #{l.fdStateCode},
+            time_out_deal = '1'
+            where id = #{l.id}
+        </foreach>
+    </update>
+
+    <update id="updateStatusHistoryByList" parameterType="java.util.List">
+        <foreach collection="enList" item="l" separator=";" >
+            update safety_enter_filing_history set
+            fd_state = #{l.fdState},
+            fd_state_code = #{l.fdStateCode}
+            where fd_filing_id = #{l.id}
+        </foreach>
+    </update>
+
+    <select id="getMesByKafka" parameterType="java.util.Map" resultMap="EnterFilingMap">
+        select t.id, t.fd_driver_name, t.fd_car_no, t.fd_enter_type, t.fd_dock_no, tp.flow_id
+        from safety_enter_filing t
+                 inner join safety_enter_filing_approve a on t.id = a.fd_filing_id
+                 inner join safety_enter_process tp on t.id = tp.form_instance_id
+        where t.fd_car_no = #{carNo}
+          <![CDATA[
+          and a.fd_filing_begin <= #{carTime}
+          and a.fd_filing_end >= #{carTime}
+          ]]>
+    </select>
+
+    <select id="getBaseInfo" parameterType="com.yutong.safety.core.dto.SafetyPersonCarOutRuleDTO"
+            resultType="com.yutong.safety.core.dto.SafetyPersonCarOutRuleDTO">
+        select
+            sf.fd_car_no as carNo,
+            sp.fd_per_name as empName,
+            sp.fd_per_phone as phoneNo
+        from
+            safety_enter_filing sf
+        left join
+            safety_enter_filing_per sp
+         on sf.id = sp.filing_id and sp.fd_per_type_code = '10'
+        where sf.fd_state_code in ('30', '31')
+          <if test="carNo != null and carNo != ''">
+              and sf.fd_car_no = #{carNo}
+          </if>
+          <if test="empName != null and empName != ''">
+              and sp.fd_per_name = #{empName}
+          </if>
+          <if test="phoneNo != null and phoneNo != ''">
+              and sp.fd_per_phone = #{phoneNo}
+          </if>
+        order by sf.approve_time desc
+        limit 1
+    </select>
+
+    <select id="selectMergeEnterFiling" parameterType="java.util.List" resultMap="EnterFilingPerMap">
+        select e.fd_filing_factory_code,
+               p.id,
+               p.filing_id,
+               p.fd_per_type_code,
+               p.fd_per_type,
+               p.fd_per_name,
+               p.fd_per_card,
+               p.fd_per_phone,
+               p.phoneAndCard,
+               r.fd_img as fd_per_img
+        from (select id,
+                     filing_id,
+                     fd_per_type_code,
+                     fd_per_type,
+                     fd_per_name,
+                     fd_per_card,
+                     fd_per_phone,
+                     CONCAT(fd_per_phone, fd_per_card) phoneAndCard
+              from safety_enter_filing_per) p
+                 left join safety_enter_register r on p.fd_per_card = r.fd_card_no
+                 left join safety_enter_filing a on p.filing_id = a.id
+                 left join safety_enter_filing_approve e on p.filing_id = e.fd_filing_id
+        where a.fd_state_code = 30
+          and e.fd_filing_end > now()
+          and p.phoneAndCard in
+        <foreach collection="list" close=")" open="(" separator="," item="item">
+            #{item}
+        </foreach>
+    </select>
+</mapper>

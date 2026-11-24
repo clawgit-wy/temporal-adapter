@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.risk.mapper.YtsafetyHomeworkStageMapper">
+
+    <select id="queryPageList" resultType="com.yutong.modules.risk.entity.YtsafetyHomeworkStage">
+        select
+            yhs.id as id,
+            yhs.link_name as linkName,
+            yhs.link_code as linkCode,
+            yhs.factory_id as factoryId,
+            yhs.factory_code as factoryCode,
+            yhs.factory_name as factoryName,
+            yhs.area_id as areaId,
+            yhs.area_code as areaCode,
+            yhs.area_name as areaName,
+            yhs.org_id as orgId,
+            yhs.org_name as orgName,
+            yhs.org_code as orgCode,
+            yhs.location_ids as locationIds,
+            yhs.location_names as locationNames,
+            yhs.safety_role_code as safetyRoleCode,
+            yhs.safety_manager as safetyManager,
+            yhs.safety_manager_id as safetyManagerId,
+            yhs.create_name as createName,
+            yhs.create_user as createUser,
+            yhs.create_time as createTime,
+            yhs.update_name as updateName,
+            yhs.update_user as updateUser,
+            yhs.update_time as updateTime,
+            yhs.del_flag as delFlag
+        from ytsafety_homework_stage yhs
+        <where>
+            <if test="query.linkCode != null and query.linkCode != ''">
+                AND yhs.link_code LIKE CONCAT('%', #{query.linkCode}, '%')
+            </if>
+            <if test="query.linkName != null and query.linkName != ''">
+                AND yhs.link_name LIKE CONCAT('%', #{query.linkName}, '%')
+            </if>
+            <if test="query.factoryId != null and query.factoryId != ''">
+                AND yhs.factory_id IN (
+                    <foreach collection="query.factoryId.split(',')" item="item" separator=",">
+                        #{item}
+                    </foreach>
+                )
+            </if>
+            <if test="query.areaIds != null and query.areaIds != ''">
+                AND yhs.area_id IN (
+                    <foreach collection="query.areaIds.split(',')" item="item" separator=",">
+                        #{item}
+                    </foreach>
+                )
+            </if>
+            <if test="query.locationName != null and query.locationName != ''">
+                AND FIND_IN_SET(#{query.locationName}, yhs.location_names)
+            </if>
+            <if test="query.orgId != null and query.orgId != ''">
+                AND yhs.org_id = #{query.orgId}
+            </if>
+            <if test="query.safetyStaff != null and query.safetyStaff != ''">
+                AND EXISTS (
+                    SELECT 1 FROM safety_group_info gi
+                    INNER JOIN ytsafety_sys_user_depart ud ON FIND_IN_SET(ud.depart_code, gi.org_code_path) > 0
+                    INNER JOIN ytsafety_sys_responsible sr ON sr.user_id = ud.user_id AND sr.status = 0 AND sr.del_flag = 0
+                    INNER JOIN safety_sys_user_role ur ON ur.user_id = sr.user_id AND ur.del_flag = 0
+                        AND ur.role_code = yhs.safety_role_code
+                    WHERE gi.id = yhs.org_id AND gi.status = 'Y'
+                    AND (sr.emp_name LIKE CONCAT('%', #{query.safetyStaff}, '%')
+                        OR sr.emp_no LIKE CONCAT('%', #{query.safetyStaff}, '%'))
+                )
+            </if>
+            <if test="query.safetyManager != null and query.safetyManager != ''">
+                AND FIND_IN_SET(#{query.safetyManager}, safety_manager)
+            </if>
+            <if test="query.updateName != null and query.updateName != ''">
+                AND yhs.update_name = #{query.updateName}
+            </if>
+        </where>
+        order by yhs.update_time desc
+    </select>
+
+    <select id="queryStageList" resultType="com.yutong.modules.risk.vo.YtsafetyHomeworkStageExportVO">
+        select
+            yhs.id as id,
+            yhs.link_code as linkCode,
+            yhs.link_name as linkName,
+            yhs.factory_name as factoryName,
+            yhs.area_name as areaName,
+            yhs.org_name as orgName,
+            yhs.org_code as orgCode,
+            yhs.safety_role_code as safetyRoleCode,
+            yhs.location_names as locationNames,
+            yhs.safety_manager as safetyManager,
+            yhs.update_time as updateTime,
+            yhs.update_name as updateName
+            from ytsafety_homework_stage yhs
+        <where>
+            <if test="query.linkCode != null and query.linkCode != ''">
+                AND yhs.link_code LIKE CONCAT('%', #{query.linkCode}, '%')
+            </if>
+            <if test="query.linkName != null and query.linkName != ''">
+                AND yhs.link_name LIKE CONCAT('%', #{query.linkName}, '%')
+            </if>
+            <if test="query.factoryId != null and query.factoryId != ''">
+                AND yhs.factory_id IN (
+                    <foreach collection="query.factoryId.split(',')" item="item" separator=",">
+                        #{item}
+                    </foreach>
+                )
+            </if>
+            <if test="query.areaIds != null and query.areaIds != ''">
+                AND yhs.area_id IN (
+                    <foreach collection="query.areaIds.split(',')" item="item" separator=",">
+                        #{item}
+                    </foreach>
+                )
+            </if>
+            <if test="query.locationName != null and query.locationName != ''">
+                AND FIND_IN_SET(#{query.locationName}, yhs.location_names)
+            </if>
+            <if test="query.orgId != null and query.orgId != ''">
+                AND yhs.org_id = #{query.orgId}
+            </if>
+            <if test="query.safetyStaff != null and query.safetyStaff != ''">
+                AND FIND_IN_SET(#{query.safetyStaff}, yhs.safety_staff)
+            </if>
+
+            <if test="query.safetyManager != null and query.safetyManager != ''">
+                AND FIND_IN_SET(#{query.safetyManager}, yhs.safety_manager)
+            </if>
+
+            <if test="query.updateName != null and query.updateName != ''">
+                AND yhs.update_name = #{query.updateName}
+            </if>
+            <if test="query.selections != null and query.selections != ''">
+                AND yhs.id IN
+                <foreach collection="query.selections.split(',')" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        order by yhs.update_time desc
+    </select>
+
+</mapper>

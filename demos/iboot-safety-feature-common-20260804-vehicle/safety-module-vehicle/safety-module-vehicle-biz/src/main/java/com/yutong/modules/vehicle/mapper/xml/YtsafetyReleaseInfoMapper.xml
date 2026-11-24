@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.vehicle.mapper.YtsafetyReleaseInfoMapper">
+
+    <select id="vehicleInformation" resultType="java.util.Map">
+        select * from safety_enter_filing
+        where fd_car_no = #{plateNumber}
+        order by create_time desc
+        limit 1
+    </select>
+
+    <sql id="queryCondition">
+        <where>
+            r.del_flag = 0
+            <if test="dto.factoryId != null">
+                AND r.factory_id = #{dto.factoryId}
+            </if>
+            <if test="dto.locationId != null">
+                AND r.location_id = #{dto.locationId}
+            </if>
+            <if test="dto.vehicleType != null and dto.vehicleType != ''">
+                AND r.vehicle_type = #{dto.vehicleType}
+            </if>
+            <if test="dto.plateNumber != null and dto.plateNumber != ''">
+                AND r.plate_number LIKE CONCAT('%', #{dto.plateNumber}, '%')
+            </if>
+            <if test="dto.inOutType != null">
+                AND r.in_out_type = #{dto.inOutType}
+            </if>
+            <if test="dto.empName != null and dto.empName != ''">
+                AND r.emp_name LIKE CONCAT('%', #{dto.empName}, '%')
+            </if>
+            <if test="dto.releaseDateStart != null">
+                AND r.release_date &gt;= #{dto.releaseDateStart}
+            </if>
+            <if test="dto.releaseDateEnd != null">
+                AND r.release_date &lt;= #{dto.releaseDateEnd}
+            </if>
+            <if test="dto.releaseTimeStart != null">
+                AND r.release_time &gt;= #{dto.releaseTimeStart}
+            </if>
+            <if test="dto.releaseTimeEnd != null">
+                AND r.release_time &lt;= #{dto.releaseTimeEnd}
+            </if>
+            <if test="dto.selections != null and dto.selections != ''">
+                AND r.id IN
+                <foreach collection="dto.selections.split(',')" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </sql>
+
+    <select id="queryPageList" resultType="com.yutong.modules.vehicle.vo.YtsafetyReleaseInfoVO">
+        SELECT
+            r.factory_name,
+            r.factory_id,
+            r.location_name,
+            r.location_id,
+            r.vehicle_type,
+            r.plate_number,
+            CASE r.in_out_type WHEN 1 THEN '进厂' WHEN 2 THEN '出厂' ELSE r.in_out_type END AS in_out_type,
+            r.emp_name,
+            r.emp_no,
+            r.release_date,
+            r.release_time,
+            r.video_href,
+            r.protect_grade,
+            r.detailed_img,
+            r.vin,
+            r.engine_num,
+            r.car_img,
+            r.car_date,
+            r.car_belong,
+            r.driver_name,
+            r.supplier_name,
+            r.supplier_code,
+            r.goods_name,
+            r.goods_weight
+        FROM Ytsafety_release_info r
+        <include refid="queryCondition"/>
+        ORDER BY r.release_date DESC, r.release_time DESC
+    </select>
+
+    <select id="exportList" resultType="com.yutong.modules.vehicle.vo.YtsafetyReleaseInfoExporVO">
+        SELECT
+        r.factory_name,
+        r.factory_id,
+        r.location_name,
+        r.location_id,
+        r.vehicle_type,
+        r.plate_number,
+        CASE r.in_out_type WHEN 1 THEN '进厂' WHEN 2 THEN '出厂' ELSE r.in_out_type END AS in_out_type,
+        r.emp_name,
+        r.emp_no,
+        r.release_date,
+        r.release_time,
+        r.video_href,
+        r.protect_grade,
+        r.detailed_img,
+        r.vin,
+        r.engine_num,
+        r.car_img,
+        r.car_date,
+        r.car_belong,
+        r.driver_name,
+        r.supplier_name,
+        r.supplier_code,
+        r.goods_name,
+        r.goods_weight
+        FROM Ytsafety_release_info r
+        <include refid="queryCondition"/>
+        ORDER BY r.release_date DESC, r.release_time DESC
+    </select>
+
+    <select id="countExportList" resultType="long">
+        SELECT COUNT(*)
+        FROM Ytsafety_release_info r
+        <include refid="queryCondition"/>
+    </select>
+
+    <select id="exportListBatch" resultType="com.yutong.modules.vehicle.vo.YtsafetyReleaseInfoExporVO">
+        SELECT
+        r.factory_name,
+        r.factory_id,
+        r.location_name,
+        r.location_id,
+        r.vehicle_type,
+        r.plate_number,
+        CASE r.in_out_type WHEN 1 THEN '进厂' WHEN 2 THEN '出厂' ELSE r.in_out_type END AS in_out_type,
+        r.emp_name,
+        r.emp_no,
+        r.release_date,
+        r.release_time,
+        r.video_href,
+        r.protect_grade,
+        r.detailed_img,
+        r.vin,
+        r.engine_num,
+        r.car_img,
+        r.car_date,
+        r.car_belong,
+        r.driver_name,
+        r.supplier_name,
+        r.supplier_code,
+        r.goods_name,
+        r.goods_weight
+        FROM Ytsafety_release_info r
+        <include refid="queryCondition"/>
+        ORDER BY r.release_date DESC, r.release_time DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+</mapper>

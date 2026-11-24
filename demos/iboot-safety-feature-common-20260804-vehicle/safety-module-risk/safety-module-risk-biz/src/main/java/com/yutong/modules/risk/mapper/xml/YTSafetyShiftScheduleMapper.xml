@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.risk.mapper.YTSafetyShiftScheduleMapper">
+
+    <resultMap id="BaseResultMap" type="com.yutong.modules.risk.entity.YTSafetyShiftSchedule">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="schedule_date" jdbcType="VARCHAR" property="scheduleDate"/>
+        <result column="factory_id" jdbcType="BIGINT" property="factoryId"/>
+        <result column="emp_no" jdbcType="VARCHAR" property="empNo"/>
+        <result column="person_type" jdbcType="VARCHAR" property="personType"/>
+        <result column="factory" jdbcType="VARCHAR" property="factory"/>
+        <result column="shift_code" jdbcType="VARCHAR" property="shiftCode"/>
+        <result column="create_user" jdbcType="VARCHAR" property="createUser"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_user" jdbcType="VARCHAR" property="updateUser"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="del_flag" jdbcType="TINYINT" property="delFlag"/>
+    </resultMap>
+
+    <!-- 列表查询 VO 结果映射，LEFT JOIN 员工表获取姓名和岗位 -->
+    <resultMap id="VoResultMap" type="com.yutong.modules.risk.vo.ShiftSchedulePageVO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="schedule_date" jdbcType="VARCHAR" property="scheduleDate"/>
+        <result column="factory_id" jdbcType="BIGINT" property="factoryId"/>
+        <result column="emp_no" jdbcType="VARCHAR" property="empNo"/>
+        <result column="emp_name" jdbcType="VARCHAR" property="empName"/>
+        <result column="person_type" jdbcType="VARCHAR" property="personType"/>
+        <result column="position_name" jdbcType="VARCHAR" property="position"/>
+        <result column="factory" jdbcType="VARCHAR" property="factory"/>
+        <result column="shift_code" jdbcType="VARCHAR" property="shiftCode"/>
+        <result column="create_user" jdbcType="VARCHAR" property="createUser"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_user" jdbcType="VARCHAR" property="updateUser"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="del_flag" jdbcType="TINYINT" property="delFlag"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, schedule_date, factory_id, emp_no, person_type,
+        factory, shift_code, create_user, create_by, create_time,
+        update_user, update_by, update_time, del_flag
+    </sql>
+
+    <sql id="Vo_Column_List">
+        s.id, s.schedule_date, s.factory_id, s.emp_no,
+        e.emp_name, s.person_type, e.position_name,
+        s.factory, s.shift_code, s.create_user, s.create_by, s.create_time,
+        s.update_user, s.update_by, s.update_time, s.del_flag
+    </sql>
+
+    <select id="selectPageList" resultMap="VoResultMap">
+        SELECT
+        <include refid="Vo_Column_List"/>
+        FROM ytsafety_shift_schedule s
+        LEFT JOIN safety_employee_message e ON s.emp_no = e.emp_no
+        <where>
+            s.del_flag = 0
+            <if test="param.scheduleDateStart != null and param.scheduleDateStart != ''">
+                AND s.schedule_date &gt;= #{param.scheduleDateStart}
+            </if>
+            <if test="param.scheduleDateEnd != null and param.scheduleDateEnd != ''">
+                AND s.schedule_date &lt;= #{param.scheduleDateEnd}
+            </if>
+            <if test="param.factoryId != null">
+                AND s.factory_id = #{param.factoryId}
+            </if>
+            <if test="param.empNo != null and param.empNo != ''">
+                AND s.emp_no LIKE CONCAT('%', #{param.empNo}, '%')
+            </if>
+            <if test="param.personType != null and param.personType != ''">
+                AND s.person_type = #{param.personType}
+            </if>
+        </where>
+        ORDER BY s.schedule_date DESC, s.create_time DESC
+    </select>
+
+    <select id="selectVoList" resultMap="VoResultMap">
+        SELECT
+        <include refid="Vo_Column_List"/>
+        FROM ytsafety_shift_schedule s
+        LEFT JOIN safety_employee_message e ON s.emp_no = e.emp_no
+        <where>
+            s.del_flag = 0
+            <if test="param.scheduleDateStart != null and param.scheduleDateStart != ''">
+                AND s.schedule_date &gt;= #{param.scheduleDateStart}
+            </if>
+            <if test="param.scheduleDateEnd != null and param.scheduleDateEnd != ''">
+                AND s.schedule_date &lt;= #{param.scheduleDateEnd}
+            </if>
+            <if test="param.factoryId != null">
+                AND s.factory_id = #{param.factoryId}
+            </if>
+            <if test="param.empNo != null and param.empNo != ''">
+                AND s.emp_no LIKE CONCAT('%', #{param.empNo}, '%')
+            </if>
+            <if test="param.personType != null and param.personType != ''">
+                AND s.person_type = #{param.personType}
+            </if>
+        </where>
+        ORDER BY s.schedule_date DESC, s.create_time DESC
+    </select>
+
+    <select id="selectVoById" resultMap="VoResultMap">
+        SELECT
+        <include refid="Vo_Column_List"/>
+        FROM ytsafety_shift_schedule s
+        LEFT JOIN safety_employee_message e ON s.emp_no = e.emp_no
+        WHERE s.id = #{id}
+    </select>
+
+</mapper>

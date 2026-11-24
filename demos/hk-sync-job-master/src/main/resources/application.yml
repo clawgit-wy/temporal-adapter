@@ -1,0 +1,9 @@
+spring:
+  profiles:
+    active: dev
+  #    active: prod
+  application:
+    name: hk-sync-job
+
+server:
+  port: 8012

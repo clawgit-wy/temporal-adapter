@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.spot.SafetySpotCheckProcessDOMapper">
+    <resultMap id="findForAddMap" type="com.yutong.safety.core.dto.SafetySpotCheckProcessDTO">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="flow_id" jdbcType="VARCHAR" property="flowId" />
+        <result column="check_emp" jdbcType="VARCHAR" property="checkName" />
+        <result column="check_emp_no" jdbcType="VARCHAR" property="checkEmpNo" />
+        <result column="duty_name" jdbcType="VARCHAR" property="dutyName" />
+        <result column="team_name" jdbcType="VARCHAR" property="teamName" />
+        <result column="device_name" jdbcType="VARCHAR" property="deviceName" />
+        <result column="device_code" jdbcType="VARCHAR" property="deviceCode" />
+        <result column="location" jdbcType="VARCHAR" property="location" />
+        <result column="reform_time" jdbcType="TIMESTAMP" property="reformTime" />
+        <result column="check_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="node_flag" jdbcType="VARCHAR" property="nodeFlag" />
+        <result column="reform_user_info" jdbcType="VARCHAR" property="reformUserInfo" />
+        <result column="commission_flag" jdbcType="VARCHAR" property="commissionFlag" />
+    </resultMap>
+
+    <resultMap id="BaiscMap" type="com.yutong.safety.core.dto.SafetySpotCheckProcessDTO">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="flow_id" jdbcType="VARCHAR" property="flowId" />
+        <result column="check_emp" jdbcType="VARCHAR" property="checkName" />
+        <result column="check_emp_no" jdbcType="VARCHAR" property="checkEmpNo" />
+        <result column="duty_name" jdbcType="VARCHAR" property="dutyName" />
+        <result column="team_name" jdbcType="VARCHAR" property="teamName" />
+        <result column="device_id" jdbcType="INTEGER" property="deviceId" />
+        <result column="device_name" jdbcType="VARCHAR" property="deviceName" />
+        <result column="device_code" jdbcType="VARCHAR" property="deviceCode" />
+        <result column="reform_user" jdbcType="VARCHAR" property="reformUser" />
+        <result column="location" jdbcType="VARCHAR" property="location" />
+        <result column="reform_time" jdbcType="TIMESTAMP" property="reformTime" />
+        <result column="reform_user_info" jdbcType="VARCHAR" property="reformUserInfo" />
+        <result column="reform_user_leader" jdbcType="VARCHAR" property="reformUserLeader" />
+        <result column="check_time" jdbcType="TIMESTAMP" property="checkTime" />
+        <result column="node_flag" jdbcType="VARCHAR" property="nodeFlag" />
+        <result column="commission_flag" jdbcType="VARCHAR" property="commissionFlag" />
+        <result column="plan_validate_emp" jdbcType="VARCHAR" property="planValidateEmp" />
+        <result column="plan_validate_emp_no" jdbcType="VARCHAR" property="planValidateEmpNo" />
+        <result column="plan_validate_emp_login" jdbcType="VARCHAR" property="planValidateEmpLogin" />
+
+        <result column="device_check_no" jdbcType="VARCHAR" property="deviceCheckNo" />
+        <result column="device_check_name" jdbcType="VARCHAR" property="deviceCheckName" />
+        <result column="device_check_login" jdbcType="VARCHAR" property="deviceCheckLogin" />
+    </resultMap>
+
+    <resultMap id="RuleMap" type="com.yutong.safety.core.db.entity.spot.SafetySpotCheckRuleDO">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="normal_img_show" jdbcType="INTEGER" property="normalImgShow" />
+        <result column="normal_img_require" jdbcType="BIT" property="normalImgRequire" />
+        <result column="exception_img_show" jdbcType="INTEGER" property="exceptionImgShow" />
+        <result column="exception_img_require" jdbcType="BIT" property="exceptionImgRequire" />
+        <result column="reform_img_show" jdbcType="INTEGER" property="reformImgShow" />
+        <result column="reform_img_require" jdbcType="BIT" property="reformImgRequire" />
+        <result column="validate_img_show" jdbcType="INTEGER" property="validateImgShow" />
+        <result column="validate_img_require" jdbcType="BIT" property="validateImgRequire" />
+    </resultMap>
+
+    <resultMap id="LinkRuleMap" type="com.yutong.safety.core.db.entity.spot.SafetySpotLinkRecordRuleDO">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="record_id" jdbcType="INTEGER" property="recordId" />
+        <result column="rule_id" jdbcType="INTEGER" property="ruleId" />
+        <result column="rule_name" jdbcType="VARCHAR" property="ruleName" />
+        <result column="rule_info" jdbcType="VARCHAR" property="ruleInfo" />
+        <result column="rule_sort" jdbcType="INTEGER" property="ruleSort" />
+        <result column="device_id" jdbcType="INTEGER" property="deviceId" />
+        <result column="is_exception" jdbcType="INTEGER" property="isException" />
+        <result column="excep_desc" jdbcType="VARCHAR" property="excepDesc" />
+        <result column="img_url" jdbcType="VARCHAR" property="imgUrl" />
+        <result column="is_local" jdbcType="INTEGER" property="isLocal" />
+        <result column="finish_url" jdbcType="VARCHAR" property="finishUrl" />
+    </resultMap>
+
+    <insert id="insert">
+        insert into safety_spot_check_process (flow_id, title, creator, create_time, status, check_emp, check_emp_no, duty_name, team_name, device_id, device_name, device_code, location, check_time, node_flag, need_reform, reform_user, reform_user_info, device_check_no, device_check_name, device_check_login)
+        values (#{flowId}, #{title}, #{creator}, now(), '20', #{checkName}, #{checkEmpNo}, #{dutyName}, #{teamName}, #{deviceId}, #{deviceName}, #{deviceCode}, #{location}, #{checkTime}, #{nodeFlag}, #{needReform}, #{reformUser}, #{reformUserInfo}, #{deviceCheckNo}, #{deviceCheckName}, #{deviceCheckLogin})
+    </insert>
+    <insert id="insertResult">
+        insert into safety_spot_check_result (record_id, plan_time, finish_time, reform_finish, reform_img, reform_name, reform_time, reform_delay, delay_time, reform_leader, audit_note_msg) values
+        <foreach item="recordId" collection="recordIds" separator="," >
+            (#{recordId}, #{resultDTO.planTime}, #{resultDTO.finishTime}, #{resultDTO.reformFinish}, #{resultDTO.reformImg}, #{resultDTO.reformName}, #{resultDTO.reformTime}, #{resultDTO.reformDelay}, #{resultDTO.delayTime}, #{resultDTO.reformLeader}, #{resultDTO.auditNoteMsg})
+        </foreach>
+    </insert>
+    <select id="findRules" resultMap="RuleMap">
+        select r.* from safety_spot_check_rule r left join safety_spot_rule_perm p on p.rule_id = r.id
+        where p.spot_id = #{id} and r.delete_falg = '0' order by r.rule_sort asc
+    </select>
+    <select id="findLinkRules" resultMap="LinkRuleMap">
+        select * from safety_spot_link_record_rule lr
+        where lr.device_id = #{id} and
+              lr.record_id = (select max(id) from safety_spot_check_record r where r.device_id = #{id} and r.status <![CDATA[<>]]> 1)
+        order by lr.rule_sort asc
+    </select>
+    <select id="findLinkRulesTwo" resultMap="LinkRuleMap">
+        select * from safety_spot_link_record_rule lr
+        where lr.device_id = #{deviceId}
+          and lr.record_id = #{recordId}
+        order by lr.rule_sort asc
+    </select>
+    <select id="findForAdd" resultMap="findForAddMap">
+        select * from safety_spot_check_device_info t where t.id = #{deviceId}
+    </select>
+    <select id="authUser" resultType="java.lang.Integer">
+        select count(*)
+        from safety_spot_check_device_info t
+<![CDATA[
+                 LEFT JOIN safety_employee_message ce ON ce.emp_no IN (
+                     SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(t.check_emp_no, ',', numbers.n), ',', -1)
+                     FROM (SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5
+                     UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9
+                     UNION ALL SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12
+                     ) numbers
+                     WHERE numbers.n <= (LENGTH(t.check_emp_no) - LENGTH(REPLACE(t.check_emp_no, ',', '')) + 1)
+                 )
+                 LEFT JOIN safety_employee_message pe ON pe.emp_no IN (
+                     SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(t.pro_tem_check_emp_no, ',', numbers.n), ',', -1)
+                     FROM (SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5
+                     UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9
+                     UNION ALL SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12
+                     ) numbers
+                     WHERE numbers.n <= (LENGTH(t.pro_tem_check_emp_no) - LENGTH(REPLACE(t.pro_tem_check_emp_no, ',', '')) + 1)
+                 )
+ ]]>
+        where t.id = #{deviceId}
+          and (
+                  (ce.email like CONCAT(#{username}, '@', '%') and ce.status = 'NORMAL')
+               or (pe.email like CONCAT(#{username}, '@', '%')
+                    <![CDATA[
+                   and t.pro_tem_begin_date <= #{dat}
+                    ]]>
+                   and t.pro_tem_end_date >= #{dat}
+                   and pe.status = 'NORMAL')
+          )
+    </select>
+    <select id="findIds" resultType="java.lang.String">
+        select r.id from safety_spot_check_record r left join safety_spot_check_task t on t.id = r.task_id
+        where r.device_id = #{deviceId} and r.status <![CDATA[<>]]> 1 and DATE_FORMAT(now(),'%Y-%m-%d') between t.task_begin_date and t.task_end_date
+    </select>
+    <select id="findIdsAudit" resultType="java.lang.String">
+        select r.id from safety_spot_check_record r where r.flow_id = #{flowId}
+    </select>
+    <select id="findForView" resultMap="BaiscMap">
+        select * from safety_spot_check_process p where p.flow_id = #{flowId}
+    </select>
+    <select id="findRecordResult" resultType="com.yutong.safety.core.db.entity.spot.SafetySpotCheckResultDO">
+        select * from safety_spot_check_result t where t.record_id = #{recordId} order by t.id asc
+    </select>
+    <select id="getEmpInfoByUsername" resultType="java.util.Map">
+        select e.emp_no empNo, e.emp_name empName, e.email email,e.phone_no phoneNo
+         from safety_employee_message e where e.status = 'NORMAL' and e.email like concat(#{username},'@','%')
+    </select>
+    <select id="selectHistoryResult" resultType="java.lang.String">
+        select max(r.id) from safety_spot_check_record c left join safety_spot_check_result r on c.id = r.record_id and r.reform_finish=1 where c.flow_id = #{flowId} group by r.record_id
+    </select>
+    <select id="getFactoryById" resultType="java.lang.String">
+        select d.factory_id from safety_spot_check_device_info d where d.id = #{deviceId}
+    </select>
+
+    <update id="updateRecord">
+        update safety_spot_check_record
+        <set>
+            <if test="recordDO.checkEmp != null">
+                check_emp = #{recordDO.checkEmp,jdbcType=VARCHAR},
+            </if>
+            <if test="recordDO.checkEmpNo != null">
+                check_emp_no = #{recordDO.checkEmpNo,jdbcType=VARCHAR},
+            </if>
+            <if test="recordDO.checkTime != null">
+                check_time = #{recordDO.checkTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="recordDO.checkImg != null">
+                check_img = #{recordDO.checkImg,jdbcType=VARCHAR},
+            </if>
+            <if test="recordDO.deviceStatus != null">
+                device_status = #{recordDO.deviceStatus,jdbcType=INTEGER},
+            </if>
+            <if test="recordDO.exceptionDesc != null">
+                exception_desc = #{recordDO.exceptionDesc,jdbcType=VARCHAR},
+            </if>
+            <if test="recordDO.status != null">
+                status = #{recordDO.status,jdbcType=INTEGER},
+            </if>
+            <if test="recordDO.planReformDate != null">
+                plan_reform_date = #{recordDO.planReformDate,jdbcType=VARCHAR},
+            </if>
+            <if test="recordDO.isReform != null">
+                is_reform = #{recordDO.isReform,jdbcType=INTEGER},
+            </if>
+            <if test="recordDO.reformImg != null">
+                reform_img = #{recordDO.reformImg,jdbcType=VARCHAR},
+            </if>
+            <if test="recordDO.reformTime != null">
+                reform_time = #{recordDO.reformTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="recordDO.reformEmp != null">
+                reform_emp = #{recordDO.reformEmp,jdbcType=VARCHAR},
+            </if>
+            <if test="recordDO.reformEmpNo != null">
+                reform_emp_no = #{recordDO.reformEmpNo,jdbcType=VARCHAR},
+            </if>
+            <if test="recordDO.validateStatus != null">
+                validate_status = #{recordDO.validateStatus,jdbcType=INTEGER},
+            </if>
+            <if test="recordDO.validateTime != null">
+                validate_time = #{recordDO.validateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="recordDO.validateEmp != null">
+                validate_emp = #{recordDO.validateEmp,jdbcType=VARCHAR},
+            </if>
+            <if test="recordDO.validateEmpNo != null">
+                validate_emp_no = #{recordDO.validateEmpNo,jdbcType=VARCHAR},
+            </if>
+            <if test="recordDO.updateEmpNo != null">
+                update_emp_no = #{recordDO.updateEmpNo,jdbcType=VARCHAR},
+            </if>
+            <if test="recordDO.updateEmp != null">
+                update_emp = #{recordDO.updateEmp,jdbcType=VARCHAR},
+            </if>
+            <if test="flowId != null">
+                flow_id = #{flowId,jdbcType=VARCHAR},
+            </if>
+            update_time = now()
+        </set>
+        where id in
+        <foreach item="item" collection="recordIds" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </update>
+    <update id="updateLinkRecordRule">
+        <foreach collection="recordRuleDOS" item="item" separator=";">
+            update safety_spot_link_record_rule
+            set
+            <if test="item.isException != null">
+                is_exception = #{item.isException,jdbcType=INTEGER},
+            </if>
+            <if test="item.excepDesc != null">
+                excep_desc = #{item.excepDesc,jdbcType=VARCHAR},
+            </if>
+            <if test="item.imgUrl != null">
+                img_url = #{item.imgUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="item.isLocal != null">
+                is_local = #{item.isLocal,jdbcType=INTEGER},
+            </if>
+            <if test="item.finishUrl != null">
+                finish_url = #{item.finishUrl,jdbcType=VARCHAR},
+            </if>
+            update_time = now()
+            where rule_id = #{item.ruleId} and device_id = #{item.deviceId} and record_id in
+            <foreach item="item" collection="recordIds" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </foreach>
+    </update>
+    <update id="updateProcessData">
+        update safety_spot_check_process t
+        <set>
+            <if test="reformTime != null">
+                reform_time = #{reformTime},
+            </if>
+            <if test="reformUser != null">
+                reform_user = #{reformUser},
+            </if>
+            <if test="reformUserInfo != null">
+                reform_user_info = #{reformUserInfo},
+            </if>
+            <if test="reformUserLeader != null">
+                reform_user_leader = #{reformUserLeader},
+            </if>
+            <if test="checkResult != null">
+                check_result = #{checkResult},
+            </if>
+            <if test="nodeFlag != null">
+                node_flag = #{nodeFlag},
+            </if>
+            <if test="commissionFlag != null">
+                commission_flag = #{commissionFlag},
+            </if>
+            <if test="planValidateEmp != null ">
+                plan_validate_emp = #{planValidateEmp},
+            </if>
+            <if test="planValidateEmpNo != null">
+                plan_validate_emp_no = #{planValidateEmpNo},
+            </if>
+            <if test="planValidateEmpLogin != null">
+                plan_validate_emp_login = #{planValidateEmpLogin}
+            </if>
+        </set>
+        where flow_id = #{flowId}
+    </update>
+    <update id="updateProcessDelayTime">
+        update safety_spot_check_process t set t.reform_time = #{delayTime} where t.flow_id = #{flowId}
+    </update>
+    <update id="updateRecordDelayTime">
+        update safety_spot_check_record t set t.delay_reform_date = #{delayTime}, t.delay_reform_flag = 1 where t.flow_id = #{flowId}
+    </update>
+    <update id="updateRecordStatus">
+        update safety_spot_check_record t set
+        <if test="type == 'reformTwo'">
+            t.reform_emp = #{user.empName}, t.reform_emp_no = #{user.empNo}, t.plan_reform_date = #{user.reformTime}
+        </if>
+        <if test="type == 'reform'">
+            t.is_reform = 1, t.reform_time = now()
+        </if>
+        <if test="type == 'validate'">
+            t.validate_status = 1, t.validate_time = now(), t.validate_emp = #{user.empName}, t.validate_emp_no = #{user.empNo}
+        </if>
+        <if test="type == 'validateBelow'">
+            t.validate_status = 4, t.validate_time = now(), t.validate_emp = #{user.empName}, t.validate_emp_no = #{user.empNo}
+        </if>
+        where t.flow_id = #{flowId}
+    </update>
+    <update id="updateHistoryResult">
+        update safety_spot_check_result set delay_time = #{delayTime} where id in
+        <foreach item="item" collection="resultIds" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="selectRemindProcessList" resultType="com.yutong.safety.core.dto.SafetySpotCheckProcessDTO">
+        SELECT DISTINCT p.*
+          FROM safety_spot_check_process P ,safety_spot_check_record r
+         WHERE p.flow_id = r.flow_id
+           AND P.`status` = '20'
+        <if test="nodeFlag != null">
+            and p.node_flag = #{nodeFlag}
+        </if>
+        <if test="status != null">
+            and R.`status` = #{status}
+        </if>
+        <if test="reformTipFlag != null">
+            and R.plan_reform_date IS NULL
+        </if>
+        <if test="reformDueFlag != null">
+        <![CDATA[
+            and P.reform_time < NOW()+1
+        ]]>
+        </if>
+    </select>
+
+    <update id="updateValidDetailU" >
+        update safety_spot_check_result
+        set valid_result = #{validResult}
+        <if test="validRemark != null and validRemark != '' ">
+            ,valid_remark = #{validRemark}
+        </if>
+        <if test="user != null ">
+            ,valid_name = #{user.empName}
+        </if>
+        where record_id =
+              (select id from safety_spot_check_record where flow_id = #{flowId} limit 1)
+        order by reform_time desc
+        limit 1
+    </update>
+</mapper>

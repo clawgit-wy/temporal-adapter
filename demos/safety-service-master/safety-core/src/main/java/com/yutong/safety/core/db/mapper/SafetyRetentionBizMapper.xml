@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.SafetyRetentionBizMapper">
+  <resultMap id="RetentionNoticeMap" type="com.yutong.safety.common.vo.web.RetentionNoticeVO">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="retention_hour" jdbcType="INTEGER" property="retentionHour" />
+    <result column="car_type" jdbcType="VARCHAR" property="carType" />
+    <result column="content" jdbcType="VARCHAR" property="content" />
+    <result column="remind_rule" jdbcType="VARCHAR" property="remindRule" />
+    <result column="remind_num" jdbcType="INTEGER" property="remindNum" />
+      <result column="remind_decide" jdbcType="VARCHAR" property="remindDecide" />
+    <result column="send_num" jdbcType="INTEGER" property="sendNum" />
+    <result column="remind_gap" jdbcType="INTEGER" property="remindGap" />
+    <result column="remind_type" jdbcType="VARCHAR" property="remindType" />
+    <result column="is_used" jdbcType="INTEGER" property="isUsed" />
+    <result column="update_time" jdbcType="VARCHAR" property="updateTime" />
+    <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, retention_hour, car_type, content, remind_rule, remind_num, concat(remind_rule,remind_num) as remind_decide,
+      send_num, remind_gap,remind_type, is_used, DATE_FORMAT(update_time,'%Y-%m-%d %H:%i:%s') as update_time, update_by
+  </sql>
+  <select id="selectByExample" parameterType="com.yutong.safety.core.db.entity.SafetyRetentionNoticeDOExample" resultMap="RetentionNoticeMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from safety_retention_notice
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+
+  <select id="countByExample" parameterType="com.yutong.safety.core.db.entity.SafetyRetentionNoticeDOExample" resultType="java.lang.Long">
+    select count(*) from safety_retention_notice
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+
+    <!-- 获取有效的滞留通知规则列表 -->
+    <select id="getNoticeRuleList" parameterType="com.yutong.safety.common.vo.web.RetentionNoticeVO" resultMap="RetentionNoticeMap">
+        select
+        <include refid="Base_Column_List" />
+        from safety_retention_notice a
+        WHERE a.update_time = (
+            SELECT max(b.update_time)
+            FROM safety_retention_notice b
+            WHERE b.car_type = a.car_type
+            and b.is_used = a.is_used
+            and b.remind_rule = a.remind_rule
+        )
+        <if test="isUsed != null">
+            and is_used = #{isUsed}
+        </if>
+        <if test="carType != null and carType != ''">
+            and car_type = #{carType}
+        </if>
+    </select>
+
+    <!-- 厂区道路与厂区关系自定义SQL BEGIN -->
+    <sql id="Example_Where_Clause_Lane_Factory">
+        <!--
+          WARNING - @mbg.generated
+          This element is automatically generated by MyBatis Generator, do not modify.
+          This element was generated on Fri Apr 12 15:19:58 CST 2024.
+        -->
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+
+    <select id="selectFactoryList" parameterType="com.yutong.safety.core.db.entity.SafetyLaneFactoryDOExample" resultType="java.lang.String">
+        select distinct factory_name
+        from safety_lane_factory
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause_Lane_Factory" />
+        </if>
+        <if test="orderByClause != null">
+            order by ${orderByClause}
+        </if>
+        <if test="limit != null">
+            <if test="offset != null">
+                limit ${offset}, ${limit}
+            </if>
+            <if test="offset == null">
+                limit ${limit}
+            </if>
+        </if>
+    </select>
+    <!-- 厂区道路与厂区关系自定义SQL END -->
+
+    <!-- 厂区车辆管理自定义SQL BEGIN -->
+    <update id="updateParkStatus">
+        update safety_car_in_factory
+           set park_status = 1,update_time=CURRENT_TIMESTAMP
+         where park_status = 0
+    </update>
+
+    <insert id="updateBatchCarInFactory" parameterType="java.util.List" useGeneratedKeys="true" keyColumn="carNo">
+        insert into safety_car_in_factory
+        (car_no,car_category,car_type,staff_no,staff_name,in_door,in_lane_name,in_time,car_color,park_status,create_time,update_time,factory)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.carNo},
+            #{item.carCategory},
+            #{item.carType},
+            #{item.staffNo},
+            #{item.staffName},
+            #{item.inDoor},
+            #{item.inLaneName},
+            #{item.inTime},
+            #{item.carColor},
+            0,
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP,
+            #{item.factory})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        car_category = values(car_category),
+        car_type = values(car_type),
+        staff_no = values(staff_no),
+        staff_name = values(staff_name),
+        in_door = values(in_door),
+        in_lane_name = values(in_lane_name),
+        in_time = values(in_time),
+        car_color = values(car_color),
+        park_status = 0,
+        is_retention = 0,
+        update_time = CURRENT_TIMESTAMP,
+        factory = values(factory)
+    </insert>
+
+    <update id="modifyCarRetentionStatus" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+        update safety_car_in_factory
+        <set>
+            <if test="item.isRetention != null ">
+                is_retention = #{item.isRetention,jdbcType=INTEGER},
+            </if>
+            <if test="item.factory != null and  item.factory != '' ">
+                factory = #{item.factory,jdbcType=VARCHAR},
+            </if>
+            <if test="item.informStatus != null ">
+                inform_status = #{item.informStatus,jdbcType=INTEGER},
+            </if>
+            update_time = CURRENT_TIMESTAMP
+        </set>
+        <where>
+            <if test="item.carNo != null">
+                car_no = #{item.carNo,jdbcType=VARCHAR}
+            </if>
+        </where>
+        </foreach>
+    </update>
+
+    <!-- 厂区车辆VO-map -->
+    <resultMap id="BaseResultCarMap" type="com.yutong.safety.core.db.entity.SafetyCarInFactoryDO">
+        <id column="car_no" jdbcType="VARCHAR" property="carNo" />
+        <result column="car_type" jdbcType="VARCHAR" property="carType" />
+        <result column="car_category" jdbcType="VARCHAR" property="carCategory" />
+        <result column="staff_no" jdbcType="VARCHAR" property="staffNo" />
+        <result column="staff_name" jdbcType="VARCHAR" property="staffName" />
+        <result column="in_door" jdbcType="VARCHAR" property="inDoor" />
+        <result column="in_time" jdbcType="VARCHAR" property="inTime" />
+        <result column="factory" jdbcType="VARCHAR" property="factory" />
+        <result column="car_model" jdbcType="VARCHAR" property="carModel" />
+        <result column="car_color" jdbcType="VARCHAR" property="carColor" />
+        <result column="park_status" jdbcType="INTEGER" property="parkStatus" />
+        <result column="is_retention" jdbcType="INTEGER" property="isRetention" />
+        <result column="retention_num" jdbcType="INTEGER" property="retentionNum" />
+        <result column="in_lane_name" jdbcType="VARCHAR" property="inLaneName" />
+        <result column="inform_status" jdbcType="INTEGER" property="informStatus" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    </resultMap>
+    <sql id="Example_Where_Clause_Car_In_Factory">
+        <where>
+            <foreach collection="oredCriteria" item="criteria" separator="or">
+                <if test="criteria.valid">
+                    <trim prefix="(" prefixOverrides="and" suffix=")">
+                        <foreach collection="criteria.criteria" item="criterion">
+                            <choose>
+                                <when test="criterion.noValue">
+                                    and ${criterion.condition}
+                                </when>
+                                <when test="criterion.singleValue">
+                                    and ${criterion.condition} #{criterion.value}
+                                </when>
+                                <when test="criterion.betweenValue">
+                                    and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                                </when>
+                                <when test="criterion.listValue">
+                                    and ${criterion.condition}
+                                    <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                                        #{listItem}
+                                    </foreach>
+                                </when>
+                            </choose>
+                        </foreach>
+                    </trim>
+                </if>
+            </foreach>
+        </where>
+    </sql>
+
+    <sql id="Base_Car_Column_List">
+        car_no, car_type, car_category, t1.staff_no, staff_name, in_door, in_time, factory,
+        car_model, car_color, park_status, is_retention, retention_num, in_lane_name, inform_status,
+        create_time, update_time
+    </sql>
+    <select id="selectByExampleCarInFactory" parameterType="com.yutong.safety.core.db.entity.SafetyCarInFactoryDOExample" resultMap="BaseResultCarMap">
+        select
+        <if test="distinct">
+            distinct
+        </if>
+        <include refid="Base_Car_Column_List" />
+        from safety_car_in_factory t1
+        <if test="_parameter != null">
+            <include refid="Example_Where_Clause_Car_In_Factory" />
+        </if>
+        <if test="orderByClause != null">
+            order by ${orderByClause}
+        </if>
+        <if test="limit != null">
+            <if test="offset != null">
+                limit ${offset}, ${limit}
+            </if>
+            <if test="offset == null">
+                limit ${limit}
+            </if>
+        </if>
+    </select>
+    <select id="selectByPrimaryKeyCarInFactory" parameterType="java.lang.String" resultMap="BaseResultCarMap">
+        select
+        <include refid="Base_Car_Column_List" />
+        from safety_car_in_factory t1
+        left join safety_lane_factory t2 on t1.in_lane_name = t2.lane_name
+        where car_no = #{carNo,jdbcType=VARCHAR}
+    </select>
+
+    <!-- 厂区车辆管理自定义SQL END -->
+
+    <!-- 车辆滞留逻辑处理 begin -->
+
+    <!-- 获取车辆列表-处理过公出时间和工厂字段的方法 -->
+    <select id="selectCarList" parameterType="com.yutong.safety.common.param.web.CarInFactoryListParam"
+            resultMap="BaseResultCarMap">
+        select t1.car_no, t1.car_type, t1.car_category, t1.staff_no, t1.staff_name, t1.in_door, t1.factory,
+        t1.car_model, car_color, t1.park_status, t1.is_retention, t1.retention_num, t1.in_lane_name, t1.inform_status,
+        t1.create_time, t1.update_time,
+        t1.in_time
+        from safety_car_in_factory t1
+        LEFT JOIN safety_staff_evection t3 ON t1.staff_no = t3.staff_no
+        where 1 = 1 and t1.park_status = 0
+        <if test="carType !=null and carType != ''">
+            and t1.car_type = #{carType}
+        </if>
+        <if test="isRetention != null">
+            and t1.is_retention = #{isRetention}
+        </if>
+        <if test="carNo !=null and carNo != ''">
+            and t1.car_no = #{carNo}
+        </if>
+        <if test="factory !=null and factory != ''">
+            and t1.factory = #{factory}
+        </if>
+        <if test="staffNo != null and staffNo !=''">
+            and t1.staff_no = #{staffNo}
+        </if>
+    </select>
+
+    <!-- 获取有效各类车型最新的一条规则 -->
+    <select id="getRetentionNoticeList" resultType="com.yutong.safety.core.db.entity.SafetyRetentionNoticeDO">
+        SELECT
+            id, retention_hour, car_type, content, remind_rule, remind_num, send_num, remind_gap,
+    remind_type, is_used, create_time, create_by, update_time, update_by
+        FROM
+            safety_retention_notice a
+        WHERE
+            a.update_time = (
+                SELECT
+                    max(b.update_time)
+                FROM
+                    safety_retention_notice b
+                WHERE
+                    b.car_type = a.car_type
+                  and b.is_used = a.is_used
+            )
+        and a.is_used = 1
+    </select>
+
+    <!-- 获取滞留次数和通知次数 -->
+    <select id="getNoticeLogReport" resultType="com.yutong.safety.common.vo.NoticeLogVO">
+        SELECT
+            TMP1.*, TMP3.retention_nums
+        FROM
+            (
+                SELECT
+                    R.car_no,
+                    R.in_time,
+                    R.inform_type,
+                    R.notice_id,
+                    COUNT(1) AS notice_nums,
+                    DATE_FORMAT(
+                        max(r.create_time),
+                        '%Y-%m-%d %H:%i:%s'
+                    ) AS notice_time
+                FROM safety_retention_inform_record R
+                GROUP BY R.car_no, R.in_time, R.inform_type, R.notice_id
+            ) TMP1,(
+            SELECT car_no,COUNT(1) retention_nums,max(in_time) as in_time
+            FROM
+                (
+                    SELECT DISTINCT	r1.car_no,r1.in_time
+                    FROM safety_retention_inform_record r1
+                ) AS TMP2
+            GROUP BY
+                car_no
+        ) TMP3 where TMP1.car_no = TMP3.car_no and TMP1.in_time = TMP3.in_time
+    </select>
+
+    <!-- 批量新增下发记录 -->
+    <insert id="batchInsertNoticeLog" parameterType="java.util.List">
+        insert into safety_retention_inform_record
+        (car_no,car_type,car_category,staff_no,telephone,staff_name,factory,in_time,
+        create_time,inform_content,notice_id,inform_type,remind_type,retention_num)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.carNo},
+            #{item.carType},
+            #{item.carCategory},
+            #{item.staffNo},
+            #{item.telephone},
+            #{item.staffName},
+            #{item.factory},
+            #{item.inTime},
+            #{item.createTime},
+            #{item.informContent},
+            #{item.noticeId},
+            #{item.informType},
+            #{item.remindType},
+            #{item.retentionNum})
+        </foreach>
+    </insert>
+    <!-- 车辆滞留逻辑处理 end -->
+
+    <!-- 批量新增白名单数据 -->
+    <insert id="batchInsertWhite" parameterType="java.util.List">
+        insert into safety_retention_white (car_no, staff_no, staff_name,
+        factory, car_type, remark,create_time, update_time, begin_time, end_time
+        )
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.carNo}, #{item.staffNo}, #{item.staffName},
+            #{item.factory}, #{item.carType}, #{item.remark},
+            CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, #{item.beginTime}, #{item.endTime}
+            )
+        </foreach>
+    </insert>
+</mapper>

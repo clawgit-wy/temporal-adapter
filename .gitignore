@@ -35,3 +35,12 @@ server/ui/
 # 临时文件
 *.tmp
 *.bak
+
+# 大体积二进制 / 离线安装包（不入库，另行备份）
+DeskBox-Portable/
+.screenshots/
+/觅千手.zip
+packages/*.tar.gz
+packages/*.zip
+setup/temporal-native/
+**/mirrors/

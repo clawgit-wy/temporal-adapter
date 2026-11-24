@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.risk.mapper.YtsafetyLocationInfoProcessDetailsMapper">
+
+    <delete id="deleteByProcessId">
+        DELETE FROM ytsafety_location_info_process_details WHERE process_id = #{processId}
+    </delete>
+
+    <!-- 安全员名称不在 SQL 中关联，由 Service 层通过 SafetyResponsibleNameResolver 批量回填（当前组织无责任人时向上级组织递归） -->
+    <select id="queryList" resultType="com.yutong.modules.risk.vo.YtsafetyLocationInfoProcessDetailsVO">
+        SELECT
+            t.*
+        FROM ytsafety_location_info_process_details t
+        WHERE t.process_id = #{processId} AND t.del_flag = 0
+    </select>
+
+    <select id="queryByLocationCodes" resultType="com.yutong.modules.risk.vo.YtsafetyLocationInfoProcessDetailsVO">
+        SELECT
+        t.*
+        FROM ytsafety_location_info_process_details t
+        WHERE t.location_code IN
+        <foreach collection="locationCodes" item="code" open="(" separator="," close=")">
+            #{code}
+        </foreach>
+        AND t.del_flag = 0
+    </select>
+
+    <insert id="batchInsert" parameterType="list">
+        INSERT INTO ytsafety_location_info_process_details
+        (
+            id, process_id, change_id,
+            factory_id, factory_code, factory_name,
+            area_id, area_code, area_name,
+            org_id, org_code, org_name,
+            risk_level, risk_color, safety_role_code,
+            location_name, location_code, main_image,
+            status, create_name, create_user, create_time,
+            update_name, update_user, update_time,
+            del_flag, version
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.id}, #{item.processId}, #{item.changeId},
+                #{item.factoryId}, #{item.factoryCode}, #{item.factoryName},
+                #{item.areaId}, #{item.areaCode}, #{item.areaName},
+                #{item.orgId}, #{item.orgCode}, #{item.orgName},
+                #{item.riskLevel}, #{item.riskColor}, #{item.safetyRoleCode},
+                #{item.locationName}, #{item.locationCode}, #{item.mainImage},
+                #{item.status}, #{item.createName}, #{item.createUser}, #{item.createTime},
+                #{item.updateName}, #{item.updateUser}, #{item.updateTime},
+                #{item.delFlag}, #{item.version}
+            )
+        </foreach>
+    </insert>
+
+    <!--
+        索引建议（请在数据库执行以下 DDL）：
+
+        CREATE INDEX idx_loc_process_del ON ytsafety_location_info_process_details(process_id, del_flag);
+    -->
+
+</mapper>

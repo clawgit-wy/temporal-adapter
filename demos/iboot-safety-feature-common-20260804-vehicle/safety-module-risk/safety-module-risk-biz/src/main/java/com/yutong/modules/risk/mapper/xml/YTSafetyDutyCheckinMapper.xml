@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.risk.mapper.YTSafetyDutyCheckinMapper">
+
+    <resultMap id="PageVOResultMap" type="com.yutong.modules.risk.vo.DutyCheckinPageVO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="factory_id" jdbcType="BIGINT" property="factoryId"/>
+        <result column="location_id" jdbcType="BIGINT" property="locationId"/>
+        <result column="emp_no" jdbcType="VARCHAR" property="empNo"/>
+        <result column="emp_name" jdbcType="VARCHAR" property="empName"/>
+        <result column="phone_no" jdbcType="VARCHAR" property="phoneNo"/>
+        <result column="position" jdbcType="VARCHAR" property="position"/>
+        <result column="person_type" jdbcType="VARCHAR" property="personType"/>
+        <result column="factory" jdbcType="VARCHAR" property="factory"/>
+        <result column="location" jdbcType="VARCHAR" property="location"/>
+        <result column="department_team" jdbcType="VARCHAR" property="departmentTeam"/>
+        <result column="shift_code" jdbcType="VARCHAR" property="shiftCode"/>
+        <result column="shift_start_time" jdbcType="VARCHAR" property="shiftStartTime"/>
+        <result column="shift_end_time" jdbcType="VARCHAR" property="shiftEndTime"/>
+        <result column="duty_date" jdbcType="VARCHAR" property="dutyDate"/>
+        <result column="checkin_time" jdbcType="TIMESTAMP" property="checkinTime"/>
+        <result column="clock_in_time" jdbcType="VARCHAR" property="clockInTime"/>
+        <result column="clock_out_time" jdbcType="VARCHAR" property="clockOutTime"/>
+        <result column="duty_status" jdbcType="VARCHAR" property="dutyStatus"/>
+        <result column="is_makeup" jdbcType="TINYINT" property="isMakeup"/>
+        <result column="apply_reason" jdbcType="VARCHAR" property="applyReason"/>
+        <result column="apply_time" jdbcType="TIMESTAMP" property="applyTime"/>
+        <result column="approve_user" jdbcType="VARCHAR" property="approveUser"/>
+        <result column="approve_remark" jdbcType="VARCHAR" property="approveRemark"/>
+        <result column="create_user" jdbcType="VARCHAR" property="createUser"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_user" jdbcType="VARCHAR" property="updateUser"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="del_flag" jdbcType="TINYINT" property="delFlag"/>
+        <result column="model_flag" jdbcType="VARCHAR" property="modelFlag"/>
+        <result column="flow_code" jdbcType="VARCHAR" property="flowCode"/>
+        <result column="flow_subject" jdbcType="VARCHAR" property="flowSubject"/>
+    </resultMap>
+
+    <resultMap id="BaseResultMap" type="com.yutong.modules.risk.entity.YTSafetyDutyCheckin">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="factory_id" jdbcType="BIGINT" property="factoryId"/>
+        <result column="location_id" jdbcType="BIGINT" property="locationId"/>
+        <result column="emp_no" jdbcType="VARCHAR" property="empNo"/>
+        <result column="emp_name" jdbcType="VARCHAR" property="empName"/>
+        <result column="phone_no" jdbcType="VARCHAR" property="phoneNo"/>
+        <result column="person_type" jdbcType="VARCHAR" property="personType"/>
+        <result column="factory" jdbcType="VARCHAR" property="factory"/>
+        <result column="position" jdbcType="VARCHAR" property="position"/>
+        <result column="location" jdbcType="VARCHAR" property="location"/>
+        <result column="department_team" jdbcType="VARCHAR" property="departmentTeam"/>
+        <result column="shift_code" jdbcType="VARCHAR" property="shiftCode"/>
+        <result column="shift_start_time" jdbcType="VARCHAR" property="shiftStartTime"/>
+        <result column="shift_end_time" jdbcType="VARCHAR" property="shiftEndTime"/>
+        <result column="duty_date" jdbcType="VARCHAR" property="dutyDate"/>
+        <result column="checkin_time" jdbcType="TIMESTAMP" property="checkinTime"/>
+        <result column="clock_in_time" jdbcType="VARCHAR" property="clockInTime"/>
+        <result column="clock_out_time" jdbcType="VARCHAR" property="clockOutTime"/>
+        <result column="duty_status" jdbcType="TINYINT" property="dutyStatus"/>
+        <result column="is_makeup" jdbcType="TINYINT" property="isMakeup"/>
+        <result column="apply_reason" jdbcType="VARCHAR" property="applyReason"/>
+        <result column="apply_time" jdbcType="TIMESTAMP" property="applyTime"/>
+        <result column="approve_user" jdbcType="VARCHAR" property="approveUser"/>
+        <result column="approve_remark" jdbcType="VARCHAR" property="approveRemark"/>
+        <result column="create_user" jdbcType="VARCHAR" property="createUser"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_user" jdbcType="VARCHAR" property="updateUser"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="del_flag" jdbcType="TINYINT" property="delFlag"/>
+        <result column="model_flag" jdbcType="VARCHAR" property="modelFlag"/>
+        <result column="flow_code" jdbcType="VARCHAR" property="flowCode"/>
+        <result column="flow_subject" jdbcType="VARCHAR" property="flowSubject"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, factory_id, location_id, emp_no, emp_name, phone_no, person_type, factory, position,
+        location, department_team, shift_code, shift_start_time, shift_end_time, duty_date, checkin_time, clock_in_time, clock_out_time, duty_status,
+        is_makeup, apply_reason, apply_time, approve_user, approve_remark,
+        create_user, create_by, create_time, update_user, update_by, update_time, del_flag,
+        model_flag, flow_code, flow_subject
+    </sql>
+
+    <select id="selectPageList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM ytsafety_duty_checkin
+        <where>
+            del_flag = 0
+            <if test="param.factoryId != null">
+                AND factory_id = #{param.factoryId}
+            </if>
+            <if test="param.empNo != null and param.empNo != ''">
+                AND emp_no LIKE CONCAT('%', #{param.empNo}, '%')
+            </if>
+            <if test="param.empName != null and param.empName != ''">
+                AND emp_name LIKE CONCAT('%', #{param.empName}, '%')
+            </if>
+            <if test="param.personType != null and param.personType != ''">
+                AND person_type = #{param.personType}
+            </if>
+            <if test="param.position != null and param.position != ''">
+                AND position LIKE CONCAT('%', #{param.position}, '%')
+            </if>
+            <if test="param.location != null and param.location != ''">
+                AND location LIKE CONCAT('%', #{param.location}, '%')
+            </if>
+            <if test="param.factory != null and param.factory != ''">
+                AND factory LIKE CONCAT('%', #{param.factory}, '%')
+            </if>
+            <if test="param.dutyDate != null and param.dutyDate != ''">
+                AND duty_date = #{param.dutyDate}
+            </if>
+            <if test="param.dutyStatus != null">
+                AND duty_status = #{param.dutyStatus}
+            </if>
+            <if test="param.isMakeup != null">
+                AND is_makeup = #{param.isMakeup}
+            </if>
+        </where>
+        ORDER BY duty_date DESC, create_time DESC
+    </select>
+
+    <select id="selectPageListVO" resultMap="PageVOResultMap">
+        SELECT
+            d.id, d.factory_id, d.location_id, d.emp_no,
+            d.emp_name, d.phone_no, d.position,
+            (SELECT sdi.item_name FROM safety_dict_item sdi WHERE sdi.supper_code = 'person_type' AND sdi.item_code = d.person_type) AS person_type,
+            d.factory, d.location, d.department_team, d.shift_code,
+            d.shift_start_time, d.shift_end_time, d.duty_date, d.checkin_time, d.clock_in_time, d.clock_out_time,
+            CASE d.duty_status WHEN 1 THEN '在岗' ELSE '未在岗' END AS duty_status,
+            d.is_makeup, d.apply_reason, d.apply_time, d.approve_user, d.approve_remark,
+            d.create_user, d.create_by, d.create_time, d.update_user, d.update_by, d.update_time, d.del_flag,
+            d.model_flag, d.flow_code, d.flow_subject
+        FROM ytsafety_duty_checkin d
+        <where>
+            d.del_flag = 0
+            <if test="param.factoryId != null">
+                AND d.factory_id = #{param.factoryId}
+            </if>
+            <if test="param.empNo != null and param.empNo != ''">
+                AND d.emp_no LIKE CONCAT('%', #{param.empNo}, '%')
+            </if>
+            <if test="param.empName != null and param.empName != ''">
+                AND d.emp_name LIKE CONCAT('%', #{param.empName}, '%')
+            </if>
+            <if test="param.personType != null and param.personType != ''">
+                AND d.person_type = #{param.personType}
+            </if>
+            <if test="param.position != null and param.position != ''">
+                AND d.position LIKE CONCAT('%', #{param.position}, '%')
+            </if>
+            <if test="param.location != null and param.location != ''">
+                AND d.location LIKE CONCAT('%', #{param.location}, '%')
+            </if>
+            <if test="param.factory != null and param.factory != ''">
+                AND d.factory LIKE CONCAT('%', #{param.factory}, '%')
+            </if>
+            <!-- 值班日期过滤 -->
+            <if test="param.dutyDate != null and param.dutyDate != ''">
+                <choose>
+                    <when test="param.today">
+                        <!-- 实时：未下班打卡 且（有班次并签到 或 已到上班时间） -->
+                        AND d.clock_out_time IS NULL
+                        AND (
+                            (d.duty_status = 1 AND DATE(d.shift_start_time) = d.duty_date)
+                            OR d.shift_start_time <![CDATA[ <= ]]> NOW()
+                        )
+                    </when>
+                    <otherwise>
+                        <!-- 历史：班次与查询日期有交集 -->
+                        AND (DATE(d.shift_start_time) = #{param.dutyDate}
+                             OR DATE(d.shift_end_time) = #{param.dutyDate})
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="param.dutyStatus != null">
+                AND d.duty_status = #{param.dutyStatus}
+            </if>
+            <if test="param.isMakeup != null">
+                AND d.is_makeup = #{param.isMakeup}
+            </if>
+        </where>
+        ORDER BY d.duty_date DESC, d.create_time DESC
+    </select>
+
+    <!-- 导出 VO 结果映射，LEFT JOIN 员工表获取姓名、手机号、岗位 -->
+    <resultMap id="ExportVOResultMap" type="com.yutong.modules.risk.vo.DutyCheckinExportVO">
+        <result column="emp_no" jdbcType="VARCHAR" property="empNo"/>
+        <result column="emp_name" jdbcType="VARCHAR" property="empName"/>
+        <result column="phone_no" jdbcType="VARCHAR" property="phone"/>
+        <result column="position" jdbcType="VARCHAR" property="position"/>
+        <result column="person_type" jdbcType="VARCHAR" property="personType"/>
+        <result column="factory" jdbcType="VARCHAR" property="factory"/>
+        <result column="location" jdbcType="VARCHAR" property="location"/>
+        <result column="department_team" jdbcType="VARCHAR" property="departmentTeam"/>
+        <result column="duty_date" jdbcType="VARCHAR" property="dutyDate"/>
+        <result column="shift_code" jdbcType="VARCHAR" property="shiftCode"/>
+        <result column="duty_status" jdbcType="VARCHAR" property="dutyStatus"/>
+    </resultMap>
+
+    <select id="selectListExport" resultMap="ExportVOResultMap">
+        SELECT
+            d.emp_no,
+            d.emp_name,
+            d.phone_no,
+            d.position,
+            (SELECT sdi.item_name FROM safety_dict_item sdi WHERE sdi.supper_code = 'person_type' AND sdi.item_code = d.person_type) AS person_type,
+            d.factory, d.location, d.department_team, d.duty_date, d.shift_code,
+            CASE d.duty_status WHEN 1 THEN '在岗' ELSE '未在岗' END AS duty_status
+        FROM ytsafety_duty_checkin d
+        <where>
+            d.del_flag = 0
+            <if test="param.factoryId != null">
+                AND d.factory_id = #{param.factoryId}
+            </if>
+            <if test="param.empNo != null and param.empNo != ''">
+                AND d.emp_no LIKE CONCAT('%', #{param.empNo}, '%')
+            </if>
+            <if test="param.empName != null and param.empName != ''">
+                AND d.emp_name LIKE CONCAT('%', #{param.empName}, '%')
+            </if>
+            <if test="param.personType != null and param.personType != ''">
+                AND d.person_type = #{param.personType}
+            </if>
+            <if test="param.position != null and param.position != ''">
+                AND d.position LIKE CONCAT('%', #{param.position}, '%')
+            </if>
+            <if test="param.location != null and param.location != ''">
+                AND d.location LIKE CONCAT('%', #{param.location}, '%')
+            </if>
+            <if test="param.factory != null and param.factory != ''">
+                AND d.factory LIKE CONCAT('%', #{param.factory}, '%')
+            </if>
+            <!-- 值班日期过滤 -->
+            <if test="param.dutyDate != null and param.dutyDate != ''">
+                <choose>
+                    <when test="param.today">
+                        <!-- 实时：未下班打卡 且（有班次并签到 或 已到上班时间） -->
+                        AND d.clock_out_time IS NULL
+                        AND (
+                        (d.duty_status = 1 AND DATE(d.shift_start_time) = d.duty_date)
+                        OR d.shift_start_time <![CDATA[ <= ]]> NOW()
+                        )
+                    </when>
+                    <otherwise>
+                        <!-- 历史：班次窗口与查询日期有交集 -->
+                        AND (DATE(d.shift_start_time) = #{param.dutyDate}
+                             OR DATE(d.shift_end_time) = #{param.dutyDate})
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="param.dutyStatus != null">
+                AND d.duty_status = #{param.dutyStatus}
+            </if>
+            <if test="param.isMakeup != null">
+                AND d.is_makeup = #{param.isMakeup}
+            </if>
+        </where>
+        ORDER BY d.duty_date DESC, d.create_time DESC
+    </select>
+
+    <!-- 月度查询 VO 结果映射，LEFT JOIN 员工表 -->
+    <resultMap id="MonthVOResultMap" type="com.yutong.modules.risk.vo.DutyCheckinMonthVO">
+        <result column="emp_no" jdbcType="VARCHAR" property="empNo"/>
+        <result column="emp_name" jdbcType="VARCHAR" property="empName"/>
+        <result column="position" jdbcType="VARCHAR" property="position"/>
+        <result column="person_type" jdbcType="VARCHAR" property="personType"/>
+        <result column="factory" jdbcType="VARCHAR" property="factory"/>
+        <result column="location" jdbcType="VARCHAR" property="location"/>
+        <result column="location_id" jdbcType="BIGINT" property="locationId"/>
+        <result column="duty_date" jdbcType="VARCHAR" property="dutyDate"/>
+        <result column="checkin_time" jdbcType="TIMESTAMP" property="checkinTime"/>
+        <result column="duty_status" jdbcType="TINYINT" property="dutyStatus"/>
+        <result column="is_makeup" jdbcType="TINYINT" property="isMakeup"/>
+    </resultMap>
+
+    <resultMap id="SecurityDutyPersonVOMap" type="com.yutong.modules.risk.vo.SecurityDutyPersonVO">
+        <result column="emp_no" jdbcType="VARCHAR" property="empNo"/>
+        <result column="emp_name" jdbcType="VARCHAR" property="empName"/>
+        <result column="phone_no" jdbcType="VARCHAR" property="phoneNo"/>
+        <result column="factory" jdbcType="VARCHAR" property="factory"/>
+        <result column="duty_date" jdbcType="VARCHAR" property="dutyDate"/>
+        <result column="person_type" jdbcType="VARCHAR" property="personType"/>
+    </resultMap>
+
+    <select id="selectDutyPersonByFactory" resultMap="SecurityDutyPersonVOMap">
+        SELECT
+            d.emp_no,
+            d.emp_name,
+            d.phone_no,
+            d.factory,
+            d.duty_date,
+            d.person_type
+        FROM ytsafety_duty_checkin d
+        WHERE d.del_flag = 0
+          AND d.person_type = '2'
+          AND d.factory = #{factory}
+          AND d.duty_date = #{dutyDate}
+        ORDER BY d.create_time DESC
+        LIMIT 1
+    </select>
+
+    <select id="selectByMonthVO" resultMap="MonthVOResultMap">
+        SELECT
+            d.emp_no, d.emp_name, d.position, d.person_type,
+            d.factory, d.location, d.location_id, d.duty_date, d.checkin_time,
+            d.duty_status, d.is_makeup
+        FROM ytsafety_duty_checkin d
+        WHERE d.del_flag = 0
+          AND d.duty_date LIKE CONCAT(#{month}, '%')
+        ORDER BY d.duty_date DESC, d.create_time DESC
+    </select>
+
+</mapper>

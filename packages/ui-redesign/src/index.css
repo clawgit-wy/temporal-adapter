@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  background-color: #0a0e1a;
+  color: #e2e8f0;
+}
+
+/* ============ 浅色主题覆盖 ============
+ * 当 html 元素带有 .light 类时，覆盖深色背景为浅色配色
+ * 深色主题为默认（html.dark 或无类名时）
+ */
+html.light body {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+html.light {
+  /* 覆盖 base-* 色系（仅影响使用 bg-base-XXX/text-base-XXX 的元素） */
+  --color-base-900: #f8fafc;
+  --color-base-800: #ffffff;
+  --color-base-700: #e2e8f0;
+  --color-base-600: #cbd5e1;
+}
+
+html.light .bg-base-900 { background-color: #f8fafc !important; }
+html.light .bg-base-800 { background-color: #ffffff !important; }
+html.light .bg-base-700 { background-color: #e2e8f0 !important; }
+html.light .bg-base-700\/50 { background-color: rgba(226, 232, 240, 0.5) !important; }
+html.light .bg-base-600 { background-color: #cbd5e1 !important; }
+html.light .hover\:bg-base-700:hover { background-color: #e2e8f0 !important; }
+html.light .hover\:bg-base-600:hover { background-color: #cbd5e1 !important; }
+html.light .border-base-700 { border-color: #e2e8f0 !important; }
+html.light .border-base-600 { border-color: #cbd5e1 !important; }
+html.light .text-slate-100 { color: #0f172a !important; }
+html.light .text-slate-200 { color: #1e293b !important; }
+html.light .text-slate-300 { color: #334155 !important; }
+html.light .text-slate-400 { color: #475569 !important; }
+html.light .hover\:text-slate-200:hover { color: #1e293b !important; }
+html.light .hover\:text-slate-100:hover { color: #0f172a !important; }
+
+/* 滚动条在浅色主题下的配色 */
+html.light ::-webkit-scrollbar-track { background: #e2e8f0; }
+html.light ::-webkit-scrollbar-thumb { background: #94a3b8; }
+html.light ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* JSON syntax highlighting */
+.json-key { color: #93c5fd; }
+.json-string { color: #86efac; }
+.json-number { color: #fbbf24; }
+.json-boolean { color: #f9a8d4; }
+.json-null { color: #94a3b8; }
+
+/* Timeline pulse animation */
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+}
+.pulse-ring {
+  animation: pulse-ring 2s infinite;
+}
+
+/* Slide up animation */
+@keyframes slide-up {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.slide-up {
+  animation: slide-up 0.3s ease-out;
+}

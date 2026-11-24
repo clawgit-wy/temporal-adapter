@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.park.SafetyParkEmployeePowerBizMapper">
+
+    <sql id="Base_Where_Query1">
+        <if test="empNo != null and empNo != ''">
+           and sop.emp_no = #{empNo}
+        </if>
+        <if test="fixedEmpNo != null and fixedEmpNo != ''">
+            and sop.emp_no = #{fixedEmpNo}
+        </if>
+        <if test="empName != null and empName != ''">
+            and SEM.emp_name = #{empName}
+        </if>
+        <if test="userType != null and userType != ''">
+            and SEM.user_type = #{userType}
+        </if>
+        <if test="carNo != null and carNo != ''">
+            and sepc1.VEHICLE_INFO like concat('%',#{carNo},'%')
+        </if>
+        <if test="carNo != null and carNo != ''">
+            and FIND_IN_SET(#{carNo},sepc1.VEHICLE_INFO)
+        </if>
+        <if test="factoryCode != null and factoryCode != ''">
+            and FIND_IN_SET(#{factoryCode},sop.factory)
+        </if>
+        <if test="lockCar != null and lockCar != ''">
+            and FIND_IN_SET(#{lockCar},sepc2.LOCK_VEHICLE)
+        </if>
+        <if test="deptCodeList != null">
+            and SEM.org_code in
+            <foreach collection="deptCodeList" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="filterDutyDept != null and filterDutyDept != ''">
+            and (
+            <foreach item="item" index="index" collection="filterDutyDept.split(';')" separator=" or ">
+                SEM.org_code_path like CONCAT(#{item},'%')
+            </foreach>
+            )
+        </if>
+    </sql>
+
+    <select id="selectList" resultType="com.yutong.safety.core.db.entity.park.vo.ParkEmployeePowerVO"
+        parameterType="com.yutong.safety.core.db.entity.park.param.ParkEmployeePowerListParam">
+        select * from (
+              select SEM.emp_name ,SEM.user_type ,SEM.org_code ,SEM.org_name ,SEM.org_code_path ,SEM.org_name_path ,
+                     sop.emp_no,sepc1.VEHICLE_INFO car_infos,sepc2.LOCK_VEHICLE lock_cars,sop.factory factory_code,sop.update_time ,'' REMARK
+              from safety.safety_outsider_promise sop
+                       left join safety.safety_employee_message sem on sem.emp_no = sop.emp_no
+                       left join (select employee_no,group_concat(sepc.car_no) VEHICLE_INFO from safety.safety_employee_private_car sepc group by employee_no) sepc1 on sop.emp_no  = sepc1.employee_no
+                       left join (select employee_no,group_concat(car_no) LOCK_VEHICLE from safety.safety_employee_private_car where lock_flag='是' group by employee_no) sepc2 on sop.emp_no  = sepc1.employee_no
+              where sop.factory not in ('','99') and sem.status = 'NORMAL'
+              <include refid="Base_Where_Query1"/>
+              union all
+              select SEM.emp_name ,SEM.user_type ,SEM.org_code ,SEM.org_name ,SEM.org_code_path ,SEM.org_name_path ,
+                  sop.emp_no,sepc1.VEHICLE_INFO car_infos,sepc2.LOCK_VEHICLE lock_cars,sop.factory factory_code,sop.update_time ,sop.REMARK
+              from (select EMPLOYEE_CODE emp_no,group_concat(FACTORY_ID) factory,max(update_time) update_time,group_concat(DISTINCT remark) REMARK
+                  from safety_park_employee_power_info spepi
+                  where IS_DELETE = 0 group by EMPLOYEE_CODE ) sop
+                  left join safety.safety_employee_message sem on sem.emp_no = sop.emp_no
+                  left join (select employee_no,group_concat(sepc.car_no) VEHICLE_INFO from safety.safety_employee_private_car sepc group by employee_no) sepc1 on sop.emp_no  = sepc1.employee_no
+                  left join (select employee_no,group_concat(car_no) LOCK_VEHICLE from safety.safety_employee_private_car where lock_flag='是' group by employee_no) sepc2 on sop.emp_no  = sepc1.employee_no
+              where 1 = 1 and sem.status = 'NORMAL'
+        <include refid="Base_Where_Query1"/>
+          ) CUR_TABLE where 1= 1
+        <if test="orderByClause != null and orderByClause != ''">
+            order by ${orderByClause}
+        </if>
+        <if test="pageFlag != null and pageFlag">
+            <if test="limit != null">
+                <if test="offset != null">
+                    limit ${offset}, ${limit}
+                </if>
+                <if test="offset == null">
+                    limit ${limit}
+                </if>
+            </if>
+        </if>
+    </select>
+
+    <select id="selectCount" parameterType="com.yutong.safety.core.db.entity.park.param.ParkEmployeePowerListParam" resultType="java.lang.Long">
+        select count(1) from (
+             select SEM.emp_name ,SEM.user_type ,SEM.org_code ,SEM.org_name ,SEM.org_code_path ,SEM.org_name_path ,
+                    sop.emp_no,sepc1.VEHICLE_INFO car_infos,sepc2.LOCK_VEHICLE lock_cars,sop.factory factory_code,sop.update_time ,
+                    '' REMARK
+             from safety.safety_outsider_promise sop
+                      left join safety.safety_employee_message sem on sem.emp_no = sop.emp_no
+                      left join (select employee_no,group_concat(sepc.car_no) VEHICLE_INFO from safety.safety_employee_private_car sepc group by employee_no) sepc1 on sop.emp_no  = sepc1.employee_no
+                      left join (select employee_no,group_concat(car_no) LOCK_VEHICLE from safety.safety_employee_private_car where lock_flag='是' group by employee_no) sepc2 on sop.emp_no  = sepc1.employee_no
+             where sop.factory not in ('','99') and sem.status = 'NORMAL'
+            <include refid="Base_Where_Query1"/>
+             union all
+             select SEM.emp_name ,SEM.user_type ,SEM.org_code ,SEM.org_name ,SEM.org_code_path ,SEM.org_name_path ,
+                 sop.emp_no,sepc1.VEHICLE_INFO car_infos,sepc2.LOCK_VEHICLE lock_cars,sop.factory factory_code,sop.update_time ,
+                 sop.REMARK
+             from (select EMPLOYEE_CODE emp_no,group_concat(FACTORY_ID) factory,max(update_time) update_time,group_concat(remark) REMARK
+                 from safety_park_employee_power_info spepi
+                 where IS_DELETE = 0 group by EMPLOYEE_CODE ) sop
+                 left join safety.safety_employee_message sem on sem.emp_no = sop.emp_no
+                 left join (select employee_no,group_concat(sepc.car_no) VEHICLE_INFO from safety.safety_employee_private_car sepc group by employee_no) sepc1 on sop.emp_no  = sepc1.employee_no
+                 left join (select employee_no,group_concat(car_no) LOCK_VEHICLE from safety.safety_employee_private_car where lock_flag='是' group by employee_no) sepc2 on sop.emp_no  = sepc1.employee_no
+             where 1 = 1 and sem.status = 'NORMAL'
+            <include refid="Base_Where_Query1"/>
+          ) CUR_TABLE
+    </select>
+
+    <sql id="Base_Where_Query">
+        <if test="empNo != null and empNo != ''">
+            and sop.empNo = #{empNo}
+        </if>
+        <if test="fixedEmpNo != null and fixedEmpNo != ''">
+            and sop.empNo = #{fixedEmpNo}
+        </if>
+        <if test="empName != null and empName != ''">
+            and SEM.emp_name = #{empName}
+        </if>
+        <if test="userType != null and userType != ''">
+            and SEM.user_type = #{userType}
+        </if>
+        <if test="factoryCode != null and factoryCode != ''">
+            and FIND_IN_SET(#{factoryCode},sop.factoryCode)
+        </if>
+        <if test="deptCodeList != null">
+            and SEM.org_code in
+            <foreach collection="deptCodeList" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="filterDutyDept != null and filterDutyDept != ''">
+            and (
+            <foreach item="item" index="index" collection="filterDutyDept.split(';')" separator=" or ">
+                SEM.org_code_path like CONCAT(#{item},'%')
+            </foreach>
+            )
+        </if>
+        <if test="empNoList != null">
+            and sop.empNo in
+            <foreach collection="empNoList" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+    </sql>
+
+    <sql id="Base_Where_Query_NEW_1">
+        <if test="empNo != null and empNo != ''">
+            and emp_no = #{empNo}
+        </if>
+        <if test="fixedEmpNo != null and fixedEmpNo != ''">
+            and emp_no = #{fixedEmpNo}
+        </if>
+        <if test="factoryCode != null and factoryCode != ''">
+            and FIND_IN_SET(#{factoryCode},factory)
+        </if>
+        <if test="empNoList != null">
+            and emp_no in
+            <foreach collection="empNoList" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+    </sql>
+
+    <sql id="Base_Where_Query_NEW_2">
+        <if test="empNo != null and empNo != ''">
+            and EMPLOYEE_CODE = #{empNo}
+        </if>
+        <if test="fixedEmpNo != null and fixedEmpNo != ''">
+            and EMPLOYEE_CODE = #{fixedEmpNo}
+        </if>
+        <if test="empNoList != null">
+            and EMPLOYEE_CODE in
+            <foreach collection="empNoList" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+    </sql>
+
+    <sql id="Base_Where_Query_NEW_3">
+        <if test="empName != null and empName != ''">
+            and SEM.emp_name = #{empName}
+        </if>
+        <if test="userType != null and userType != ''">
+            and SEM.user_type = #{userType}
+        </if>
+        <if test="deptCodeList != null">
+            and SEM.org_code in
+            <foreach collection="deptCodeList" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="filterDutyDept != null and filterDutyDept != ''">
+            and (
+            <foreach item="item" index="index" collection="filterDutyDept.split(';')" separator=" or ">
+                SEM.org_code_path like CONCAT(#{item},'%')
+            </foreach>
+            )
+        </if>
+        <if test="empNoList != null">
+            and sop.empNo in
+            <foreach collection="empNoList" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+    </sql>
+
+    <select id="selectListNew"
+            resultType="com.yutong.safety.core.db.entity.park.vo.ParkEmployeePowerVO"
+            parameterType="com.yutong.safety.core.db.entity.park.param.ParkEmployeePowerListParam">
+        select sop.*,
+               sem.emp_name,
+               sem.user_type,
+               sem.org_code,
+               sem.org_name,
+               sem.org_code_path,
+               sem.org_name_path
+        from (
+                 select emp_no      empNo,
+                        factory     factoryCode,
+                        update_time updateTime,
+                        remark
+                 from safety.safety_outsider_promise
+                 where factory not in ('', '99')
+                 <include refid="Base_Where_Query_NEW_1"/>
+                 union all
+                 select EMPLOYEE_CODE                 empNo,
+                        group_concat(FACTORY_ID)      factoryCode,
+                        max(update_time)              updateTime,
+                        group_concat(DISTINCT remark) remark
+                 from safety_park_employee_power_info
+                 where IS_DELETE = 0
+                 <include refid="Base_Where_Query_NEW_2"/>
+                 group by EMPLOYEE_CODE
+        <if test="factoryCode != null and factoryCode != ''">
+            having FIND_IN_SET(#{factoryCode},group_concat(FACTORY_ID))
+        </if>
+             ) sop
+                 left join safety.safety_employee_message sem on sem.emp_no = sop.empNo
+        where sem.status = 'NORMAL'
+        <include refid="Base_Where_Query_NEW_3"/>
+        <if test="orderByClause != null and orderByClause != ''">
+            order by ${orderByClause}
+        </if>
+        <if test="pageFlag != null and pageFlag">
+            <if test="limit != null">
+                <if test="offset != null">
+                    limit ${offset}, ${limit}
+                </if>
+                <if test="offset == null">
+                    limit ${limit}
+                </if>
+            </if>
+        </if>
+    </select>
+
+    <select id="selectCountNew" parameterType="com.yutong.safety.core.db.entity.park.param.ParkEmployeePowerListParam" resultType="java.lang.Long">
+        select count(1)
+        from (
+                 select emp_no      empNo,
+                        factory     factoryCode,
+                        update_time updateTime,
+                        remark
+                 from safety.safety_outsider_promise
+                 where factory not in ('', '99')
+                 <include refid="Base_Where_Query_NEW_1"/>
+                 union all
+                 select EMPLOYEE_CODE                 empNo,
+                        group_concat(FACTORY_ID)      factoryCode,
+                        max(update_time)              updateTime,
+                        group_concat(DISTINCT remark) remark
+                 from safety_park_employee_power_info
+                 where IS_DELETE = 0
+                 <include refid="Base_Where_Query_NEW_2"/>
+                 group by EMPLOYEE_CODE
+        <if test="factoryCode != null and factoryCode != ''">
+            having FIND_IN_SET(#{factoryCode},group_concat(FACTORY_ID))
+        </if>
+             ) sop
+                 left join safety.safety_employee_message sem on sem.emp_no = sop.empNo
+        where sem.status = 'NORMAL'
+        <include refid="Base_Where_Query_NEW_3"/>
+    </select>
+
+    <!-- 只获取正式员工的合并后厂区权限 -->
+    <select id="getUnSyncCarList" resultType="java.lang.String"
+            parameterType="com.yutong.safety.core.db.entity.park.param.ParkEmployeePowerListParam">
+        select distinct EMPLOYEE_CODE
+        from safety.safety_park_employee_power_info spepi
+        where spepi.down_mark = '1' and spepi.IS_DELETE = 0
+    </select>
+
+    <update id="modifyDownMark" parameterType="java.util.List">
+        update safety.safety_park_employee_power_info spepi
+           set down_mark = '0'
+        where is_delete = 0 and EMPLOYEE_CODE in
+        <foreach collection="list"  separator="," item="ll" close=")" open="(">
+            #{ll}
+        </foreach>
+    </update>
+
+    <update id="batchDelEmployeePower">
+        update safety.safety_park_employee_power_info spepi
+        set IS_DELETE = 1,REMARK='注销权限定时任务',UPDATE_TIME=now()
+        where is_delete = 0 and EMPLOYEE_CODE in
+        <foreach collection="list"  separator="," item="ll" close=")" open="(">
+            #{ll}
+        </foreach>
+    </update>
+</mapper>

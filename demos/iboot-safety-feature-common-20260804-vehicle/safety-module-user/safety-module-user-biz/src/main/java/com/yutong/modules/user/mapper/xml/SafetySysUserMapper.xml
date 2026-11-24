@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.user.mapper.SafetySysUserMapper">
+    <select id="queryPageList" resultType="com.yutong.modules.user.vo.SafetySysUserVO">
+        SELECT
+        ssu.id,
+        ssu.emp_no,
+        ssu.emp_name,
+        ssu.user_name,
+        sem.phone_no,
+        sem.email,
+        sem.org_name,
+        ssu.update_time,
+        ssu.power_factory_id,
+        IFNULL(role_data.role_id, '') AS role_id,
+        IFNULL(dept_data.department_id, '') AS department_id,
+        IFNULL(role_data.role_names, '') AS role_names,
+        IFNULL(factory_data.factory_names, '') AS factory_names,
+        IFNULL(dept_data.depart_name, '') AS depart_name
+        FROM safety_sys_user ssu
+        -- 改成 LEFT JOIN 保证用户一定出现
+        LEFT JOIN safety_employee_message sem
+        ON ssu.emp_no = sem.emp_no
+
+        -- 【修复】角色子查询：把 WHERE 条件移动到 ON 里，不丢失用户
+        LEFT JOIN (
+        SELECT
+        ssur.user_id,
+        GROUP_CONCAT(DISTINCT ssr.id SEPARATOR ',') AS role_id,
+        GROUP_CONCAT(DISTINCT ssr.role_name SEPARATOR ',') AS role_names
+        FROM safety_sys_user_role ssur
+        LEFT JOIN safety_sys_role ssr
+        ON ssur.role_id = ssr.id AND ssr.delete_falg = "0"  -- 关键修复
+        GROUP BY ssur.user_id
+        ) role_data ON ssu.id = role_data.user_id
+
+        LEFT JOIN (
+        SELECT
+        user_id,
+        GROUP_CONCAT(DISTINCT factory_name SEPARATOR ',') AS factory_names
+        FROM ytsafety_sys_user_factory
+        GROUP BY user_id
+        ) factory_data ON ssu.id = factory_data.user_id
+
+        LEFT JOIN (
+        SELECT
+        user_id,
+        GROUP_CONCAT(DISTINCT depart_id SEPARATOR ',') AS department_id,
+        GROUP_CONCAT(DISTINCT depart_name SEPARATOR ',') AS depart_name
+        FROM ytsafety_sys_user_depart
+        GROUP BY user_id
+        ) dept_data ON ssu.id = dept_data.user_id
+
+        WHERE ssu.delete_falg = 0
+
+        <if test="dto.departmentId != null and dto.departmentId != ''">
+            AND
+            <foreach collection="dto.departmentId.split(',')" item="item" open="(" separator=" or " close=")">
+                FIND_IN_SET(#{item}, dept_data.department_id)
+            </foreach>
+        </if>
+
+        <if test="dto.empName != null and dto.empName != ''">
+            AND ssu.emp_name LIKE CONCAT('%', #{dto.empName}, '%')
+        </if>
+
+        <if test="dto.empNo != null and dto.empNo != ''">
+            AND ssu.emp_no LIKE CONCAT('%', #{dto.empNo}, '%')
+        </if>
+
+        <if test="dto.phone != null and dto.phone != ''">
+            AND sem.phone_no = #{dto.phone}
+        </if>
+
+        <if test="dto.roleId != null and dto.roleId != ''">
+            AND
+            <foreach collection="dto.roleId.split(',')" item="item" open="(" separator=" or " close=")">
+                 FIND_IN_SET(#{item}, role_data.role_id)
+            </foreach>
+        </if>
+
+        ORDER BY ssu.update_time DESC
+    </select>
+
+    <select id="queryById" resultType="com.yutong.modules.user.vo.SafetySysUserVO">
+        SELECT
+        ssu.id,
+        ssu.emp_no,
+        ssu.emp_name,
+        ssu.user_name,
+        sem.phone_no,
+        sem.email,
+        sem.org_name,
+        ssu.update_time,
+        ssu.power_factory_id,
+        IFNULL(role_data.role_id, '') AS role_id,
+        IFNULL(dept_data.department_id, '') AS department_id,
+        IFNULL(role_data.role_names, '') AS role_names,
+        IFNULL(factory_data.factory_names, '') AS factory_names,
+        IFNULL(dept_data.depart_name, '') AS depart_name
+        FROM safety_sys_user ssu
+        -- 改成 LEFT JOIN 保证用户一定出现
+        LEFT JOIN safety_employee_message sem
+        ON ssu.emp_no = sem.emp_no
+
+        -- 【修复】角色子查询：把 WHERE 条件移动到 ON 里，不丢失用户
+        LEFT JOIN (
+        SELECT
+        ssur.user_id,
+        GROUP_CONCAT(DISTINCT ssr.id SEPARATOR ',') AS role_id,
+        GROUP_CONCAT(DISTINCT ssr.role_name SEPARATOR ',') AS role_names
+        FROM safety_sys_user_role ssur
+        LEFT JOIN safety_sys_role ssr
+        ON ssur.role_id = ssr.id AND ssr.delete_falg = "0" and ssr.role_type = 2  -- 关键修复
+        GROUP BY ssur.user_id
+        ) role_data ON ssu.id = role_data.user_id
+
+        LEFT JOIN (
+        SELECT
+        user_id,
+        GROUP_CONCAT(DISTINCT factory_name SEPARATOR ',') AS factory_names
+        FROM ytsafety_sys_user_factory
+        GROUP BY user_id
+        ) factory_data ON ssu.id = factory_data.user_id
+
+        LEFT JOIN (
+        SELECT
+        user_id,
+        GROUP_CONCAT(DISTINCT depart_id SEPARATOR ',') AS department_id,
+        GROUP_CONCAT(DISTINCT depart_name SEPARATOR ',') AS depart_name
+        FROM ytsafety_sys_user_depart
+        GROUP BY user_id
+        ) dept_data ON ssu.id = dept_data.user_id
+        WHERE ssu.delete_falg = 0 and ssu.id = #{id}
+    </select>
+    <select id="queryList" resultType="com.yutong.modules.user.vo.SafetySysUserVO">
+        SELECT
+        ssu.id,
+        ssu.emp_no,
+        ssu.emp_name,
+        ssu.user_name,
+        sem.phone_no,
+        sem.email,
+        sem.org_name,
+        ssu.update_time,
+        ssu.power_factory_id,
+        IFNULL(role_data.role_id, '') AS role_id,
+        IFNULL(dept_data.department_id, '') AS department_id,
+        IFNULL(role_data.role_names, '') AS role_names,
+        IFNULL(factory_data.factory_names, '') AS factory_names,
+        IFNULL(dept_data.depart_name, '') AS depart_name
+        FROM safety_sys_user ssu
+        -- 改成 LEFT JOIN 保证用户一定出现
+        LEFT JOIN safety_employee_message sem
+        ON ssu.emp_no = sem.emp_no
+
+        -- 【修复】角色子查询：把 WHERE 条件移动到 ON 里，不丢失用户
+        LEFT JOIN (
+        SELECT
+        ssur.user_id,
+        GROUP_CONCAT(DISTINCT ssr.id SEPARATOR ',') AS role_id,
+        GROUP_CONCAT(DISTINCT ssr.role_name SEPARATOR ',') AS role_names
+        FROM safety_sys_user_role ssur
+        LEFT JOIN safety_sys_role ssr
+        ON ssur.role_id = ssr.id AND ssr.delete_falg = "0"  -- 关键修复
+        GROUP BY ssur.user_id
+        ) role_data ON ssu.id = role_data.user_id
+
+        LEFT JOIN (
+        SELECT
+        user_id,
+        GROUP_CONCAT(DISTINCT factory_name SEPARATOR ',') AS factory_names
+        FROM ytsafety_sys_user_factory
+        GROUP BY user_id
+        ) factory_data ON ssu.id = factory_data.user_id
+
+        LEFT JOIN (
+        SELECT
+        user_id,
+        GROUP_CONCAT(DISTINCT depart_id SEPARATOR ',') AS department_id,
+        GROUP_CONCAT(DISTINCT depart_name SEPARATOR ',') AS depart_name
+        FROM ytsafety_sys_user_depart
+        GROUP BY user_id
+        ) dept_data ON ssu.id = dept_data.user_id
+
+        WHERE ssu.delete_falg = 0
+
+        <if test="dto.departmentId != null and dto.departmentId != ''">
+            AND
+            <foreach collection="dto.departmentId.split(',')" item="item" open="(" separator=" or " close=")">
+                FIND_IN_SET(#{item}, dept_data.department_id)
+            </foreach>
+        </if>
+
+        <if test="dto.empName != null and dto.empName != ''">
+            AND ssu.emp_name LIKE CONCAT('%', #{dto.empName}, '%')
+        </if>
+
+        <if test="dto.empNo != null and dto.empNo != ''">
+            AND ssu.emp_no LIKE CONCAT('%', #{dto.empNo}, '%')
+        </if>
+
+        <if test="dto.phone != null and dto.phone != ''">
+            AND sem.phone_no = #{dto.phone}
+        </if>
+
+        <if test="dto.roleId != null and dto.roleId != ''">
+            AND
+            <foreach collection="dto.roleId.split(',')" item="item" open="(" separator=" or " close=")">
+                FIND_IN_SET(#{item}, role_data.role_id)
+            </foreach>
+        </if>
+
+        ORDER BY ssu.update_time DESC
+    </select>
+
+    <select id="getTree" resultType="com.yutong.modules.user.vo.MenuTree">
+        SELECT
+        m.id,
+        m.perm_name,
+        m.perm_url,
+        m.sort,
+        m.delete_falg,
+        -- 多表联查字段
+        t.id AS tid
+        FROM safety_sys_perm m
+        LEFT JOIN safety_sys_perm t ON m.id = t.parent_id
+        where m.delete_falg ='0' and m.is_show = 1 and m.external_url IS NULL
+    </select>
+
+    <select id="selectIdByEmpNo" resultType="java.lang.Long">
+        SELECT id
+        FROM safety_sys_user
+        WHERE delete_falg = 0
+          AND emp_no = #{empNo}
+        LIMIT 1
+    </select>
+
+    <select id="queryUserListByEmpNos" resultType="org.jeecg.common.system.vo.LoginUser">
+        SELECT su.id user_id, em.emp_no, em.emp_name real_name, em.emp_login eip_name,
+               em.email, em.org_code, em.org_name, em.position_code, em.position_name, em.phone_no phone
+        FROM safety_employee_message em
+        LEFT JOIN safety_sys_user su ON em.emp_no = su.emp_no
+        WHERE su.delete_falg = '0' AND em.emp_no IN
+        <foreach collection="empNos" item="empNo" open="(" separator="," close=")">
+            #{empNo}
+        </foreach>
+    </select>
+
+</mapper>

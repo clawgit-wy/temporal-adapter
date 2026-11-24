@@ -1,0 +1,15 @@
+# 生产环境配置
+temporal:
+  address: ${TEMPORAL_ADDRESS:127.0.0.1:7233}
+
+mokapi:
+  url: ${MOKAPI_URL:http://localhost:19090}
+
+logging:
+  level:
+    com.hik.worker: INFO
+    com.hik.worker.activity: INFO
+    com.hik.worker.workflow: INFO
+    io.temporal: WARN
+  file:
+    path: logs

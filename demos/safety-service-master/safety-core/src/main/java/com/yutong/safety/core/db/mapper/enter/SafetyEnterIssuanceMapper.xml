@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.enter.SafetyEnterIssuanceMapper">
+    <resultMap id="safetyEnterIssuance" type="com.yutong.safety.core.db.entity.enter.result.SafetyEnterIssuanceRT">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="fd_enter_type_code" jdbcType="VARCHAR" property="fdEnterTypeCode" />
+        <result column="fd_name" jdbcType="VARCHAR" property="fdName" />
+        <result column="fd_card_no" jdbcType="VARCHAR" property="fdCardNo" />
+        <result column="fd_img" jdbcType="VARCHAR" property="fdImg" />
+        <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
+        <result column="create_by" jdbcType="VARCHAR" property="createBy" />
+        <result column="create_time" jdbcType="VARCHAR" property="createTime" />
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
+        <result column="update_time" jdbcType="VARCHAR" property="updateTime" />
+        <result column="enter_factory_code" jdbcType="VARCHAR" property="enterFactoryCode" />
+        <result column="enter_factory" jdbcType="VARCHAR" property="enterFactory" />
+        <result column="issuance_time" jdbcType="VARCHAR" property="issuanceTime" />
+        <result column="issuance_result" jdbcType="VARCHAR" property="issuanceResult" />
+        <result column="enter_start_time" jdbcType="VARCHAR" property="enterStartTime" />
+        <result column="enter_end_time" jdbcType="VARCHAR" property="enterEndTime" />
+        <result column="fd_filing_id" jdbcType="VARCHAR" property="fdFilingId" />
+        <result column="fd_per_phone" jdbcType="VARCHAR" property="fdPerPhone" />
+        <result column="fd_phone" jdbcType="VARCHAR" property="fdPhone" />
+    </resultMap>
+
+    <insert id="save" parameterType="com.yutong.safety.core.db.entity.enter.SafetyEnterIssuanceDO">
+        insert into safety_enter_issuance (
+            fd_enter_type_code,
+            fd_name,
+            fd_card_no,
+            enter_factory_code,
+            enter_factory,
+            enter_start_time,
+            enter_end_time,
+            fd_img,
+            issuance_result,
+            issuance_time,
+            fd_per_phone,
+            fd_filing_id,
+            create_by
+        ) values (
+           #{data.fdEnterTypeCode},
+           #{data.fdName},
+           #{data.fdCardNo},
+           #{data.enterFactoryCode},
+           #{data.enterFactory},
+           #{data.enterStartTime},
+           #{data.enterEndTime},
+           #{data.fdImg},
+           #{data.issuanceResult},
+           #{data.issuanceTime},
+           #{data.fdPerPhone},
+           #{data.fdFilingId},
+           #{data.createBy}
+        )
+    </insert>
+
+    <insert id="saveBatch" parameterType="List">
+        insert into safety_enter_issuance (
+            fd_enter_type_code,
+            fd_name,
+            fd_card_no,
+            enter_factory_code,
+            enter_factory,
+            enter_start_time,
+            enter_end_time,
+            fd_img,
+            issuance_result,
+            issuance_time,
+            fd_per_phone,
+            fd_filing_id,
+            create_by
+        ) values
+        <foreach collection="list" item="data" index="index" separator=",">
+        (  #{data.fdEnterTypeCode},
+           #{data.fdName},
+           #{data.fdCardNo},
+           #{data.enterFactoryCode},
+           #{data.enterFactory},
+           #{data.enterStartTime},
+           #{data.enterEndTime},
+           #{data.fdImg},
+           #{data.issuanceResult},
+           now(),
+           #{data.fdPerPhone},
+           #{data.fdFilingId},
+           #{data.createBy}
+        )
+        </foreach>
+    </insert>
+
+    <update id="update" parameterType="com.yutong.safety.core.db.entity.enter.SafetyEnterIssuanceDO">
+        update safety_enter_issuance
+        <set >
+            <if test="data.fdEnterTypeCode != null" >
+                fd_enter_type_code = #{data.fdEnterTypeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="data.fdName != null" >
+                fd_name = #{data.fdName,jdbcType=VARCHAR},
+            </if>
+            <if test="data.fdCardNo != null" >
+                fd_card_no = #{data.fdCardNo,jdbcType=VARCHAR},
+            </if>
+            <if test="data.fdImg != null" >
+                fd_img = #{data.fdImg,jdbcType=VARCHAR},
+            </if>
+            <if test="data.createBy != null" >
+                create_by = #{data.createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="data.createTime != null" >
+                create_time = #{data.createTime,jdbcType=VARCHAR},
+            </if>
+            <if test="data.updateBy != null" >
+                update_by = #{data.updateBy,jdbcType=VARCHAR},
+            </if>
+            <if test="data.enterFactoryCode != null" >
+                enter_factory_code = #{data.enterFactoryCode,jdbcType=VARCHAR},
+            </if>
+            <if test="data.enterFactory != null" >
+                enter_factory = #{data.enterFactory,jdbcType=VARCHAR},
+            </if>
+            <if test="data.enterStartTime != null" >
+                enter_start_time = #{data.enterStartTime,jdbcType=VARCHAR},
+            </if>
+            <if test="data.enterEndTime != null" >
+                enter_end_time = #{data.enterEndTime,jdbcType=VARCHAR},
+            </if>
+            <if test="data.issuanceTime != null" >
+                issuance_time = #{data.issuanceTime,jdbcType=VARCHAR},
+            </if>
+            <if test="data.issuanceResult != null" >
+                issuance_result = #{data.issuanceResult,jdbcType=VARCHAR},
+            </if>
+            <if test="data.isDelete != null" >
+                is_delete = #{data.isDelete,jdbcType=TINYINT},
+            </if>
+            <if test="data.updateTime != null" >
+                update_time = #{data.updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="data.fdFilingId != null" >
+                fd_filing_id = #{data.fdFilingId,jdbcType=VARCHAR},
+            </if>
+            <if test="data.fdPerPhone != null" >
+                fd_per_phone = #{data.fdPerPhone,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{data.id,jdbcType=INTEGER}
+    </update>
+
+    <sql id="search">
+        <if test="fdEnterTypeCode != null and fdEnterTypeCode != ''">
+            and a.fd_enter_type_code = #{fdEnterTypeCode}
+        </if>
+        <if test="fdName != null and fdName != ''">
+            and a.fd_name = #{fdName}
+        </if>
+        <if test="fdCardNo != null and fdCardNo != ''">
+            and a.fd_card_no = #{fdCardNo}
+        </if>
+        <if test="enterFactoryCode != null and enterFactoryCode != ''">
+            and a.enter_factory_code = #{enterFactoryCode}
+        </if>
+        <if test="issuanceResult != null and issuanceResult != ''">
+            and a.issuance_result = #{issuanceResult}
+        </if>
+        <if test="enterStartTime != null ">
+            <![CDATA[and (a.enter_end_time >= #{enterStartTime})]]>
+        </if>
+        <if test="enterEndTime != null ">
+            <![CDATA[and (a.enter_start_time <= #{enterEndTime})]]>
+        </if>
+        <if test="downStartTime != null ">
+            <![CDATA[and (a.issuance_time >= #{downStartTime})]]>
+        </if>
+        <if test="downEndTime != null ">
+            <![CDATA[and (a.issuance_time <= #{downEndTime})]]>
+        </if>
+    </sql>
+
+    <select id="queryCount" resultType="int"
+            parameterType="com.yutong.safety.core.db.entity.enter.search.SafetyEnterIssuanceSh">
+        SELECT count(1) FROM safety_enter_issuance a
+        WHERE 1=1
+        <include refid="search"/>
+    </select>
+
+    <select id="queryList" resultMap="safetyEnterIssuance"
+            parameterType="com.yutong.safety.core.db.entity.enter.search.SafetyEnterIssuanceSh">
+        SELECT
+            a.id,
+            a.fd_enter_type_code,
+            a.fd_name,
+            a.fd_card_no,
+            a.enter_factory,
+            a.enter_factory_code,
+            a.enter_start_time,
+            a.enter_end_time,
+            a.fd_img,
+            a.is_delete,
+            a.fd_filing_id,
+            a.fd_per_phone,
+            DATE_FORMAT(a.issuance_time,'%Y-%m-%d %H:%i:%s') issuance_time,
+            a.issuance_result,
+            a.create_by,
+            DATE_FORMAT(a.create_time,'%Y-%m-%d %H:%i:%s') create_time,
+            a.update_by,
+            DATE_FORMAT(a.update_time,'%Y-%m-%d %H:%i:%s') update_time
+        FROM
+            safety_enter_issuance a
+        WHERE
+        1=1
+        <include refid="search"/>
+        order by a.create_time desc
+        <if test="export == null">
+            <if test="limit != null">
+                <if test="offset != null">
+                    limit #{offset}, #{limit}
+                </if>
+                <if test="offset == null">
+                    limit #{limit}
+                </if>
+            </if>
+        </if>
+        <if test="export != null">
+            limit 5000
+        </if>
+    </select>
+
+    <update id="updateBatch" parameterType="java.util.List">
+        <foreach collection="list" item="data" index="index" separator=";">
+            update safety_enter_issuance
+            <set >
+                <if test="data.fdEnterTypeCode != null" >
+                    fd_enter_type_code = #{data.fdEnterTypeCode,jdbcType=VARCHAR},
+                </if>
+                <if test="data.fdName != null" >
+                    fd_name = #{data.fdName,jdbcType=VARCHAR},
+                </if>
+                <if test="data.fdCardNo != null" >
+                    fd_card_no = #{data.fdCardNo,jdbcType=VARCHAR},
+                </if>
+                <if test="data.fdImg != null" >
+                    fd_img = #{data.fdImg,jdbcType=VARCHAR},
+                </if>
+                <if test="data.createBy != null" >
+                    create_by = #{data.createBy,jdbcType=VARCHAR},
+                </if>
+                <if test="data.createTime != null" >
+                    create_time = #{data.createTime,jdbcType=VARCHAR},
+                </if>
+                <if test="data.updateBy != null" >
+                    update_by = #{data.updateBy,jdbcType=VARCHAR},
+                </if>
+                <if test="data.enterFactoryCode != null" >
+                    enter_factory_code = #{data.enterFactoryCode,jdbcType=VARCHAR},
+                </if>
+                <if test="data.enterFactory != null" >
+                    enter_factory = #{data.enterFactory,jdbcType=VARCHAR},
+                </if>
+                <if test="data.enterStartTime != null" >
+                    enter_start_time = #{data.enterStartTime,jdbcType=VARCHAR},
+                </if>
+                <if test="data.enterEndTime != null" >
+                    enter_end_time = #{data.enterEndTime,jdbcType=VARCHAR},
+                </if>
+                <if test="data.issuanceTime != null" >
+                    issuance_time = #{data.issuanceTime,jdbcType=VARCHAR},
+                </if>
+                <if test="data.issuanceResult != null" >
+                    issuance_result = #{data.issuanceResult,jdbcType=VARCHAR},
+                </if>
+                <if test="data.isDelete != null" >
+                    is_delete = #{data.isDelete,jdbcType=TINYINT},
+                </if>
+                <if test="data.updateTime != null" >
+                    update_time = #{data.updateTime,jdbcType=TIMESTAMP},
+                </if>
+                <if test="data.fdFilingId != null" >
+                    fd_filing_id = #{data.fdFilingId,jdbcType=VARCHAR},
+                </if>
+                <if test="data.fdPerPhone != null" >
+                    fd_per_phone = #{data.fdPerPhone,jdbcType=VARCHAR},
+                </if>
+            </set>
+            where id = #{data.id,jdbcType=INTEGER}
+        </foreach>
+    </update>
+</mapper>

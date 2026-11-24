@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.goodsOut.SafetyGoodsOutDetailGoodsDOBizMapper">
+
+  <sql id="Biz_Column_List">
+    id, process_id, goods_code, goods_name, goods_unit, goods_num, remark
+  </sql>
+
+  <sql id="Biz_Where_Clause">
+    <if test="processId != null and processId != '' ">
+        and process_id = #{processId}
+    </if>
+    <if test="goodsCode != null and goodsCode != '' ">
+        and goods_code = #{goodsCode}
+    </if>
+    <if test="processIdList != null">
+        and process_id in
+        <foreach collection="processIdList" item="item" open="(" separator="," close=")" >
+          #{item}
+        </foreach>
+    </if>
+  </sql>
+
+  <select id="selectByCondition" parameterType="com.yutong.safety.core.db.entity.goodsOut.param.GoodsOutDetailGoodsListParam"
+          resultType="com.yutong.safety.core.db.entity.goodsOut.SafetyGoodsOutDetailGoodsDO">
+    select
+    <include refid="Biz_Column_List" />
+    from safety_goods_out_detail_goods
+    where 1 = 1
+    <include refid="Biz_Where_Clause" />
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="begin != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+
+  <select id="countByCondition" parameterType="com.yutong.safety.core.db.entity.goodsOut.param.GoodsOutDetailGoodsListParam" resultType="java.lang.Long">
+    select count(1) from safety_goods_out_detail_goods
+    where 1 = 1
+    <include refid="Biz_Where_Clause" />
+  </select>
+
+    <sql id="goods_detail_column">
+        flow_id,flow_no,`subject`,create_time_str,goout_emp_name,out_factory_name,examine_emp_name,
+        out_type_name,process_id,id,goods_code,goods_name,goods_unit,goods_num,vehicle_no,vin_no,remark,process_vehicle_no,
+        case status when '10' then '起草' when '20' then '审核中' when '30' then '发布' when '11' then '驳回' when '00' then '废弃' else status end status
+    </sql>
+
+  <select id="selectDetailList" parameterType="com.yutong.safety.core.db.entity.goodsOut.param.GoodsOutDetailListParam"
+      resultType="com.yutong.safety.core.db.entity.goodsOut.vo.GoodsOutDetailGoodsVO">
+      select
+        <include refid="goods_detail_column"/>
+          ,is_history_exce
+      FROM (
+        SELECT p.flow_id,p.flow_no,p.`subject`,DATE_FORMAT(p.create_time,'%Y-%m-%d %H:%i:%s') create_time_str,
+              case when (p.outside_name is null or p.outside_name='') then p.goout_emp_name else outside_name end  goout_emp_name,p.out_factory_name,p.examine_emp_name,p.`status`,
+               p.out_type_name,g.process_id,g.id,g.goods_code,g.goods_name,g.goods_unit,g.goods_num,
+               '' vehicle_no,'' vin_no,g.remark,p.vehicle_no process_vehicle_no,
+               e.is_exception is_history_exce
+        from safety.safety_goods_out_detail_goods g
+        INNER JOIN safety.safety_goods_out_process p  on g.process_id = p.id
+        LEFT JOIN safety.safety_goods_out_exception e on p.id = e.process_id
+          where 1 = 1
+          <include refid="Detail_Goods_Where_Clause"/>
+        UNION all
+        SELECT p.flow_id,p.flow_no,p.`subject`,DATE_FORMAT(p.create_time,'%Y-%m-%d %H:%i:%s') create_time_str,
+               case when (p.outside_name is null or p.outside_name='') then p.goout_emp_name else outside_name end goout_emp_name,p.out_factory_name,p.examine_emp_name,p.`status`,
+               p.out_type_name,v.process_id,v.id,'' goods_code,'' goods_name,'' goods_unit,
+               '' goods_num,v.vehicle_no,v.vin_no,'' remark,p.vehicle_no process_vehicle_no,
+               e.is_exception is_history_exce
+        from safety.safety_goods_out_detail_vehicle v
+        INNER JOIN safety.safety_goods_out_process p on v.process_id = p.id
+        LEFT JOIN safety.safety_goods_out_exception e on p.id = e.process_id
+        where 1 = 1
+      <include refid="Detail_Vehicle_Where_Clause"/>
+        ) as cur_tmp
+      where 1 = 1
+      <if test="isHistoryExce != null and isHistoryExce != '' ">
+        and is_history_exce = #{isHistoryExce}
+      </if>
+      order by create_time_str desc
+    <if test='begin != null and begin == "1"'>
+        <if test="limit != null">
+            <if test="offset != null">
+                limit ${offset}, ${limit}
+            </if>
+            <if test="offset == null">
+                limit ${limit}
+            </if>
+        </if>
+    </if>
+  </select>
+
+  <select id="selectDetailCount" parameterType="com.yutong.safety.core.db.entity.goodsOut.param.GoodsOutDetailListParam"
+          resultType="java.lang.Long">
+      select count(1) FROM (
+      SELECT p.flow_id,p.flow_no,p.`subject`,DATE_FORMAT(p.create_time,'%Y-%m-%d %H:%i:%s') create_time,p.goout_emp_name,p.out_factory_name,p.examine_emp_name,p.`status`,
+            p.out_type_name,g.process_id,g.id,g.goods_code,g.goods_name,g.goods_unit,g.goods_num,'' vehicle_no,'' vin_no,g.remark,
+            p.vehicle_no process_vehicle_no, e.is_exception is_history_exce
+      from safety.safety_goods_out_detail_goods g
+      INNER JOIN safety.safety_goods_out_process p  on g.process_id = p.id
+      LEFT JOIN safety.safety_goods_out_exception e on p.id = e.process_id
+      where 1 = 1
+      <include refid="Detail_Goods_Where_Clause"/>
+      UNION all
+      SELECT p.flow_id,p.flow_no,p.`subject`,DATE_FORMAT(p.create_time,'%Y-%m-%d %H:%i:%s') create_time,p.goout_emp_name,p.out_factory_name,p.examine_emp_name,p.`status`,
+            p.out_type_name,v.process_id,v.id,'' goods_code,'' goods_name,'' goods_unit,'' goods_num,v.vehicle_no,v.vin_no,'' remark,
+            p.vehicle_no process_vehicle_no, e.is_exception is_history_exce
+      from safety.safety_goods_out_detail_vehicle v
+      INNER JOIN safety.safety_goods_out_process p  on v.process_id = p.id
+      LEFT JOIN safety.safety_goods_out_exception e on p.id = e.process_id
+      where 1 = 1
+      <include refid="Detail_Vehicle_Where_Clause"/>
+      ) as cur_tmp
+      where 1 = 1
+      <if test="isHistoryExce != null and isHistoryExce != '' ">
+          and is_history_exce = #{isHistoryExce}
+      </if>
+  </select>
+
+    <sql id="Detail_Goods_Where_Clause">
+        <if test="goodsCode != null and goodsCode != ''">
+            and goods_code = #{goodsCode}
+        </if>
+        <if test="gooutEmpName != null and gooutEmpName != ''">
+            and goout_emp_name = #{gooutEmpName}
+        </if>
+        <if test="examineEmpName != null and examineEmpName!= '' ">
+            and examine_emp_name = #{examineEmpName}
+        </if>
+        <if test="status != null and status!=''">
+            and status = #{status}
+        </if>
+        <if test="outTypeName != null and outTypeName!=''">
+            and out_type_name = #{outTypeName}
+        </if>
+        <if test="vehicleNo != null and vehicleNo != ''">
+            and '' = #{vehicleNo}
+        </if>
+        <if test="vinNo != null and vinNo != ''">
+            and '' = #{vinNo}
+        </if>
+        <if test="outFactory != null and outFactory != ''">
+            and p.out_factory_name =  #{outFactory}
+        </if>
+        <if test="outFactoryId != null and outFactoryId != ''">
+            and p.out_factory_id in
+            <foreach item="item" index="index" collection="outFactoryId.split(',')" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="outFactoryIds != null and outFactoryIds != '' ">
+            and (p.out_factory_id in
+            <foreach item="item" index="index" collection="outFactoryIds.split(',')" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            <if test="curPersonLogin != null and curPersonLogin != '' ">
+                or p.creator = #{curPersonLogin}
+            </if>
+            )
+        </if>
+        <if test="createTimeBegin != null and createTimeBegin != ''">
+            and p.create_time >= #{createTimeBegin}
+            <if test="createTimeEnd != null and createTimeEnd != '' ">
+                <![CDATA[ and p.create_time < #{createTimeEnd} ]]>
+            </if>
+        </if>
+
+        <if test="processIdList != null">
+            and (g.process_id in
+            <foreach item="item" index="index" collection="processIdList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            )
+        </if>
+    </sql>
+
+    <sql id="Detail_Vehicle_Where_Clause">
+        <if test="goodsCode != null and goodsCode != ''">
+            and '' = #{goodsCode}
+        </if>
+        <if test="gooutEmpName != null and gooutEmpName != ''">
+            and goout_emp_name = #{gooutEmpName}
+        </if>
+        <if test="examineEmpName != null and examineEmpName!= '' ">
+            and examine_emp_name = #{examineEmpName}
+        </if>
+        <if test="status != null and status!=''">
+            and status = #{status}
+        </if>
+        <if test="outTypeName != null and outTypeName!=''">
+            and out_type_name = #{outTypeName}
+        </if>
+        <if test="vehicleNo != null and vehicleNo != ''">
+            and v.vehicle_no = #{vehicleNo}
+        </if>
+        <if test="vinNo != null and vinNo != ''">
+            and vin_no = #{vinNo}
+        </if>
+        <if test="outFactory != null and outFactory != ''">
+            and p.out_factory_name =  #{outFactory}
+        </if>
+        <if test="outFactoryId != null and outFactoryId != ''">
+            and p.out_factory_id in
+            <foreach item="item" index="index" collection="outFactoryId.split(',')" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="outFactoryIds != null and outFactoryIds != '' ">
+            and (p.out_factory_id in
+            <foreach item="item" index="index" collection="outFactoryIds.split(',')" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            <if test="curPersonLogin != null and curPersonLogin != '' ">
+                or p.creator = #{curPersonLogin}
+            </if>
+            )
+        </if>
+        <if test="createTimeBegin != null and createTimeBegin != ''">
+            and p.create_time >= #{createTimeBegin}
+            <if test="createTimeEnd != null and createTimeEnd != '' ">
+                <![CDATA[ and p.create_time < #{createTimeEnd} ]]>
+            </if>
+        </if>
+
+        <if test="processIdList != null">
+            and (v.process_id in
+            <foreach item="item" index="index" collection="processIdList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            )
+        </if>
+    </sql>
+
+    <update id="modifyReceive" parameterType="com.yutong.safety.core.db.entity.goodsOut.SafetyGoodsOutDetailReceiveDO">
+        update safety_goods_out_detail_receive
+           set receive_time = #{receiveTime},
+               is_exception = #{isException},
+               receive_status = #{receiveStatus},
+               receive_img = #{receiveImg},
+               remark = #{remark}
+        where process_id = #{processId} and receive_emp_eip = #{receiveEmpEip}
+    </update>
+
+    <select id="getRecord" parameterType="com.yutong.safety.core.db.entity.goodsOut.SafetyGoodsOutDetailReceiveDO"
+            resultType="com.yutong.safety.core.db.entity.goodsOut.SafetyGoodsOutDetailReceiveDO">
+        select * from safety_goods_out_detail_receive
+        where process_id = #{processId} and receive_emp_eip = #{receiveEmpEip}
+    </select>
+
+    <select id="getListByProcessList" parameterType="com.yutong.safety.core.db.entity.goodsOut.param.GoodsOutDetailListParam"
+            resultType="com.yutong.safety.core.db.entity.goodsOut.vo.GoodsOutDetailGoodsVO">
+        select
+            <include refid="goods_detail_column"/>
+            ,is_history_exce
+        FROM (
+            SELECT p.flow_id,p.flow_no,p.`subject`,DATE_FORMAT(p.create_time,'%Y-%m-%d %H:%i:%s') create_time_str,
+            case when (p.outside_name is null or p.outside_name='') then p.goout_emp_name else outside_name end  goout_emp_name,p.out_factory_name,p.examine_emp_name,p.`status`,
+            p.out_type_name,g.process_id,g.id,g.goods_code,g.goods_name,g.goods_unit,g.goods_num,
+            '' vehicle_no,'' vin_no,g.remark,p.vehicle_no process_vehicle_no,
+            e.is_exception is_history_exce
+            from safety.safety_goods_out_detail_goods g
+            INNER JOIN safety.safety_goods_out_process p  on g.process_id = p.id
+            LEFT JOIN safety.safety_goods_out_exception e on p.id = e.process_id
+            where 1 = 1
+            <include refid="Detail_Goods_Where_Clause"/>
+        ) as cur_tmp
+        order by create_time_str desc
+    </select>
+</mapper>

@@ -1,0 +1,26 @@
+server:
+  port: 7001
+spring:
+  application:
+    name: iboot-safety-system
+  cloud:
+    nacos:
+      username: abyjs_user
+      password: work1.hard
+      server-addr: 10.66.18.130:8142,10.66.18.131:8142,10.66.18.132:8142
+      config:
+        server-addr: ${spring.cloud.nacos.server-addr}
+        namespace: safety
+        group: DEFAULT_GROUP
+      discovery:
+        server-addr: ${spring.cloud.nacos.server-addr}
+        namespace: mp
+        group: DEFAULT_GROUP
+  config:
+    import:
+      - optional:nacos:iboot-safety.yaml
+
+# 宇信通机器人消息推送配置（如需启用请取消注释）
+#im:
+#  sendMsg:
+#    postUrl: http://10.66.32.53:60009/api/TokenBlackList/Add

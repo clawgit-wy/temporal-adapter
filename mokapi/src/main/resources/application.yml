@@ -19,3 +19,6 @@ mokapi:
 logging:
   level:
     com.hik.mokapi: DEBUG
+    com.hik.mokapi.config.RequestLoggingFilter: DEBUG
+  file:
+    path: logs

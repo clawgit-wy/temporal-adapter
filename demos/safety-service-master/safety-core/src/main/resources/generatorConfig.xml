@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+    <!--<classPathEntry location="E:\mes\repository\mysql\mysql-connector-java\5.1.39\mysql-connector-java-5.1.39.jar"/>-->
+
+    <classPathEntry location="D:\repository\mysql\mysql-connector-java\5.1.39\mysql-connector-java-5.1.39.jar"/>
+
+    <context id="DB2Tables" targetRuntime="MyBatis3">
+        <plugin type="org.mybatis.generator.plugins.ExamplePagePlugin"/>
+        <plugin type="org.mybatis.generator.plugins.SerializablePlugin"/>
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                        connectionURL="jdbc:mysql://10.66.229.187:33306/safety?useUnicode=true&amp;characterEncoding=utf-8&amp;allowMultiQueries=true&amp;useSSL=false"
+                        userId="root"
+                        password="root">
+        </jdbcConnection>
+
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="false"/>
+        </javaTypeResolver>
+
+        <javaModelGenerator targetPackage="com.yutong.safety.core.db.entity" targetProject="src/main/java">
+            <property name="enableSubPackages" value="true"/>
+            <property name="trimStrings" value="true"/>
+        </javaModelGenerator>
+
+        <sqlMapGenerator targetPackage="com.yutong.safety.core.db.mapper" targetProject="src/main/java">
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.yutong.safety.core.db.mapper"
+                             targetProject="src/main/java">
+            <property name="enableSubPackages" value="true"/>
+    </javaClientGenerator>
+
+       <!-- <table tableName="safety_black_message" domainObjectName="SafetyBlackMessageDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>-->
+
+        <!--<table tableName="safety_field_manage" domainObjectName="SafetyFieldManageDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>-->
+
+        <!--<table tableName="safety_sheet_set" domainObjectName="SafetySheetSetDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>-->
+
+        <!--<table tableName="safety_notice" domainObjectName="SafetyNoticeDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>-->
+
+        <!--<table tableName="safety_log_message" domainObjectName="SafetyLogMessageDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>-->
+
+        <!--<table tableName="safety_user_message" domainObjectName="SafetyUserMessageDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>-->
+
+       <!-- <table tableName="safety_visitor_hairpin" domainObjectName="SafetyVisitorHairpinDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>-->
+
+        <!--<table tableName="safety_region_device" domainObjectName="SafetyRegionDeviceDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>-->
+
+       <!-- <table tableName="safety_empower_device" domainObjectName="SafetyEmpowerDeviceDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>-->
+
+        <!--<table tableName="safety_stop_empower" domainObjectName="SafetyStopEmpowerDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>-->
+
+       <!-- <table tableName="safety_sys_perm" domainObjectName="SafetySysPermDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+            <columnOverride column="level" javaType="java.lang.Integer"/>
+            <columnOverride column="cate" javaType="java.lang.Integer"/>
+            <columnOverride column="sort" javaType="java.lang.Integer"/>
+        </table>-->
+
+        <!--<table tableName="safety_sys_role" domainObjectName="SafetySysRoleDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>-->
+
+       <!--<table tableName="safety_sys_role_perm" domainObjectName="SafetySysRolePermDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>-->
+
+        <!--<table tableName="safety_sys_user_role" domainObjectName="SafetySysUserRoleDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>-->
+
+        <!--<table tableName="safety_sys_user" domainObjectName="SafetySysUserDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>-->
+
+       <!-- <table tableName="safety_region_device" domainObjectName="SafetyRegionDeviceDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>-->
+
+        <!--<table tableName="safety_data_send_log" domainObjectName="SafetyDataSendLogDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>-->
+
+        <!--<table tableName="safety_card_refund" domainObjectName="SafetyCardRefundDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>-->
+
+        <!--<table tableName="safety_general_config" domainObjectName="SafetyGeneralConfigDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+
+         <table tableName="safety_external_detection" domainObjectName="SafetyExternalDetectionDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+-->
+        <!--<table tableName="SAFETY_CAR_OUT_RULE" domainObjectName="SafetyCarOutRuleDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+
+        <table tableName="SAFETY_CAR_OUT_RULE_history" domainObjectName="SafetyCarOutRuleHistoryDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+
+        <table tableName="safety_retention_notice" domainObjectName="SafetyRetentionNoticeDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+
+        <table tableName="safety_car_in_factory" domainObjectName="SafetyCarInFactoryDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+
+        <table tableName="safety_retention_white" domainObjectName="SafetyRetentionWhiteDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+        <table tableName="safety_lane_factory" domainObjectName="SafetyLaneFactoryDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+        <table tableName="safety_car_in_factory" domainObjectName="SafetyCarInFactoryDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+        <table tableName="safety_spot_check_device_info" domainObjectName="SafetySpotCheckDeviceInfoDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+        <table tableName="safety_spot_check_rule" domainObjectName="SafetySpotCheckRuleDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+        <table tableName="safety_spot_rule_perm" domainObjectName="SafetySpotRulePermDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+        <table tableName="safety_spot_check_record" domainObjectName="SafetySpotCheckRecordDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+        <table tableName="safety_spot_link_record_rule" domainObjectName="SafetySpotLinkRecordRuleDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+        <table tableName="safety_patrol_plan" domainObjectName="SafetyPatrolPlanDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+        <table tableName="safety_goods_out_detail_goods" domainObjectName="SafetyGoodsOutDetailGoodsDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+        <table tableName="safety_goods_out_process" domainObjectName="SafetyGoodsOutProcessDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+        -->
+        <table tableName="safety_build_long_confirm_history" domainObjectName="SafetyBuildLongConfirmHistoryDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+        <table tableName="safety_build_long_confirm" domainObjectName="SafetyBuildLongConfirmDO">
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="MYSQL" identity="true"/>
+        </table>
+    </context>
+</generatorConfiguration>

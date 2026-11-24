@@ -1,0 +1,50 @@
+接口：http://10.66.230.210:60009/Api/FaceHandSet/FaceIssue
+参数：较之前去除GID输入
+{
+  "OperType": 0,
+  "Staff": {
+    "ID": 0,
+    "StaffNo": "SI1000001",
+    "StaffName": "张三",
+    "Sex": 0,
+    "Birthday": "2024-11-06",
+    "IdNo": "",
+    "WxNo": "",
+    "QQNo": "",
+    "Email": "",
+    "TelphoneNo": "",
+    "MobileNo": "",
+    "Address": "",
+    "Plate": "",
+    "BuildingNo": "",
+    "HouseNo": "",
+    "RoomNo": "",
+    "DrivingLisenseNo": "",
+    "EducatingStatue": "",
+    "School": "",
+    "Major": "",
+    "NativePlace": "",
+    "PoliticalStatus": "",
+    "Skills": "",
+    "MaritalStatus": "",
+    "OrganizationId": "243EAAD0-2797-410F-9EC5-E45842D2E4C0",
+    //"RollDate": "2024-11-16T09:03:33",
+    "RegDate": "2024-11-16T09:03:33",
+    "OperName": "",
+    "Status": 0,
+    "IdentNumber": 0,
+    "Reserve1": "",
+    "Reserve2": "",
+    "Reserve3": "",
+    "Remark": "",
+    "Rid": "86443df9-c8e7-4131-9444-aa6dad4325d1"
+  },
+  
+  "BeginTime": "2025-09-10",
+  "EndTime": "2034-11-06",
+  "AuthorizeDeviceNo": [
+    3,4
+  ],
+  "StaffState": 1,
+  "FacePicture": ""
+}

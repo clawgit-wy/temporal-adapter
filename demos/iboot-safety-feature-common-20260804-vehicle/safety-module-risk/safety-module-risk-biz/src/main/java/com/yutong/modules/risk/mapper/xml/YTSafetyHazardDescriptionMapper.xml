@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.risk.mapper.YTSafetyHazardDescriptionMapper">
+
+    <select id="listBYHazardReportId" resultType="com.yutong.modules.risk.vo.YTSafetyHazardDescriptionVO">
+        SELECT
+            id,
+            process_id as processId,
+            problem_description as problemDescription,
+            attachment_ids as attachmentIds
+        FROM ytsafety_hazard_description
+        WHERE process_id = #{id}
+    </select>
+
+    <select id="listByReportIds" resultType="com.yutong.modules.risk.vo.YTSafetyHazardDescriptionVO">
+        SELECT
+            id,
+            process_id AS processId,
+            problem_description AS problemDescription,
+            attachment_ids AS attachmentIds
+        FROM ytsafety_hazard_description
+        WHERE process_id IN
+        <foreach collection="reportIds" item="reportId" open="(" separator="," close=")">
+            #{reportId}
+        </foreach>
+        ORDER BY process_id, id
+    </select>
+</mapper>

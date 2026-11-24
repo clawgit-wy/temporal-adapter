@@ -1,0 +1,128 @@
+##############################################################################
+# Demo Worker + Mokapi + Temporal 一体化 Docker Compose
+#
+# 用途：
+#   一键启动 Worker 调用演示所需的全部服务
+#   - Temporal Server (gRPC 7233)：工作流调度核心
+#   - Temporal UI Server (HTTP 8080→8280)：Web UI 管理界面
+#   - PostgreSQL (5432)：Temporal 持久化存储
+#   - Mokapi (19090)：模拟海康威视第三方接口
+#   - Demo Worker (18093)：Temporal Worker + 演示场景 API
+#
+# 启动：docker compose -f docker-compose.demo.yml up -d
+# 停止：docker compose -f docker-compose.demo.yml down
+# 查看日志：docker compose -f docker-compose.demo.yml logs -f
+##############################################################################
+services:
+  # 1. PostgreSQL 数据库
+  postgresql:
+    image: postgres:15-alpine
+    container_name: demo-postgresql
+    environment:
+      - POSTGRES_USER=temporal
+      - POSTGRES_PASSWORD=temporal
+      - POSTGRES_DB=temporal
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgresql:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U temporal"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - demo-network
+    restart: unless-stopped
+
+  # 2. Temporal Server
+  temporal:
+    image: temporalio/auto-setup:1.29.7
+    container_name: demo-temporal-server
+    ports:
+      - "7233:7233"
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=temporal
+      - POSTGRES_SEEDS=postgresql
+      - DBNAME=temporal
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/docker.yaml
+      - LOG_LEVEL=error,warn,info
+      - SERVICES=history,matching,frontend,worker
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    networks:
+      - demo-network
+    restart: unless-stopped
+
+  # 3. Temporal UI Server
+  temporal-ui:
+    image: temporalio/ui:2.32.0
+    container_name: demo-temporal-ui
+    ports:
+      - "8280:8080"
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_UI_PORT=8080
+      - TEMPORAL_UI_ENABLED=true
+      - TEMPORAL_CORS_UNSAFE_ALLOW_ALL_ORIGINS=true
+      - TEMPORAL_DEFAULT_NAMESPACE=default
+      - TEMPORAL_AUTH_ENABLED=false
+      - TEMPORAL_DISABLE_WRITE_ACTIONS=false
+      - TEMPORAL_START_WORKFLOW_DISABLED=false
+      - TEMPORAL_CSRF_COOKIE_INSECURE=true
+    depends_on:
+      temporal:
+        condition: service_started
+    networks:
+      - demo-network
+    restart: unless-stopped
+
+  # 4. Mokapi - 模拟海康威视第三方接口
+  mokapi:
+    build:
+      context: ../mokapi
+      dockerfile: Dockerfile
+    container_name: demo-mokapi
+    ports:
+      - "19090:19090"
+    environment:
+      - MOKAPI_DEFAULT_DELAY_MS=0
+      - MOKAPI_ERROR_RATE=0.0
+      - MOKAPI_SLOW_DELAY_MS=3000
+    volumes:
+      - ./logs/mokapi:/app/logs
+    networks:
+      - demo-network
+    restart: unless-stopped
+
+  # 5. Demo Worker - Temporal Worker + 演示场景 API
+  demo-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: demo-worker
+    ports:
+      - "18093:18093"
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - MOKAPI_URL=http://mokapi:19090
+      - JAVA_OPTS=-Xms256m -Xmx512m
+    depends_on:
+      temporal:
+        condition: service_started
+      mokapi:
+        condition: service_started
+    volumes:
+      - ./logs/demo-worker:/app/logs
+    networks:
+      - demo-network
+    restart: unless-stopped
+
+networks:
+  demo-network:
+    name: demo-network
+    driver: bridge

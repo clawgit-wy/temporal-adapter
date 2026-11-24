@@ -1,0 +1,191 @@
+##############################################################################
+# building-access-worker Jenkins Pipeline
+#
+# 使用方式:
+#   1. Jenkins 新建 Pipeline 任务，命名为 building-access-worker
+#   2. Pipeline 定义选择 "Pipeline script from SCM"
+#   3. 指定 Git 仓库，Script Path 填写 building-access-worker/Jenkinsfile
+#   4. 构建时选择对应参数
+#
+# 支持的操作:
+#   - BUILD:   构建镜像（不部署）
+#   - DEPLOY:  构建镜像 + 部署指定Worker
+#   - SCALE:   弹性扩缩容
+#   - START:   启动指定Worker
+#   - STOP:    停止指定Worker
+#   - RESTART: 重启指定Worker
+#   - STATUS:  查看状态
+##############################################################################
+
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = 'building-access-worker'
+        // docker-compose.yml 所在目录（workers/ 根目录）
+        COMPOSE_DIR = "${env.WORKSPACE}"
+    }
+
+    parameters {
+        choice(
+            name: 'OPERATION',
+            choices: ['BUILD', 'DEPLOY', 'SCALE', 'START', 'STOP', 'RESTART', 'STATUS'],
+            description: '''操作类型:
+ BUILD   - 只构建镜像（不部署）
+ DEPLOY  - 构建镜像并部署
+ SCALE   - 弹性扩缩容
+ START   - 启动指定Worker
+ STOP    - 停止指定Worker
+ RESTART - 重启指定Worker
+ STATUS  - 查看状态'''
+        )
+
+        choice(
+            name: 'WORKER_NAME',
+            choices: [
+                'all',
+                'worker-permission-distribution',
+                'worker-device-sync',
+                'worker-permission-init',
+                'worker-depart-confirm',
+                'worker-hik-sync'
+            ],
+            description: '选择要操作的Worker（SCALE/START/STOP/RESTART/DEPLOY时使用）'
+        )
+
+        string(
+            name: 'REPLICA_COUNT',
+            defaultValue: '1',
+            description: '扩缩容目标实例数（仅SCALE操作使用）'
+        )
+
+        string(
+            name: 'IMAGE_TAG',
+            defaultValue: 'latest',
+            description: 'Docker镜像Tag'
+        )
+
+        string(
+            name: 'GIT_BRANCH',
+            defaultValue: 'main',
+            description: 'Git分支名'
+        )
+    }
+
+    stages {
+        stage('Checkout') {
+            when { expression { params.OPERATION != 'STATUS' } }
+            steps {
+                checkout scm
+                script {
+                    env.GIT_COMMIT_SHORT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    echo "Git Commit: ${env.GIT_COMMIT_SHORT}"
+                }
+            }
+        }
+
+        stage('Build Image') {
+            when {
+                anyOf {
+                    expression { params.OPERATION == 'BUILD' }
+                    expression { params.OPERATION == 'DEPLOY' }
+                }
+            }
+            steps {
+                script {
+                    echo ">>> 构建镜像: ${IMAGE_NAME}:${params.IMAGE_TAG}"
+                    sh "docker build -t ${IMAGE_NAME}:${params.IMAGE_TAG} ./building-access-worker"
+                }
+            }
+        }
+
+        stage('Execute') {
+            steps {
+                script {
+                    def op = params.OPERATION
+                    def worker = params.WORKER_NAME
+
+                    switch(op) {
+                        case 'BUILD':
+                            echo ">>> 镜像构建完成: ${IMAGE_NAME}:${params.IMAGE_TAG}"
+                            break
+
+                        case 'DEPLOY':
+                            if (worker == 'all') {
+                                echo ">>> 部署全部Worker"
+                                sh "docker-compose up -d"
+                            } else {
+                                echo ">>> 部署: ${worker}"
+                                sh "docker-compose up -d ${worker}"
+                            }
+                            break
+
+                        case 'SCALE':
+                            if (worker == 'all') {
+                                error "SCALE不支持all，请选择具体Worker"
+                            }
+                            echo ">>> 扩缩容: ${worker} -> ${params.REPLICA_COUNT} 实例"
+                            sh "docker-compose up -d --scale ${worker}=${params.REPLICA_COUNT} ${worker}"
+                            break
+
+                        case 'START':
+                            if (worker == 'all') {
+                                sh "docker-compose up -d"
+                            } else {
+                                sh "docker-compose start ${worker}"
+                            }
+                            break
+
+                        case 'STOP':
+                            if (worker == 'all') {
+                                sh "docker-compose stop"
+                            } else {
+                                sh "docker-compose stop ${worker}"
+                            }
+                            break
+
+                        case 'RESTART':
+                            if (worker == 'all') {
+                                sh "docker-compose restart"
+                            } else {
+                                sh "docker-compose restart ${worker}"
+                            }
+                            break
+
+                        case 'STATUS':
+                            sh "docker-compose ps"
+                            break
+                    }
+                }
+            }
+        }
+
+        stage('Verify') {
+            when {
+                anyOf {
+                    expression { params.OPERATION == 'DEPLOY' }
+                    expression { params.OPERATION == 'SCALE' }
+                    expression { params.OPERATION == 'START' }
+                    expression { params.OPERATION == 'RESTART' }
+                }
+            }
+            steps {
+                echo ">>> 等待10秒后验证..."
+                sleep 10
+                sh "docker-compose ps"
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ 操作成功: ${params.OPERATION}"
+        }
+        failure {
+            echo "❌ 操作失败: ${params.OPERATION}"
+        }
+        always {
+            cleanWs()
+        }
+    }
+}

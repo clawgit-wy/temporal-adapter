@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.risk.mapper.YTSafetyValidateScenePostDOBizMapper">
+  <resultMap id="BaseResultMap" type="com.yutong.modules.risk.entity.YTSafetyValidateScenePost">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="data_type" jdbcType="INTEGER" property="dataType" />
+    <result column="flow_no" jdbcType="VARCHAR" property="flowNo" />
+    <result column="factory_id" jdbcType="BIGINT" property="factoryId" />
+    <result column="factory" jdbcType="VARCHAR" property="factory" />
+    <result column="team_id" jdbcType="VARCHAR" property="teamId" />
+    <result column="team_name" jdbcType="VARCHAR" property="teamName" />
+    <result column="person_category" jdbcType="VARCHAR" property="personCategory" />
+    <result column="post_name" jdbcType="VARCHAR" property="postName" />
+    <result column="emp_no" jdbcType="VARCHAR" property="empNo" />
+    <result column="emp_name" jdbcType="VARCHAR" property="empName" />
+    <result column="emp_dept" jdbcType="VARCHAR" property="empDept" />
+    <result column="reach_duration" jdbcType="INTEGER" property="reachDuration" />
+    <result column="leader_emp_no" jdbcType="VARCHAR" property="leaderEmpNo" />
+    <result column="leader_emp_name" jdbcType="VARCHAR" property="leaderEmpName" />
+    <result column="validate_team" jdbcType="VARCHAR" property="validateTeam" />
+    <result column="validate_desc" jdbcType="VARCHAR" property="validateDesc" />
+    <result column="validate_begin_time" jdbcType="VARCHAR" property="validateBeginTime" />
+    <result column="validate_end_time" jdbcType="VARCHAR" property="validateEndTime" />
+    <result column="create_emp_no" jdbcType="VARCHAR" property="createEmpNo" />
+    <result column="create_emp" jdbcType="VARCHAR" property="createEmp" />
+    <result column="create_dept" jdbcType="VARCHAR" property="createDept" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="is_pass" jdbcType="INTEGER" property="isPass" />
+    <result column="is_examine" jdbcType="INTEGER" property="isExamine" />
+    <result column="reform_desc" jdbcType="VARCHAR" property="reformDesc" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="is_reform" jdbcType="INTEGER" property="isReform" />
+    <result column="deal_time" jdbcType="TIMESTAMP" property="dealTime" />
+    <result column="update_emp_no" jdbcType="VARCHAR" property="updateEmpNo" />
+    <result column="update_emp" jdbcType="VARCHAR" property="updateEmp" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+
+  <sql id="whereSql">
+    WHERE 1 = 1 and data_type = #{dataType}
+    <if test="factoryId != null">
+      and factory_id = #{factoryId}
+    </if>
+    <if test="factory != null and factory != ''">
+      and factory like CONCAT('%',#{factory},'%')
+    </if>
+    <if test="postName != null and postName != ''">
+      and post_name like CONCAT('%',#{postName},'%')
+    </if>
+    <if test="teamName != null and teamName != ''">
+      and team_name like CONCAT('%',#{teamName},'%')
+    </if>
+    <if test="teamId != null and teamId !='' ">
+      and FIND_IN_SET(#{teamId},team_id)
+    </if>
+    <if test="personCategory != null and personCategory!='' ">
+      and person_category = #{personCategory}
+    </if>
+    <if test="empName != null and empName != ''">
+      and emp_name = #{empName}
+    </if>
+    <if test="empNo != null and empNo != ''">
+      and emp_no = #{empNo}
+    </if>
+    <if test="empDept != null and empDept != ''">
+      and emp_dept like CONCAT('%',#{empDept},'%')
+    </if>
+    <if test="leaderEmpName != null and leaderEmpName != ''">
+      and leader_emp_name = #{leaderEmpName}
+    </if>
+    <if test="leaderEmpNo != null and leaderEmpNo != ''">
+      and leader_emp_no = #{leaderEmpNo}
+    </if>
+    <if test="validateBegin != null and validateBegin != ''">
+        and validate_begin_time >= #{validateBegin}
+    </if>
+    <if test="validateEnd != null and validateEnd != '' ">
+    <![CDATA[
+        and validate_begin_time <= #{validateEnd}
+    ]]>
+    </if>
+    <if test="isPass != null">
+        and is_pass = #{isPass}
+    </if>
+    <if test="isExamine != null">
+        and is_examine = #{isExamine}
+    </if>
+    <if test="reformDesc != null and reformDesc != ''">
+        and reform_desc like CONCAT('%',#{reformDesc},'%')
+    </if>
+    <if test="createEmp != null and createEmp != ''">
+        and create_emp = #{createEmp}
+    </if>
+    <if test="createEmpNo != null and createEmpNo != ''">
+      and create_emp_no = #{createEmpNo}
+    </if>
+    <if test="flowNo != null and flowNo != ''">
+      and flow_no = #{flowNo}
+    </if>
+    <if test="createDept != null and createDept != ''">
+      and create_dept like CONCAT('%',#{createDept},'%')
+    </if>
+    <if test="createBegin != null and createBegin != ''">
+      and create_time >= #{createBegin}
+    </if>
+    <if test="createEnd != null and createEnd != ''">
+    <![CDATA[
+      and create_time <= #{createEnd}
+    ]]>
+    </if>
+    <if test="dealBegin != null and dealBegin != ''">
+      and deal_time >= #{dealBegin}
+    </if>
+    <if test="dealEnd != null and dealEnd != ''">
+      <![CDATA[
+      and deal_time <= #{dealEnd}
+    ]]>
+    </if>
+    <if test="factoryIds !=null and factoryIds !='' ">
+      and factory_id in
+      <foreach item="item" index="index" collection="factoryIds.split(',')"  open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
+  </sql>
+  <sql id="Base_Column_List">
+    id, data_type, flow_no, factory_id, factory, team_id, team_name, person_category,
+    post_name, emp_no, emp_name, emp_dept, reach_duration, leader_emp_no, leader_emp_name,
+    validate_team, validate_desc, validate_begin_time, validate_end_time, create_emp_no,
+    create_emp, create_dept, create_time, is_pass, is_examine, reform_desc, remark, is_reform,
+    deal_time, update_emp_no, update_emp, update_time
+  </sql>
+
+  <select id="selectList" parameterType="com.yutong.modules.risk.web.ValidateScenePostListParam"
+          resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from ytsafety_validate_scene_post
+    <if test="_parameter != null">
+      <include refid="whereSql" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+      <if test="pageFlag">
+          <if test="offset != null">
+              limit ${offset}, ${limit}
+          </if>
+          <if test="offset == null">
+              limit ${limit}
+          </if>
+      </if>
+  </select>
+
+  <select id="selectCount" parameterType="com.yutong.modules.risk.web.ValidateScenePostListParam"
+          resultType="java.lang.Long">
+    select count(1) from ytsafety_validate_scene_post
+    <if test="_parameter != null">
+      <include refid="whereSql" />
+    </if>
+  </select>
+
+  <select id="selectPageList" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from ytsafety_validate_scene_post
+    <where>
+      1 = 1 and data_type = #{param.dataType}
+      <if test="param.factoryId != null">
+        and factory_id = #{param.factoryId}
+      </if>
+      <if test="param.factory != null and param.factory != ''">
+        and factory like CONCAT('%',#{param.factory},'%')
+      </if>
+      <if test="param.postName != null and param.postName != ''">
+        and post_name like CONCAT('%',#{param.postName},'%')
+      </if>
+      <if test="param.teamName != null and param.teamName != ''">
+        and team_name like CONCAT('%',#{param.teamName},'%')
+      </if>
+      <if test="param.teamId != null and param.teamId !='' ">
+        and FIND_IN_SET(#{param.teamId},team_id)
+      </if>
+      <if test="param.personCategory != null and param.personCategory!='' ">
+        and person_category = #{param.personCategory}
+      </if>
+      <if test="param.empName != null and param.empName != ''">
+        and emp_name = #{param.empName}
+      </if>
+      <if test="param.empNo != null and param.empNo != ''">
+        and emp_no = #{param.empNo}
+      </if>
+      <if test="param.empDept != null and param.empDept != ''">
+        and emp_dept like CONCAT('%',#{param.empDept},'%')
+      </if>
+      <if test="param.leaderEmpName != null and param.leaderEmpName != ''">
+        and leader_emp_name = #{param.leaderEmpName}
+      </if>
+      <if test="param.leaderEmpNo != null and param.leaderEmpNo != ''">
+        and leader_emp_no = #{param.leaderEmpNo}
+      </if>
+      <if test="param.validateBegin != null and param.validateBegin != ''">
+          and validate_begin_time >= #{param.validateBegin}
+      </if>
+      <if test="param.validateEnd != null and param.validateEnd != '' ">
+      <![CDATA[
+          and validate_begin_time <= #{param.validateEnd}
+      ]]>
+      </if>
+      <if test="param.isPass != null">
+          and is_pass = #{param.isPass}
+      </if>
+      <if test="param.isExamine != null">
+          and is_examine = #{param.isExamine}
+      </if>
+      <if test="param.reformDesc != null and param.reformDesc != ''">
+          and reform_desc CONCAT('%',#{param.reformDesc},'%')
+      </if>
+      <if test="param.createEmp != null and param.createEmp != ''">
+          and create_emp = #{param.createEmp}
+      </if>
+      <if test="param.createEmpNo != null and param.createEmpNo != ''">
+        and create_emp_no = #{param.createEmpNo}
+      </if>
+      <if test="param.flowNo != null and param.flowNo != ''">
+        and flow_no = #{param.flowNo}
+      </if>
+      <if test="param.createDept != null and param.createDept != ''">
+        and create_dept like CONCAT('%',#{param.createDept},'%')
+      </if>
+      <if test="param.createBegin != null and param.createBegin != ''">
+        and create_time >= #{param.createBegin}
+      </if>
+      <if test="param.createEnd != null and param.createEnd != ''">
+      <![CDATA[
+        and create_time <= #{param.createEnd}
+      ]]>
+      </if>
+      <if test="param.dealBegin != null and param.dealBegin != ''">
+        and deal_time >= #{param.dealBegin}
+      </if>
+      <if test="param.dealEnd != null and param.dealEnd != ''">
+        <![CDATA[
+        and deal_time <= #{param.dealEnd}
+      ]]>
+      </if>
+      <if test="param.factoryIds !=null and param.factoryIds !='' ">
+        and factory_id in
+        <foreach item="item" index="index" collection="param.factoryIds.split(',')"  open="(" separator="," close=")">
+          #{item}
+        </foreach>
+      </if>
+    </where>
+    <if test="param.orderByClause != null">
+      order by ${param.orderByClause}
+    </if>
+  </select>
+</mapper>

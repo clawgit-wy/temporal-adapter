@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.spot.SafetySpotCheckPlanDOBizMapper">
+  <resultMap id="BaseResultMap1" type="com.yutong.safety.common.vo.web.SpotCheckPlanVO">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="plan_name" jdbcType="VARCHAR" property="planName" />
+    <result column="factory_id" jdbcType="VARCHAR" property="factoryId" />
+    <result column="factory_name" jdbcType="VARCHAR" property="factoryName" />
+    <result column="cycle" jdbcType="INTEGER" property="cycle" />
+    <result column="team_id" jdbcType="INTEGER" property="teamId" />
+    <result column="team_name" jdbcType="VARCHAR" property="teamName" />
+    <result column="begin_date" jdbcType="VARCHAR" property="beginDate" />
+    <result column="end_date" jdbcType="VARCHAR" property="endDate" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="update_person" jdbcType="VARCHAR" property="updatePerson" />
+    <result column="update_person_no" jdbcType="VARCHAR" property="updatePersonNo" />
+    <result column="dormancy_begin" jdbcType="VARCHAR" property="dormancyBegin" />
+    <result column="dormancy_end" jdbcType="VARCHAR" property="dormancyEnd" />
+  </resultMap>
+
+  <select id="selectList" resultMap="BaseResultMap1">
+    select id,plan_name,cycle,team_id,team_name,begin_date,end_date,`status`,
+			 remark,dormancy_begin,dormancy_end,factory_id,factory_name,update_time,
+             update_person,update_person_no
+      from (SELECT a.id,max(a.plan_name) plan_name,max(a.cycle) cycle,max(a.team_id) team_id,
+						 max(a.team_name) team_name,max(a.begin_date) begin_date,max(a.end_date) end_date,max(a.`status`) `status`,
+						 max(a.remark) remark,max(a.dormancy_begin) dormancy_begin,max(a.dormancy_end) dormancy_end,
+						 GROUP_CONCAT(b.factory_id) factory_id,GROUP_CONCAT(c.field_name) as factory_name,max(a.update_time) update_time
+						 ,max(a.update_person) update_person,max(a.update_person_no) update_person_no
+			 FROM safety_spot_check_plan A
+			 LEFT JOIN safety_spot_link_plan_factory B ON A.ID = B.PLAN_ID
+			 LEFT JOIN safety_field_manage c on b.factory_id = c.id
+			where 1 = 1
+    <if test="param.status !=null">
+      and a.status = #{param.status}
+    </if>
+    <if test="param.planName !=null and param.planName != ''">
+      and a.plan_name like concat('%',#{param.planName},'%')
+    </if>
+    <if test="param.teamId !=null">
+      and a.teamId = #{param.teamId}
+    </if>
+    <if test="param.teamName != null and param.teamName!= '' ">
+      and a.team_name like concat('%',#{param.teamName},'%')
+    </if>
+    <if test="param.beginDate != null and param.beginDate != '' ">
+      and a.end_date >= #{param.beginDate}
+    </if>
+    <if test="param.endDate != null and param.endDate != '' ">
+      <![CDATA[
+        and a.begin_date <= #{param.endDate}
+       ]]>
+    </if>
+    <if test="param.idStr !=null and param.idStr !='' ">
+      and b.factory_id in
+      <foreach item="item" index="index" collection="param.idStr.split(',')"  open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
+    <if test="param.taskFlag != null and param.taskFlag == 1">
+      <if test="param.beginDate != null">
+       <![CDATA[  and a.begin_date <= #{param.beginDate} and a.end_date > #{param.endDate} ]]>
+      </if>
+    </if>
+			group by a.id) tmp
+    where 1 = 1
+    <if test = "param.factoryId !=null">
+      and FIND_IN_SET(#{param.factoryId},factory_id)
+    </if>
+    ORDER BY update_time desc
+    <if test="param.begin != null">
+      <if test="param.offset != null">
+        limit ${param.offset}, ${param.limit}
+      </if>
+      <if test="param.offset == null">
+        limit ${param.limit}
+      </if>
+    </if>
+
+  </select>
+
+  <select id="selectCount" resultType="java.lang.Long">
+    select count(1)
+    from (SELECT a.id,max(a.plan_name) plan_name,max(a.cycle) cycle,max(a.team_id) team_id,
+    max(a.team_name) team_name,max(a.begin_date) begin_date,max(a.end_date) end_date,max(a.`status`) `status`,
+    max(a.remark) remark,max(a.dormancy_begin) dormancy_begin,max(a.dormancy_end) dormancy_end,
+    GROUP_CONCAT(b.factory_id) factory_id,GROUP_CONCAT(c.field_name) as factory_name,max(a.update_time) update_time
+    ,max(a.update_person) update_person,max(a.update_person_no) update_person_no
+    FROM safety_spot_check_plan A
+    LEFT JOIN safety_spot_link_plan_factory B ON A.ID = B.PLAN_ID
+    LEFT JOIN safety_field_manage c on b.factory_id = c.id
+    where 1 = 1
+    <if test="param.status !=null">
+      and a.status = #{param.status}
+    </if>
+    <if test="param.planName !=null and param.planName != ''">
+      and a.plan_name like concat('%',#{param.planName},'%')
+    </if>
+    <if test="param.teamId !=null">
+      and a.teamId = #{param.teamId}
+    </if>
+    <if test="param.teamName != null and param.teamName!= '' ">
+      and a.team_name like concat('%',#{param.teamName},'%')
+    </if>
+    <if test="param.beginDate != null and param.beginDate != '' ">
+      and a.end_date >= #{param.beginDate}
+    </if>
+    <if test="param.endDate != null and param.endDate != '' ">
+      <![CDATA[
+        and a.begin_date <= #{param.endDate}
+       ]]>
+    </if>
+    <if test="param.idStr !=null and param.idStr !='' ">
+      and b.factory_id in
+      <foreach item="item" index="index" collection="param.idStr.split(',')"  open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
+    group by a.id) tmp
+    where 1 = 1
+    <if test = "param.factoryId !=null">
+      and FIND_IN_SET(#{param.factoryId},factory_id)
+    </if>
+
+  </select>
+
+    <delete id="deleteByPlanId" parameterType="java.lang.Integer">
+        delete from safety_spot_link_plan_factory where plan_id = #{planId}
+    </delete>
+
+    <insert id="batchInsert">
+        insert into safety_spot_link_plan_factory(plan_id,factory_id) values
+        <foreach collection="linkList" item="item" separator=",">
+            (#{item.planId}, #{item.factoryId})
+        </foreach>
+    </insert>
+</mapper>

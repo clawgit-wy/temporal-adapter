@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.enter.SafetyEnterProcessMapper">
+    <resultMap id="EnterProcessMap" type="com.yutong.safety.core.db.entity.enter.result.SafetyEnterProcessRt">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="flow_id" jdbcType="INTEGER" property="flowId" />
+        <result column="title" jdbcType="VARCHAR" property="title" />
+        <result column="model_id" jdbcType="VARCHAR" property="modelId" />
+        <result column="template_form_id" jdbcType="VARCHAR" property="templateFormId" />
+        <result column="form_instance_id" jdbcType="VARCHAR" property="formInstanceId" />
+        <result column="fd_car_no" jdbcType="VARCHAR" property="fdCarNo" />
+    </resultMap>
+    <select id="selectEnterProcessByInstanceId" resultMap="EnterProcessMap">
+        select p.id,p.flow_id,p.title,p.model_id,p.template_form_id,p.form_instance_id,f.fd_car_no
+        from safety_enter_process p
+        left join safety_enter_filing f on p.form_instance_id=f.id
+        where p.form_instance_id=#{formInstanceId}
+    </select>
+
+    <insert id="insertEnterProcess" parameterType="com.yutong.safety.core.db.entity.enter.SafetyEnterProcess">
+        insert into safety_enter_process(
+        flow_id,title,creator,create_time,model_id,template_form_id,form_instance_id
+        )
+        values (
+        #{flowId},#{title},#{creator},#{createTime},#{modelId},#{templateFormId},#{formInstanceId}
+        )
+    </insert>
+
+    <insert id="insertEnterProcessBatch" parameterType="java.util.List">
+        insert into safety_enter_process(
+            flow_id,title,creator,create_time,model_id,template_form_id,form_instance_id
+        )
+        values
+        <foreach collection="list" item="d" index="index" separator=",">
+            (#{d.flowId},#{d.title},#{d.creator},now(),#{d.modelId},#{d.templateFormId},#{d.formInstanceId})
+        </foreach>
+    </insert>
+</mapper>

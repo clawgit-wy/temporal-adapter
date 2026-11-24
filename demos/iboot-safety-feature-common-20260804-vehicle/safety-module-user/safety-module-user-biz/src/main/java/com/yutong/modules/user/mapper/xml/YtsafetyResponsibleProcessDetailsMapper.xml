@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.user.mapper.YtsafetyResponsibleProcessDetailsMapper">
+
+    <select id="queryList" resultType="com.yutong.modules.user.vo.YtsafetyResponsibleProcessDetailsVO">
+        select  rpd.id,
+                rpd.process_id,
+                rpd.change_user_id,
+                rpd.change_emp_no,
+                rpd.change_emp_name,
+                rpd.user_id,
+                rpd.emp_name,
+                rpd.emp_no,
+                rpd.login_name user_name,
+                rpd.user_type,
+                rpd.valid_period,
+                rpd.status,
+                rpd.change_type,
+                rpd.factory_id,
+                rpd.depart_id,
+                rpd.role_id,
+                rpd.remark,
+                rpd.create_time,
+                rpd.create_user,
+                rpd.create_name,
+                rpd.update_time,
+                rpd.update_user,
+                rpd.update_name,
+                em.phone_no phone,
+                em.org_name_path org_name,
+                em.position_name,
+                em.email
+        from ytsafety_responsible_process_details rpd
+        left join safety_employee_message em on rpd.emp_no = em.emp_no
+        where rpd.process_id = #{processId} and rpd.del_flag = 0
+    </select>
+
+</mapper>

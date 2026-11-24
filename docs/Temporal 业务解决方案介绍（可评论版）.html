@@ -1,0 +1,2991 @@
+<!DOCTYPE html>
+<!-- saved from url=(0170)file:///Users/apple/Desktop/AdapterService/docs/Temporal%E4%B8%9A%E5%8A%A1%E5%BA%94%E7%94%A8%E6%96%B9%E6%A1%88%E4%BB%8B%E7%BB%8D_%E5%8F%AF%E8%AF%84%E8%AE%BA%E7%89%88.html -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Temporal 业务解决方案介绍（可评论版）</title>
+<script src="./Temporal 业务解决方案介绍（可评论版）_files/marked.min.js"></script>
+<style>
+:root {
+  --primary: #0969da;
+  --comment-bg: #fff8c5;
+  --comment-border: #d4a72c;
+  --comment-active: #ddf4ff;
+  --sidebar-bg: #ffffff;
+  --border-color: #d0d7de;
+  --text-color: #1f2328;
+  --bg-color: #ffffff;
+  --code-bg: #f6f8fa;
+}
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  color: var(--text-color);
+  background: var(--bg-color);
+  margin: 0;
+  padding: 0;
+  line-height: 1.7;
+}
+
+/* === Layout === */
+#toolbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 52px;
+  background: #24292f;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  z-index: 1000;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+#toolbar .title { font-size: 16px; font-weight: 600; flex: 1; }
+#toolbar button {
+  background: #238636;
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  margin-left: 8px;
+  transition: background 0.2s;
+}
+#toolbar button:hover { background: #2ea043; }
+#toolbar button.secondary { background: #30363d; }
+#toolbar button.secondary:hover { background: #3d444d; }
+#toolbar .comment-count {
+  background: #1f6feb;
+  color: #fff;
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-size: 12px;
+  margin-left: 6px;
+}
+
+#content {
+  max-width: 900px;
+  margin: 72px auto 40px;
+  padding: 40px 60px;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+/* === Markdown Styles === */
+h1, h2, h3, h4, h5, h6 { margin-top: 28px; margin-bottom: 12px; font-weight: 600; line-height: 1.3; }
+h1 { font-size: 2em; border-bottom: 2px solid var(--border-color); padding-bottom: 8px; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border-color); padding-bottom: 6px; }
+h3 { font-size: 1.25em; }
+h4 { font-size: 1.05em; }
+p { margin: 10px 0; }
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  font-size: 14px;
+  display: block;
+  overflow-x: auto;
+}
+table th, table td {
+  border: 1px solid var(--border-color);
+  padding: 8px 12px;
+  text-align: left;
+}
+table th { background: var(--code-bg); font-weight: 600; }
+table tr:nth-child(even) { background: #fafbfc; }
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 16px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.5;
+}
+pre code { background: none; padding: 0; font-size: 13px; }
+code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  background: var(--code-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+blockquote {
+  border-left: 4px solid var(--primary);
+  background: var(--comment-active);
+  margin: 12px 0;
+  padding: 8px 16px;
+  color: #57606a;
+}
+ul, ol { padding-left: 28px; }
+li { margin: 4px 0; }
+hr { border: none; border-top: 1px solid var(--border-color); margin: 24px 0; }
+strong { font-weight: 600; }
+
+/* === Comment System === */
+.commentable {
+  position: relative;
+  transition: background 0.15s;
+  border-radius: 4px;
+  padding-left: 8px;
+  margin-left: -8px;
+}
+.commentable:hover {
+  background: rgba(9, 105, 218, 0.04);
+}
+.commentable.has-comment {
+  border-left: 3px solid var(--comment-border);
+  background: rgba(212, 167, 44, 0.06);
+}
+.comment-badge {
+  position: absolute;
+  right: -36px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--comment-border);
+  color: #fff;
+  font-size: 12px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  z-index: 5;
+}
+.commentable.has-comment .comment-badge { display: flex; }
+.comment-add-btn {
+  position: absolute;
+  right: -36px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 16px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  z-index: 5;
+  line-height: 1;
+}
+.commentable:hover .comment-add-btn { display: flex; }
+.commentable.has-comment:hover .comment-add-btn { display: none; }
+
+/* Comment Popup */
+.comment-popup {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  padding: 14px;
+  width: 400px;
+  max-width: 500px;
+  margin-top: 4px;
+}
+.comment-popup.show { display: block; }
+.comment-popup textarea {
+  width: 100%;
+  min-height: 80px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 14px;
+  resize: vertical;
+  font-family: inherit;
+}
+.comment-popup .popup-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.comment-popup .popup-actions button {
+  padding: 4px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  font-size: 13px;
+  background: #f6f8fa;
+}
+.comment-popup .popup-actions button.primary {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.comment-popup .popup-actions button.danger {
+  background: #d73a49;
+  color: #fff;
+  border-color: #d73a49;
+}
+.comment-popup .popup-section {
+  font-size: 12px;
+  color: #57606a;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.comment-popup .popup-preview {
+  font-size: 12px;
+  color: #57606a;
+  background: var(--code-bg);
+  padding: 6px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  max-height: 60px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* === Sidebar === */
+#sidebar {
+  position: fixed;
+  top: 52px;
+  right: -440px;
+  width: 420px;
+  bottom: 0;
+  background: var(--sidebar-bg);
+  border-left: 1px solid var(--border-color);
+  box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+  z-index: 999;
+  transition: right 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+#sidebar.open { right: 0; }
+#sidebar .sidebar-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f6f8fa;
+}
+#sidebar .sidebar-header h3 { margin: 0; font-size: 16px; }
+#sidebar .sidebar-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #57606a;
+  padding: 4px 8px;
+}
+#sidebar .sidebar-actions {
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  gap: 8px;
+}
+#sidebar .sidebar-actions button {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  font-size: 13px;
+  background: #f6f8fa;
+  flex: 1;
+}
+#sidebar .sidebar-actions button:hover { background: #eaeef2; }
+#sidebar .sidebar-actions button.primary {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+#sidebar .sidebar-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+.sidebar-comment-item {
+  padding: 14px 20px;
+  border-bottom: 1px solid #eaecef;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.sidebar-comment-item:hover { background: var(--comment-active); }
+.sidebar-comment-item .sci-section {
+  font-size: 12px;
+  color: var(--primary);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.sidebar-comment-item .sci-preview {
+  font-size: 11px;
+  color: #8b949e;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sidebar-comment-item .sci-text {
+  font-size: 14px;
+  color: var(--text-color);
+  background: var(--comment-bg);
+  padding: 6px 10px;
+  border-radius: 4px;
+  border-left: 3px solid var(--comment-border);
+}
+.sidebar-comment-item .sci-time {
+  font-size: 11px;
+  color: #8b949e;
+  margin-top: 4px;
+}
+.sidebar-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: #8b949e;
+}
+
+/* === Overlay === */
+#overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.1);
+  z-index: 998;
+}
+#overlay.show { display: block; }
+
+/* === Copy Toast === */
+#toast {
+  display: none;
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f883d;
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 2000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+#toast.show { display: block; }
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <span class="title">Temporal 业务解决方案介绍</span>
+  <button class="secondary" onclick="toggleSidebar()">查看评论 <span class="comment-count" id="commentCount">0</span></button>
+  <button class="secondary" onclick="exportComments()">导出评论</button>
+  <button onclick="copyAllComments()">一键复制全部评论</button>
+</div>
+
+<div id="overlay" onclick="closeSidebar()" class=""></div>
+
+<div id="content"><h1 data-cid="1" class="commentable">Temporal 业务解决方案介绍<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h1>
+<h2 data-cid="2" class="commentable">一、业务场景与痛点<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h2>
+<h3 data-cid="3" class="commentable">1.1 我们的业务现状<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<p data-cid="4" class="commentable">我们的核心业务是<strong>宇通安保管理平台</strong>，涉及<strong>门禁系统的人员权限批量管理</strong>、<strong>海康威视人脸识别中台同步</strong>、<strong>访客/外来人员入厂备案</strong>等多个业务域。系统覆盖 <strong>4 万+ 在职人员</strong>，对接 <strong>500+ 门禁设备</strong>（分属<strong>新开普</strong>和<strong>富士</strong>两个门禁厂商接口），经常面临 <strong>1000+ 人的权限数据批量下发</strong>场景。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<p data-cid="5" class="commentable" style="position: relative;">经过对现有系统（<code>safety-service-master</code> 后端 4 模块 + <code>safety-web-master</code> 前端）的全面技术分析，识别出以下 <strong>7 类核心业务场景</strong>及各自存在的问题与痛点：<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<table data-cid="6" class="commentable">
+<thead>
+<tr>
+<th>场景</th>
+<th>业务描述</th>
+<th>规模</th>
+<th>当前存在的问题与痛点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>海康人脸分组批量同步</strong></td>
+<td>全量在职人员分组数据更新；外来人员人脸分组变更（每 30 分钟一次）</td>
+<td><strong>4 万+人员</strong>，逐人调用海康单人 API</td>
+<td><code>@Async</code> 线程池（5-10 线程）<strong>无速率限制</strong>，4 万次 API 瞬间冲击海康接口；<strong>无重试</strong>，失败即丢；大批量调用存在 <strong>OOM 风险</strong></td>
+</tr>
+<tr>
+<td><strong>入厂备案权限定时下发</strong></td>
+<td>每 30 分钟扫库，下发"当前时间 +33 分钟"的备案人员权限；每天 17:00 过期提醒</td>
+<td>批量备案人员</td>
+<td>30 分钟扫库产生 <strong>DB 慢查询</strong>；<strong>漏单风险</strong>（新预约需等下个周期）；EHR OAuth2 Token <strong>无缓存/刷新机制</strong>，获取失败影响全局</td>
+</tr>
+<tr>
+<td><strong>访客授权审批与定时下发</strong></td>
+<td>访客预约入场前 10 分钟自动下发门禁权限；审批流程多系统协作</td>
+<td>批量访客</td>
+<td>定时扫库实现"前 10 分钟下发"有<strong>漏单风险</strong>；CRK + 海康多系统调用<strong>均无重试</strong>；审批等待期间 <code>Thread.sleep()</code> <strong>占用线程和内存</strong></td>
+</tr>
+<tr>
+<td><strong>楼宇门禁权限批量管理</strong></td>
+<td>17 个定时任务：设备同步、权限更新、长期未进出追踪、代办发送等</td>
+<td><strong>4 万+员工 × 500+门禁</strong>（新开普 + 富士）</td>
+<td>17 个任务间存在<strong>顺序依赖</strong>但无事务保证，前序失败后续仍执行；新开普仅重试 1 次、富士<strong>无重试</strong>；调度配置分散在 XXL-JOB 后台，维护成本高</td>
+</tr>
+<tr>
+<td><strong>新开普/富士门禁权限下发</strong></td>
+<td>1000+ 人批量权限下发，每人涉及 500+ 门禁设备</td>
+<td><strong>1000+人 × 500+设备 = 50 万+次</strong> API 调用</td>
+<td><strong>50 万+ 次 API 调用无全局速率控制</strong>，可能打垮门禁接口；3DES 加密已过时；5 种 HTTP 客户端并存，维护负担重</td>
+</tr>
+<tr>
+<td><strong>BPM 流程编排</strong></td>
+<td>流程创建 -&gt; 审批 -&gt; 传阅，涉及人工审批等待（可能等数天）</td>
+<td>日常审批流程</td>
+<td>SOAP WebService <strong>无重试</strong>；HttpWS <strong>无连接池</strong>每次新建连接，性能差；人工审批等待无优雅机制，需轮询或 <code>Thread.sleep()</code></td>
+</tr>
+<tr>
+<td><strong>CRK 出入口权限管理</strong></td>
+<td>访客二维码注册、卡下发、权限注销，失败需补偿</td>
+<td>批量访客/备案</td>
+<td>权限下发<strong>无重试</strong>，失败影响访客入场；<strong>无补偿机制</strong>，失败需人工干预；审计追踪困难</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<blockquote data-cid="7" class="commentable">
+<p data-cid="8" class="commentable"><strong>注</strong>：以上场景的 Temporal 迁移优先级评估详见第三章及 <a href="file:///Users/apple/Desktop/AdapterService/docs/Temporal%E8%BF%81%E7%A7%BB%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E6%8A%A5%E5%91%8A.md">Temporal迁移技术分析报告.md</a>。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<h3 data-cid="9" class="commentable">1.2 业务场景中的六大痛点<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<blockquote data-cid="10" class="commentable">
+<p data-cid="11" class="commentable">以下每个痛点均以技术分析报告中迁移评分 ≥ 17 的实际业务场景作为案例支撑。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<h4 data-cid="12" class="commentable">痛点一：第三方接口被打垮（限流失控）<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h4>
+<blockquote data-cid="13" class="commentable">
+<p data-cid="14" class="commentable"><strong>案例场景</strong>：海康人脸分组批量同步（迁移评分 24/25）+ 楼宇门禁权限批量管理（21/25）<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<p data-cid="15" class="commentable"><strong>海康人脸同步</strong>：系统有 <strong>4 万+ 在职人员</strong>，定时任务（<code>SafetyHikJobController</code>）每 30 分钟执行一次外来人员人脸分组变更，另有全量在职人员分组数据更新任务。当前实现使用 <code>@Async</code> + <code>batchExecutorService</code> 线程池（核心 5 / 最大 10 / 队列 200），<strong>无速率限制</strong>，大批量调用时直接冲击海康 Artemis API。海康 SDK 仅提供单人操作接口，4 万人全量更新即 4 万次 API 调用，瞬间并发可能打垮海康中台或触发 429 限流。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<p data-cid="16" class="commentable"><strong>楼宇门禁权限下发</strong>：经常面临 <strong>1000+ 人的权限数据批量下发</strong>，每人涉及 <strong>500+ 门禁设备</strong>（新开普 + 富士两个厂商接口），单次批量操作即产生 <strong>50 万+ 次</strong> API 调用。当前新开普门禁接口仅重试 1 次，富士门禁接口<strong>无任何重试</strong>，且无全局速率控制。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<ul data-cid="17" class="commentable">
+<li>传统方案：手动维护信号量（Semaphore）、线程池，代码侵入性强</li>
+<li>问题：限流逻辑散落在业务代码中，难以统一管控和动态调整；不同接口限流策略不一致</li>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></ul>
+<h4 data-cid="18" class="commentable">痛点二：接口故障时重试逻辑复杂（代码膨胀）<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h4>
+<blockquote data-cid="19" class="commentable">
+<p data-cid="20" class="commentable"><strong>案例场景</strong>：BPM 流程编排（17/25）+ CRK 出入口权限管理（17/25）+ 海康人脸同步（24/25）<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<p data-cid="21" class="commentable">经技术分析发现，项目中 <strong>30+ 个外部系统集成点</strong>的重试机制严重不一致：<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<table data-cid="22" class="commentable">
+<thead>
+<tr>
+<th>集成系统</th>
+<th>API 模式</th>
+<th>当前重试</th>
+<th>问题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>海康 Artemis SDK</td>
+<td>REST</td>
+<td><strong>无</strong></td>
+<td>人脸分组/添加/检索失败即丢，数据不一致</td>
+</tr>
+<tr>
+<td>BPM 流程引擎</td>
+<td>SOAP</td>
+<td><strong>无</strong></td>
+<td>流程创建/审批失败需人工干预</td>
+</tr>
+<tr>
+<td>CRK 出入口系统</td>
+<td>REST</td>
+<td><strong>无</strong></td>
+<td>权限下发失败影响访客入场</td>
+</tr>
+<tr>
+<td>EHR 人力资源</td>
+<td>REST (OAuth2)</td>
+<td><strong>无</strong></td>
+<td>Token 获取失败影响后续所有操作</td>
+</tr>
+<tr>
+<td>IAM 身份中台</td>
+<td>REST</td>
+<td><strong>无</strong></td>
+<td>员工/组织/短信/邮件调用失败即丢</td>
+</tr>
+<tr>
+<td>新开普楼宇门禁</td>
+<td>REST (3DES)</td>
+<td>仅 1 次</td>
+<td>retcode != 200 时重试 1 次，不够</td>
+</tr>
+<tr>
+<td>文件上传 (zoffice)</td>
+<td>HTTP multipart</td>
+<td>3 次</td>
+<td>唯一有完整重试的组件</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<ul data-cid="23" class="commentable">
+<li>传统方案：手写 try-catch + for 循环重试 + 指数退避</li>
+<li>问题：每个接口调用点都要写一遍，漏写就没有重试；30+ 个集成点中仅 2 个有重试逻辑，<strong>可靠性债务极其严重</strong></li>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></ul>
+<h4 data-cid="24" class="commentable">痛点三：多步骤编排与顺序依赖难以保证（流程断裂）<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h4>
+<blockquote data-cid="25" class="commentable">
+<p data-cid="26" class="commentable"><strong>案例场景</strong>：楼宇门禁权限管理（21/25）+ 入厂备案权限下发（23/25）<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<p data-cid="27" class="commentable"><strong>楼宇门禁 17 个定时任务</strong>（<code>SafetyBuildJobController</code>）存在复杂的执行顺序依赖：<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<pre data-cid="28" class="commentable"><code>updateDeviceTask（每天更新设备）-&gt; removeDevicePower（移除无效权限）
+updatePowerTask（按组织自动授权）-&gt; autoConfirmChangePower（自动确认权限）
+modifyRecordsTask（更新出入记录）-&gt; initBuildLongTerm（更新长期未进出）-&gt; sendOwnerLongToDo（发送代办 9:10）-&gt; closeOwnerLongToDo（超 7 天消除代办）
+</code><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></pre>
+<p data-cid="29" class="commentable">当前依赖 XXL-JOB 调度中心按 cron 顺序触发各 HTTP 端点，<strong>任务间无事务保证</strong>，前序任务失败后后续任务仍会执行，导致数据不一致。17 个端点的调度配置分散在 XXL-JOB 管理后台，维护成本极高。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<p data-cid="30" class="commentable"><strong>入厂备案 6 个定时任务</strong>（<code>SafetyEntryJobController</code>）同样存在数据依赖：EHR 黑名单同步 -&gt; 权限下发 -&gt; Redis 清理，任一步骤失败影响整体业务。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<ul data-cid="31" class="commentable">
+<li>传统方案：XXL-JOB 按 cron 顺序触发，或 DB 状态字段串联</li>
+<li>问题：无事务保证，前序失败后续仍执行；流程状态分散在 DB 和内存中，排查困难</li>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></ul>
+<h4 data-cid="32" class="commentable">痛点四：长耗时等待浪费资源（定时任务笨重）<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h4>
+<blockquote data-cid="33" class="commentable">
+<p data-cid="34" class="commentable"><strong>案例场景</strong>：入厂备案权限定时下发（23/25）+ 访客授权审批与定时下发（22/25）<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<p data-cid="35" class="commentable"><strong>入厂备案权限下发</strong>：<code>entryPermissionDelegationTask</code> 每 30 分钟执行一次，扫库查询"当前时间 +33 分钟"（预留 3 分钟时间差）内需要下发权限的备案人员。这意味着：<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<ul data-cid="36" class="commentable">
+<li>每 30 分钟全表扫描一次，量大时产生 <strong>DB 慢查询</strong></li>
+<li>扫库方式存在<strong>漏单风险</strong>：任务执行期间新预约的备案人员需等下一个 30 分钟周期</li>
+<li><code>entryOverdueTask</code> 每天 17:00 邮件提醒，需额外维护 cron 配置</li>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></ul>
+<p data-cid="37" class="commentable"><strong>访客授权定时下发</strong>：访客预约入场前 10 分钟需自动下发门禁权限，当前依赖 XXL-JOB 定时扫库（每分钟扫 <code>status=PENDING</code> 且 <code>time &lt;= 入场前10分钟</code>），问题同上。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<ul data-cid="38" class="commentable">
+<li>传统方案：Quartz/XXL-JOB 定时扫库（每分钟或每 30 分钟扫一次）</li>
+<li>问题：扫库产生 DB 慢查询；量大时容易漏单；<code>Thread.sleep()</code> 白白占用线程和内存；时间精度受扫描间隔限制</li>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></ul>
+<h4 data-cid="39" class="commentable">痛点五：异步结果通知不可靠（回调丢失）<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h4>
+<blockquote data-cid="40" class="commentable">
+<p data-cid="41" class="commentable"><strong>案例场景</strong>：海康批量操作完成后的结果回传 + BPM 审批结果通知<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<p data-cid="42" class="commentable"><strong>海康批量操作结果回传</strong>：批量人脸分组同步（4 万人）执行完后，需将成功/失败汇总结果回传给主业务系统并记录。当前 <code>SafetyHikJobController</code> 的任务通过 HTTP 触发，执行结果仅写入日志，<strong>无主动回调通知机制</strong>。如果主服务需要感知执行结果，需轮询查询或依赖宇信通消息推送，但宇信通消息推送本身也<strong>无重试机制</strong>。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<p data-cid="43" class="commentable"><strong>BPM 审批结果</strong>：BPM SOAP 接口无重试，流程审批状态更新失败后无补偿机制，需人工排查。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<ul data-cid="44" class="commentable">
+<li>传统方案：Webhook 回调 + 定时补偿 Job 兜底</li>
+<li>问题：补偿 Job 需要额外开发和维护；Webhook 重试逻辑需要手写；当前系统连补偿 Job 都未实现</li>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></ul>
+<h4 data-cid="45" class="commentable">痛点六：主服务内存溢出（OOM 风险）<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h4>
+<blockquote data-cid="46" class="commentable">
+<p data-cid="47" class="commentable"><strong>案例场景</strong>：海康人脸分组批量同步（24/25）<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<p data-cid="48" class="commentable"><strong>海康人脸识别服务</strong>（<code>SafetyArtemisService</code>）使用 <code>@Async</code> + <code>batchExecutorService</code> 线程池处理人脸操作。线程池配置为：核心 5 / 最大 10 / 队列 200 / CallerRunsPolicy。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<p data-cid="49" class="commentable">当执行 <strong>4 万+ 人员全量分组更新</strong>时：<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<ol data-cid="50" class="commentable">
+<li>大量人脸图片 Base64 编码的 HTTP 请求对象堆积在 JVM 堆中</li>
+<li>海康 API 响应慢（socket 超时 10s），未完成的 Future 持续积压</li>
+<li>队列满后 CallerRunsPolicy 在调用线程执行，阻塞主流程</li>
+<li>频繁 GC 甚至 OOM，影响整个主服务的稳定性</li>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></ol>
+<p data-cid="51" class="commentable"><strong>楼宇门禁批量下发</strong>：1000+ 人 × 500+ 设备 = 50 万+ 次 API 调用，如果同步循环或无界线程池执行，同样会导致 JVM 堆积压 HTTP 请求对象与 Future，引发 OOM。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<ul data-cid="52" class="commentable">
+<li>传统方案：自建独立中转服务 + 手动限流（参见 <a href="file:///Users/apple/Desktop/AdapterService/docs/Hikvision_Batch_Adapter_Design.md">Hikvision_Batch_Adapter_Design.md</a>）</li>
+<li>问题：中转服务本身也需要处理重试、状态管理、补偿等全部可靠性问题；手写 Semaphore(15) + ThreadPoolExecutor + CompletableFuture 代码量大且易出错</li>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></ul>
+<h3 data-cid="53" class="commentable">1.3 痛点总结<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<pre data-cid="54" class="commentable"><code>┌──────────────────────────────────────────────────────────────────────────┐
+│                      传统方案的"可靠性债务"                                 │
+│                                                                          │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐                 │
+│  │ 手写重试  │  │ 手写幂等  │  │ 手写补偿  │  │ 手写定时  │                 │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘                 │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐                 │
+│  │ 手写限流  │  │ 手写状态机│  │ 手写回调  │  │ 手写兜底  │                 │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘                 │
+│                                                                          │
+│  -&gt; 7 个 Job Controller、35+ 定时任务，每个场景都要重复实现一遍             │
+│  -&gt; 30+ 个外部系统集成点，仅 2 个有重试逻辑                                │
+│  -&gt; 4 万+ 人员、500+ 门禁设备、1000+ 人批量下发，代码量是业务逻辑的 1.5~2 倍 │
+│  -&gt; 测试困难、Bug 频发、排查靠"看日志猜"                                   │
+│  -&gt; 团队精力大量消耗在"非业务价值"的基础设施代码上                          │
+└──────────────────────────────────────────────────────────────────────────┘
+</code><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></pre>
+<p data-cid="55" class="commentable"><strong>核心矛盾</strong>：团队 60% 以上的精力消耗在重试、补偿、状态管理等"非业务价值"的基础设施代码上，而可靠性仍然无法 100% 保证。7 个 Job Controller 的 35+ 个定时任务和 30+ 个外部系统集成点，每一个都是潜在的故障点和维护负担。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<hr>
+<h2 data-cid="56" class="commentable">二、解决方案：引入 Temporal<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h2>
+<h3 data-cid="57" class="commentable">2.1 Temporal 是什么<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<p data-cid="58" class="commentable"><strong>Temporal 是一个开源的分布式持久化工作流引擎（Durable Execution Engine）</strong>，它让开发者可以用普通代码编写复杂的多步骤业务流程，并<strong>由引擎 100% 保证每个步骤的可靠执行</strong>--无论过程中发生网络故障、服务器宕机、进程崩溃还是第三方接口超时。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<p data-cid="59" class="commentable">核心理念：<strong>开发者只写业务逻辑（Happy Path），可靠性由引擎兜底</strong>。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<pre data-cid="60" class="commentable"><code>┌─────────────────────────────────────────────────────────┐
+│                    传统开发模式                           │
+│                                                         │
+│  业务代码(40%)  +  重试逻辑 + 幂等控制 + 状态管理 +      │
+│  定时补偿 + 异步回调 + 异常处理 + 并发控制 + ...(60%)    │
+│                                                         │
+│  -&gt; 开发复杂、容易出 Bug、难以维护、排查困难               │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│                    Temporal 开发模式                      │
+│                                                         │
+│  业务代码(95%)  +  极少量配置(5%)                        │
+│                                                         │
+│  -&gt; 重试、状态持久化、定时器、补偿 全部由引擎自动保证      │
+│  -&gt; 开发极简、代码可读性强、可靠性大幅提升                 │
+└─────────────────────────────────────────────────────────┘
+</code><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></pre>
+<h3 data-cid="61" class="commentable">2.2 开源与商业信息<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<table data-cid="62" class="commentable">
+<thead>
+<tr>
+<th>项目</th>
+<th>信息</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>GitHub 地址</strong></td>
+<td><a href="https://github.com/temporalio/temporal">https://github.com/temporalio/temporal</a></td>
+</tr>
+<tr>
+<td><strong>GitHub Stars</strong></td>
+<td><strong>21,000+</strong>（截至 2026 年 7 月）</td>
+</tr>
+<tr>
+<td><strong>开源协议</strong></td>
+<td><strong>MIT License</strong>（自托管完全免费，无任何商业限制）</td>
+</tr>
+<tr>
+<td><strong>创立时间</strong></td>
+<td>2019 年，由 Maxim Fateev 和 Samar Abbas 创立</td>
+</tr>
+<tr>
+<td><strong>技术血统</strong></td>
+<td>创始人是 Uber Cadence 工作流引擎的作者，Temporal 是其演进版本</td>
+</tr>
+<tr>
+<td><strong>付费客户</strong></td>
+<td><strong>3,000+ 家</strong>（含 NVIDIA、Netflix、Snap、Stripe 等）</td>
+</tr>
+<tr>
+<td><strong>开源用户</strong></td>
+<td>数万名开发者</td>
+</tr>
+<tr>
+<td><strong>商业云服务</strong></td>
+<td>Temporal Cloud：Essentials $100/月起、Business $500/月起、Enterprise 定制</td>
+</tr>
+<tr>
+<td><strong>融资状态</strong></td>
+<td>多轮融资，资金充裕，社区活跃度高</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<blockquote data-cid="63" class="commentable">
+<p data-cid="64" class="commentable"><strong>授权说明</strong>：自托管版本采用 MIT 协议，<strong>完全免费且无任何使用限制</strong>，可放心用于商业生产环境。Temporal Cloud 为可选的托管服务，我们采用自托管方式，<strong>无任何授权费用</strong>。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<h3 data-cid="65" class="commentable">2.3 行业应用案例<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<p data-cid="66" class="commentable">Temporal 已被全球顶级公司用于核心生产环境，覆盖金融、物流、基础设施、AI 等领域：<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<table data-cid="67" class="commentable">
+<thead>
+<tr>
+<th>公司</th>
+<th>应用场景</th>
+<th>与我们的相似度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Stripe</strong></td>
+<td>支付处理（交易编排、重试、状态管理）</td>
+<td>★★★ 高（多步骤流程 + 重试）</td>
+</tr>
+<tr>
+<td><strong>Netflix</strong></td>
+<td>基础设施管理、CI/CD 编排（替代自研方案）</td>
+<td>★★★ 高（多步骤编排 + 可靠性）</td>
+</tr>
+<tr>
+<td><strong>OpenAI</strong></td>
+<td>AI Agent 工作流、基础设施编排（2025 年开始使用，一年内增长 60 倍）</td>
+<td>★★☆ 中（长流程编排）</td>
+</tr>
+<tr>
+<td><strong>Snap</strong></td>
+<td>消息处理、基础设施服务</td>
+<td>★★☆ 中（高并发处理）</td>
+</tr>
+<tr>
+<td><strong>NVIDIA</strong></td>
+<td>GPU 资源调度、基础设施自动化</td>
+<td>★★☆ 中（资源编排）</td>
+</tr>
+<tr>
+<td><strong>Coinbase</strong></td>
+<td>资金转账（交易可靠性保证）</td>
+<td>★★★ 高（零丢失要求）</td>
+</tr>
+<tr>
+<td><strong>Box</strong></td>
+<td>内容管理（文件处理流程编排）</td>
+<td>★★☆ 中（多步骤流程）</td>
+</tr>
+<tr>
+<td><strong>Turo</strong></td>
+<td>车辆预订（订单生命周期管理）</td>
+<td>★★★ 高（长耗时等待 + 状态机）</td>
+</tr>
+<tr>
+<td><strong>Maersk</strong></td>
+<td>物流订单（跨国多步骤流程编排）</td>
+<td>★★☆ 中（多步骤编排）</td>
+</tr>
+<tr>
+<td><strong>Airbnb</strong></td>
+<td>营销活动（用户旅程编排）</td>
+<td>★★☆ 中（流程编排）</td>
+</tr>
+<tr>
+<td><strong>Checkr</strong></td>
+<td>背景调查（人工审批 + 多步骤流程）</td>
+<td>★★★ 高（Human-in-the-Loop）</td>
+</tr>
+<tr>
+<td><strong>Datadog</strong></td>
+<td>数据库迁移、基础设施运维自动化</td>
+<td>★★☆ 中（运维编排）</td>
+</tr>
+<tr>
+<td><strong>ANZ 银行</strong></td>
+<td>抵押贷款审批（长周期 + 人工介入）</td>
+<td>★★★ 高（长耗时 + 审批）</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<blockquote data-cid="68" class="commentable">
+<p data-cid="69" class="commentable"><strong>Netflix 工程师评价</strong>："没有 Temporal，我们会远远落后于现在的位置。它提供的生产力让我们能比以前快得多地推进。如果 Temporal 不是解决方案的一部分，我负责的产品根本不可能成功。"<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<blockquote data-cid="70" class="commentable">
+<p data-cid="71" class="commentable"><strong>OpenAI 评价</strong>："Temporal 扩展性极好，它是少数真正能在大规模生产工作流中存活的系统之一。"<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<p data-cid="72" class="commentable"><strong>结论</strong>：Temporal 不是实验性技术，而是经过全球顶级公司大规模生产验证的成熟方案。我们面临的问题（批量 API 调用限流、接口重试、断点续传、长耗时等待），正是 Temporal 的核心强项。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<hr>
+<h2 data-cid="73" class="commentable">三、Temporal 如何解决我们的六大痛点<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h2>
+<h3 data-cid="74" class="commentable">3.0 迁移优先级评估<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<p data-cid="75" class="commentable">基于工作流复杂度、容错需求、可扩展性需求、维护挑战、Temporal 契合度 5 个维度（各 1-5 分，满分 25）对 1.1 中的 7 类业务场景进行综合评定，评分 ≥ 17 的场景建议优先迁移：<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<table data-cid="76" class="commentable">
+<thead>
+<tr>
+<th>优先级</th>
+<th>业务场景</th>
+<th>评分</th>
+<th>核心理由</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>P0</strong></td>
+<td>海康人脸分组批量同步</td>
+<td><strong>24/25</strong></td>
+<td>4 万人 API 调用无限流无重试、OOM 风险、完美匹配 Temporal 限流+重试+断点续传</td>
+</tr>
+<tr>
+<td><strong>P0</strong></td>
+<td>入厂备案权限定时下发</td>
+<td><strong>23/25</strong></td>
+<td>每 30 分钟扫库有漏单风险、<code>Workflow.sleep()</code> 精确替代</td>
+</tr>
+<tr>
+<td><strong>P1</strong></td>
+<td>访客授权审批与定时下发</td>
+<td><strong>22/25</strong></td>
+<td>多系统协作无重试、定时下发漏单风险、Signal 审批等待</td>
+</tr>
+<tr>
+<td><strong>P1</strong></td>
+<td>楼宇门禁权限批量管理</td>
+<td><strong>21/25</strong></td>
+<td>17 个任务顺序依赖无事务、4 万人 × 500 门禁规模大</td>
+</tr>
+<tr>
+<td><strong>P2</strong></td>
+<td>新开普/富士门禁权限下发</td>
+<td><strong>18/25</strong></td>
+<td>50 万次 API 无速率控制、3DES 过时、5 种 HTTP 客户端并存</td>
+</tr>
+<tr>
+<td><strong>P2</strong></td>
+<td>BPM 流程编排</td>
+<td><strong>17/25</strong></td>
+<td>SOAP 无重试、无连接池、人工审批等待无优雅机制</td>
+</tr>
+<tr>
+<td><strong>P2</strong></td>
+<td>CRK 出出入口权限管理</td>
+<td><strong>17/25</strong></td>
+<td>权限下发无重试无补偿、审计追踪困难</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<blockquote data-cid="77" class="commentable">
+<p data-cid="78" class="commentable">完整的评估方法论和分阶段迁移路线图详见 <a href="file:///Users/apple/Desktop/AdapterService/docs/Temporal%E8%BF%81%E7%A7%BB%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E6%8A%A5%E5%91%8A.md">Temporal迁移技术分析报告.md</a>。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<hr>
+<h3 data-cid="79" class="commentable">3.1 痛点一解决方案：内置限流与削峰<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<blockquote data-cid="80" class="commentable">
+<p data-cid="81" class="commentable"><strong>对应场景</strong>：海康人脸分组同步（4 万+ 人员）+ 楼宇门禁权限下发（1000+ 人 × 500+ 设备 = 50 万+ 次 API 调用）<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<p data-cid="82" class="commentable">Temporal Worker 支持配置全局并发上限和每秒任务数限制，<strong>限流参数一行代码搞定，无需手写信号量</strong>：<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<pre data-cid="83" class="commentable"><code class="language-java">Worker worker = factory.newWorker("HIK_BATCH_TASK_QUEUE",
+    WorkerOptions.newBuilder()
+        .setMaxConcurrentActivityExecutionSize(15)  // 全局并发不超过 15
+        .setMaxWorkerActivityTasksPerSecond(20)     // 每秒最多 20 个任务
+        .build());
+</code><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></pre>
+<p data-cid="84" class="commentable"><strong>效果</strong>：无论是 4 万人海康分组同步还是 1000 人 × 500 门禁 = 50 万次 API 调用，存入 Task Queue 排队缓冲，Worker 以恒定速率消费，<strong>绝不打垮新开普、富士或海康接口</strong>。即使瞬间涌入再多的请求，任务也只是在队列中排队，<strong>不会丢失、不会拒绝</strong>。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<h3 data-cid="85" class="commentable">3.2 痛点二解决方案：自动指数退避重试（零代码）<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<blockquote data-cid="86" class="commentable">
+<p data-cid="87" class="commentable"><strong>对应场景</strong>：30+ 个外部系统集成点中仅 2 个有重试逻辑（海康/BPM/CRK/EHR/IAM 均无重试）<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<p data-cid="88" class="commentable">Temporal Activity 执行失败后<strong>自动</strong>按配置的重试策略进行指数退避重试，<strong>业务代码无需写一行重试逻辑</strong>：<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<pre data-cid="89" class="commentable"><code>第1次失败 -&gt; 等1秒 -&gt; 第2次失败 -&gt; 等2秒 -&gt; 第3次失败 -&gt; 等4秒 -&gt; 第4次成功 ✓
+
+整个过程在 Web UI 上一目了然，业务系统完全无感知
+</code><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></pre>
+<p data-cid="90" class="commentable">超过最大重试次数后，Workflow 可优雅捕获并进入异常处理分支。<strong>无论是海康 SDK 调用、BPM SOAP 接口还是 CRK 权限下发，统一由引擎保证重试</strong>。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<h3 data-cid="91" class="commentable">3.3 痛点三解决方案：多步骤编排与断点续传（零丢失）<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<blockquote data-cid="92" class="commentable">
+<p data-cid="93" class="commentable"><strong>对应场景</strong>：楼宇门禁 17 个任务的顺序依赖 + 入厂备案 6 个任务的数据依赖<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<p data-cid="94" class="commentable">Temporal 原生支持多步骤流程编排，<strong>顺序、并行、子流程均可声明式定义</strong>。Workflow 中的代码顺序即为执行顺序，前序 Activity 完成后才会执行后续 Activity，<strong>天然保证顺序依赖</strong>：<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<pre data-cid="95" class="commentable"><code class="language-java">// 楼宇门禁 Workflow 示例：步骤顺序即执行顺序
+@WorkflowMethod
+public void executeBuildPowerWorkflow(String date) {
+    // Step 1: 更新设备（完成后才执行 Step 2）
+    activities.updateDeviceTask();
+    activities.removeDevicePower();
+    
+    // Step 2: 更新权限（依赖 Step 1 的设备数据）
+    activities.updatePowerByDate(date);
+    activities.autoConfirmPower();
+    
+    // Step 3: 更新出入记录 -&gt; 长期未进出 -&gt; 发送代办（顺序依赖链）
+    activities.modifyRecords();
+    activities.initLongTerm();
+    activities.sendOwnerLongToDo();
+}
+</code><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></pre>
+<p data-cid="96" class="commentable">同时，Temporal 采用 Event Sourcing 模式，Workflow 的<strong>每一步执行结果</strong>都持久化到数据库。Worker 进程崩溃/服务器断电后重启，Temporal <strong>自动从最后完成的步骤继续执行</strong>，已完成的 Activity <strong>绝不会重复执行</strong>。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<pre data-cid="97" class="commentable"><code>正常执行：  Step 1 ✓  -&gt;  Step 2 (执行中) 💥崩溃
+                     ↓ 服务器重启
+恢复执行：  Step 1 (跳过)  -&gt;  Step 2 (从头执行)  -&gt;  Step 3 ✓
+
+不会从头重新跑，也不会漏掉任何步骤
+</code><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></pre>
+<p data-cid="98" class="commentable"><strong>对比传统方案</strong>：XXL-JOB 按 cron 顺序触发 17 个独立 HTTP 端点，前序失败后续仍执行；Temporal 在一个 Workflow 内编排，前序失败后续不执行，且自动重试前序步骤。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<h3 data-cid="99" class="commentable">3.4 痛点四解决方案：持久化定时器（零资源占用）<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<blockquote data-cid="100" class="commentable">
+<p data-cid="101" class="commentable"><strong>对应场景</strong>：入厂备案每 30 分钟扫库下发"当前时间+33分钟"权限 + 访客入场前 10 分钟下发权限<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<p data-cid="102" class="commentable"><code>Workflow.sleep()</code> 是<strong>持久化定时器</strong>，休眠期间 Worker 进程<strong>零 CPU、零内存占用</strong>。即使休眠 30 天甚至 1 年，资源消耗也是 0。休眠期间服务器断电，恢复后<strong>继续无缝倒计时</strong>，绝无漏单风险。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<pre data-cid="103" class="commentable"><code class="language-java">// 入厂备案权限定时下发：替代每 30 分钟扫库
+// 计算预约入场时间前 33 分钟的等待时间，直接休眠
+long delay = appointmentTime.minusMinutes(33).getTime() - Workflow.currentTimeMillis();
+Workflow.sleep(delay);
+// 时间一到，Temporal 自动唤醒，执行下发 Activity
+entryActivities.delegatePermission(entryId, doorIds);
+</code><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></pre>
+<pre data-cid="104" class="commentable"><code class="language-java">// 访客入场前 10 分钟下发权限：替代每分钟扫库
+long delay = entryTime.minusMinutes(10).getTime() - Workflow.currentTimeMillis();
+Workflow.sleep(delay);
+visitorActivities.grantAccess(visitorId, doorIds);
+</code><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></pre>
+<p data-cid="105" class="commentable"><strong>对比传统方案</strong>：XXL-JOB 每 30 分钟扫库产生 DB 慢查询且有漏单风险；<code>Workflow.sleep()</code> 精确到毫秒，零资源占用，绝无漏单。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<p data-cid="106" class="commentable"><strong>动态改期/取消</strong>：访客临时改期或取消，业务系统发送一个 Signal（信号），Workflow 自动取消旧定时器并按新时间重新休眠，或直接结束流程。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<h3 data-cid="107" class="commentable">3.5 痛点五解决方案：可靠的 Webhook 回调<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<blockquote data-cid="108" class="commentable">
+<p data-cid="109" class="commentable"><strong>对应场景</strong>：海康批量操作完成后的结果回传 + BPM 审批结果通知<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<p data-cid="110" class="commentable">Webhook 回调本身就是一个 Activity。如果主系统宕机返回异常，Temporal <strong>自动重试发送</strong>，直到主系统恢复返回 200。<strong>无需手写补偿 Job</strong>。当前系统中海康任务结果仅写日志、无主动回调的问题彻底解决。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<h3 data-cid="111" class="commentable">3.6 痛点六解决方案：控制面与数据面分离<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<blockquote data-cid="112" class="commentable">
+<p data-cid="113" class="commentable"><strong>对应场景</strong>：海康人脸识别 4 万人全量更新导致 OOM + 楼宇门禁 50 万次 API 调用<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<p data-cid="114" class="commentable">引入 Temporal 后，主业务系统只需调用 <code>StartWorkflow</code>（一条 gRPC 指令，<strong>&lt; 5ms 即返回</strong>），<strong>不持有任何长连接</strong>，彻底断开与海康/新开普/富士等下游 API 的耦合。真正消耗 CPU/内存的网络调用全部在独立的 Worker 集群中执行，<strong>主服务零 OOM 风险</strong>。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<h3 data-cid="115" class="commentable">3.7 痛点与方案对照总结<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<table data-cid="116" class="commentable">
+<thead>
+<tr>
+<th>痛点</th>
+<th>传统方案</th>
+<th>Temporal 方案</th>
+<th>代码量对比</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>限流失控</td>
+<td>手写 Semaphore + 线程池</td>
+<td>Worker 配置一行参数</td>
+<td><strong>减少 90%</strong></td>
+</tr>
+<tr>
+<td>接口重试</td>
+<td>30+ 集成点仅 2 个有重试</td>
+<td>配置 RetryPolicy，零代码</td>
+<td><strong>减少 100%</strong></td>
+</tr>
+<tr>
+<td>多步骤编排与顺序依赖</td>
+<td>XXL-JOB cron 顺序触发，无事务</td>
+<td>Workflow 内声明式编排，天然有序</td>
+<td><strong>减少 90%</strong></td>
+</tr>
+<tr>
+<td>断点续传</td>
+<td>状态表 + 补偿 Job + 手动恢复</td>
+<td>引擎自动保证，零代码</td>
+<td><strong>减少 100%</strong></td>
+</tr>
+<tr>
+<td>长耗时等待</td>
+<td>XXL-JOB 每 30 分钟扫库</td>
+<td><code>Workflow.sleep()</code> 一行代码</td>
+<td><strong>减少 95%</strong></td>
+</tr>
+<tr>
+<td>回调丢失</td>
+<td>Webhook + 补偿 Job（当前未实现）</td>
+<td>Activity 自动重试直到成功</td>
+<td><strong>减少 90%</strong></td>
+</tr>
+<tr>
+<td>主服务 OOM</td>
+<td>自建中转服务 + 手动限流</td>
+<td>控制面/数据面分离，主服务只发指令</td>
+<td><strong>减少 80%</strong></td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<hr>
+<blockquote data-cid="117" class="commentable">
+<p data-cid="118" class="commentable"><strong>PoC 验证方案</strong>：具体的验证场景、代码骨架与操作步骤已独立整理至 <a href="file:///Users/apple/Desktop/AdapterService/docs/%E9%AA%8C%E8%AF%81%E5%9C%BA%E6%99%AF.md">验证场景.md</a>，本文档不再重复。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<hr>
+<h2 data-cid="119" class="commentable">四、与传统方案对比<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h2>
+<h3 data-cid="120" class="commentable">4.1 与 XXL-JOB / Quartz 对比<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<blockquote data-cid="121" class="commentable">
+<p data-cid="122" class="commentable"><strong>定位差异</strong>：XXL-JOB 和 Quartz 是<strong>定时任务调度框架</strong>，Temporal 是<strong>持久化工作流引擎</strong>。两者解决的不是同一类问题，但在"定时触发"和"任务可靠性"场景下有交集。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<table data-cid="123" class="commentable">
+<thead>
+<tr>
+<th>对比维度</th>
+<th>XXL-JOB / Quartz</th>
+<th>Temporal</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>核心定位</strong></td>
+<td>定时任务调度（Cron 触发）</td>
+<td>持久化工作流编排（全生命周期管理）</td>
+</tr>
+<tr>
+<td><strong>定时能力</strong></td>
+<td>基于 Cron 表达式定时触发</td>
+<td><code>Workflow.sleep()</code> 持久化定时器，精确到毫秒</td>
+</tr>
+<tr>
+<td><strong>长等待处理</strong></td>
+<td>需要线程一直 <code>sleep</code>，占用资源</td>
+<td>休眠期间<strong>零资源占用</strong>，可等待数天/数月</td>
+</tr>
+<tr>
+<td><strong>任务重试</strong></td>
+<td>需手写重试逻辑</td>
+<td>自动指数退避重试，零代码</td>
+</tr>
+<tr>
+<td><strong>断点续传</strong></td>
+<td>不支持，失败后需从头重跑</td>
+<td>天然支持，从断点处自动恢复</td>
+</tr>
+<tr>
+<td><strong>多步骤编排</strong></td>
+<td>不支持（每个任务是独立的）</td>
+<td>原生支持顺序/并行/子流程编排</td>
+</tr>
+<tr>
+<td><strong>人工审批</strong></td>
+<td>不支持</td>
+<td>原生支持 Signal 等待与唤醒</td>
+</tr>
+<tr>
+<td><strong>状态可视化</strong></td>
+<td>只能看到任务执行日志</td>
+<td>完整的 Event History + Web UI</td>
+</tr>
+<tr>
+<td><strong>动态取消/改期</strong></td>
+<td>需要手动停止任务 + 清理状态</td>
+<td>Signal 一行代码，自动处理</td>
+</tr>
+<tr>
+<td><strong>扫库问题</strong></td>
+<td>高频扫库产生 DB 压力，可能漏单</td>
+<td>无需扫库，定时器由引擎内部管理</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>简单的定时数据同步、报表生成</td>
+<td>复杂业务流程、多步骤编排、长耗时任务</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<p data-cid="124" class="commentable"><strong>关键结论</strong>：XXL-JOB 适合"到点执行一个动作"的简单场景；Temporal 适合"一个业务流程需要多个步骤、需要可靠保证、可能需要等待和人工介入"的复杂场景。<strong>两者不冲突，可以共存</strong>--简单定时任务用 XXL-JOB，复杂业务流程用 Temporal。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<h3 data-cid="125" class="commentable">4.2 与 MQ 延迟队列（RabbitMQ / RocketMQ）对比<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<table data-cid="126" class="commentable">
+<thead>
+<tr>
+<th>对比维度</th>
+<th>MQ 延迟队列</th>
+<th>Temporal</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>核心定位</strong></td>
+<td>消息延迟投递</td>
+<td>完整的业务流程编排</td>
+</tr>
+<tr>
+<td><strong>定时精度</strong></td>
+<td>固定延迟级别（RabbitMQ 插件）或任意延迟（RocketMQ）</td>
+<td>毫秒级精确定时</td>
+</tr>
+<tr>
+<td><strong>流程编排</strong></td>
+<td>不支持，每条消息独立</td>
+<td>原生支持多步骤顺序/并行编排</td>
+</tr>
+<tr>
+<td><strong>失败处理</strong></td>
+<td>死信队列 + 手动补偿</td>
+<td>自动重试 + 断点续传</td>
+</tr>
+<tr>
+<td><strong>状态追踪</strong></td>
+<td>消息级别，无流程视角</td>
+<td>完整的 Workflow 级别状态追踪</td>
+</tr>
+<tr>
+<td><strong>动态改期</strong></td>
+<td>不支持（需消费后重新投递）</td>
+<td>Signal 一行代码</td>
+</tr>
+<tr>
+<td><strong>资源占用</strong></td>
+<td>消息在 MQ 中存储，有 TTL 限制</td>
+<td>休眠期间零资源，无 TTL 限制</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>简单的延迟通知、超时取消</td>
+<td>复杂业务流程、多步骤编排</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<p data-cid="127" class="commentable"><strong>关键结论</strong>：MQ 延迟队列适合"延迟投递一条消息"的简单场景；Temporal 适合"延迟后还要执行一系列步骤"的复杂场景。用 MQ 做复杂流程编排，需要大量补偿代码，最终会退化成"手写版 Temporal"。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<h3 data-cid="128" class="commentable">4.3 与 APISIX / 网关限流对比<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<blockquote data-cid="129" class="commentable">
+<p data-cid="130" class="commentable"><strong>定位差异</strong>：APISIX 是 API 网关，主要职责是路由、鉴权、限流等流量治理。Temporal 的限流是 Worker 级别的任务消费速率控制。两者不在同一层面，但在"保护下游接口"场景下有交集。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<table data-cid="131" class="commentable">
+<thead>
+<tr>
+<th>对比维度</th>
+<th>APISIX 网关限流</th>
+<th>Temporal Worker 限流</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>限流层级</strong></td>
+<td>HTTP 请求级别（网关层）</td>
+<td>任务消费级别（Worker 层）</td>
+</tr>
+<tr>
+<td><strong>限流策略</strong></td>
+<td>QPS 限流 / 并发限流 / 令牌桶</td>
+<td>Worker 全局并发数 + 每秒任务数</td>
+</tr>
+<tr>
+<td><strong>超限行为</strong></td>
+<td>直接返回 429 拒绝</td>
+<td>任务在队列排队，不丢失不拒绝</td>
+</tr>
+<tr>
+<td><strong>排队缓冲</strong></td>
+<td>不支持（超出即拒绝）</td>
+<td>Task Queue 天然排队缓冲</td>
+</tr>
+<tr>
+<td><strong>重试机制</strong></td>
+<td>需客户端自行重试</td>
+<td>引擎自动指数退避重试</td>
+</tr>
+<tr>
+<td><strong>状态管理</strong></td>
+<td>无状态</td>
+<td>完整的 Workflow 状态管理</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>保护 HTTP 接口不被瞬时流量打垮</td>
+<td>保护下游 API + 保证任务可靠执行</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<p data-cid="132" class="commentable"><strong>关键结论</strong>：APISIX 解决的是"流量入口的限流"问题，超限即拒绝；Temporal 解决的是"任务执行的可靠性"问题，超限则排队，且保证最终一定执行。对于批量门禁下发这种<strong>必须全部执行成功、不能拒绝丢弃</strong>的场景，Temporal 的排队+重试模式远优于网关的拒绝模式。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<h3 data-cid="133" class="commentable">4.4 综合对比一览表<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<table data-cid="134" class="commentable">
+<thead>
+<tr>
+<th>能力维度</th>
+<th>手写方案</th>
+<th>XXL-JOB</th>
+<th>MQ 延迟队列</th>
+<th>APISIX 网关</th>
+<th><strong>Temporal</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>多步骤流程编排</td>
+<td>✗</td>
+<td>✗</td>
+<td>✗</td>
+<td>✗</td>
+<td><strong>✓ 原生</strong></td>
+</tr>
+<tr>
+<td>自动重试</td>
+<td>手写</td>
+<td>✗</td>
+<td>死信队列</td>
+<td>✗</td>
+<td><strong>✓ 零代码</strong></td>
+</tr>
+<tr>
+<td>断点续传</td>
+<td>手写</td>
+<td>✗</td>
+<td>✗</td>
+<td>✗</td>
+<td><strong>✓ 自动</strong></td>
+</tr>
+<tr>
+<td>持久化定时器</td>
+<td>✗</td>
+<td>Cron</td>
+<td>✓(有TTL)</td>
+<td>✗</td>
+<td><strong>✓(无TTL)</strong></td>
+</tr>
+<tr>
+<td>休眠零资源</td>
+<td>✗</td>
+<td>✗</td>
+<td>✓</td>
+<td>✗</td>
+<td><strong>✓</strong></td>
+</tr>
+<tr>
+<td>并发限流</td>
+<td>手写</td>
+<td>✗</td>
+<td>✗</td>
+<td>✓(超限拒绝)</td>
+<td><strong>✓(超限排队)</strong></td>
+</tr>
+<tr>
+<td>人工审批等待</td>
+<td>手写</td>
+<td>✗</td>
+<td>✗</td>
+<td>✗</td>
+<td><strong>✓ Signal</strong></td>
+</tr>
+<tr>
+<td>动态改期/取消</td>
+<td>手写</td>
+<td>手动停止</td>
+<td>重新投递</td>
+<td>✗</td>
+<td><strong>✓ Signal</strong></td>
+</tr>
+<tr>
+<td>全链路可视化</td>
+<td>自建</td>
+<td>日志</td>
+<td>✗</td>
+<td>✗</td>
+<td><strong>✓ Web UI</strong></td>
+</tr>
+<tr>
+<td>任务不丢失</td>
+<td>手写补偿</td>
+<td>✗</td>
+<td>消息持久化</td>
+<td>✗</td>
+<td><strong>✓ 引擎保证</strong></td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<hr>
+<h2 data-cid="135" class="commentable">五、技术架构设计<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h2>
+<h3 data-cid="136" class="commentable">5.1 整体架构总览<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<pre data-cid="137" class="commentable"><code>┌─────────────────────────────────────────────────────────────────────┐
+│                        业务系统层                                     │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐                 │
+│  │  主业务应用  │  │  自研 UI     │  │  管理后台    │                 │
+│  │ (发起Workflow)│  │ (Vue3+BFF)  │  │  (权限管理)  │                 │
+│  └──────┬──────┘  └──────┬──────┘  └─────────────┘                 │
+│         | gRPC            | REST/WS                                   │
+└─────────┼─────────────────┼──────────────────────────────────────────┘
+          |                 |
+          v                 v
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Temporal 控制面 (Server)                          │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐           │
+│  │ Frontend │  │ History  │  │ Matching │  │  Worker  │           │
+│  │ Service  │  │ Service  │  │ Service  │  │ Service  │           │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘           │
+│         |                 |                                          │
+│         | gRPC 7233       | 持久化                                    │
+└─────────┼─────────────────┼──────────────────────────────────────────┘
+          |                 |
+          v                 v
+┌──────────────────────┐  ┌──────────────────────────────────────────┐
+│  Temporal 数据库      │  │           Worker 集群 (数据面)             │
+│  (PostgreSQL)        │  │  ┌────────┐ ┌────────┐ ┌────────┐       │
+│  - 事件历史存储       │  │  │Worker 1│ │Worker 2│ │Worker N│       │
+│  - 任务队列状态       │  │  │(门禁)  │ │(校验)  │ │(通知)  │       │
+│  - 定时器管理         │  │  └────────┘ └────────┘ └────────┘       │
+└──────────────────────┘  │  无状态, 横向扩缩容, 独立部署             │
+                          └──────────────────────────────────────────┘
+                                     |
+                                     v
+                          ┌──────────────────────────┐
+                          │   下游第三方 API           │
+                          │  (海康威视/门禁/短信等)    │
+                          └──────────────────────────┘
+</code><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></pre>
+<h3 data-cid="138" class="commentable">5.2 核心设计原则<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<table data-cid="139" class="commentable">
+<thead>
+<tr>
+<th>原则</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>控制面与数据面分离</strong></td>
+<td>Temporal Server（调度）与 Worker（业务执行）独立部署，互不影响</td>
+</tr>
+<tr>
+<td><strong>Worker 无状态</strong></td>
+<td>Worker 可随时增减，扩缩容不影响正在执行的任务</td>
+</tr>
+<tr>
+<td><strong>Server 与 DB 同可用区</strong></td>
+<td>保证持久化链路低延迟（RTT &lt; 1ms），这是性能生命线</td>
+</tr>
+<tr>
+<td><strong>业务代码与可靠性解耦</strong></td>
+<td>开发者只写 Activity 业务逻辑，重试/补偿/状态由引擎保证</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<h3 data-cid="140" class="commentable">5.3 业务调用链路<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<pre data-cid="141" class="commentable"><code>主业务系统                         Temporal Server                    Worker 集群
+    |                                  |                               |
+    |  1. StartWorkflow (gRPC, &lt;5ms)   |                               |
+    |---------------------------------&gt;|                               |
+    |  2. 返回 WorkflowId              |                               |
+    |&lt;---------------------------------|                               |
+    |                                  |  3. 任务入队 Task Queue       |
+    |                                  |  4. Worker 长轮询领取任务      |
+    |                                  |------------------------------&gt;|
+    |                                  |                               |
+    |                                  |                               |  5. 执行 Activity
+    |                                  |                               |     (调海康API/发短信等)
+    |                                  |                               |  6. 限流(15QPS)/重试/补偿
+    |                                  |                               |     全部由引擎保证
+    |                                  |  7. 回传执行结果               |
+    |                                  |&lt;------------------------------|
+    |                                  |  8. 持久化到数据库             |
+    |                                  |                               |
+    |  9. 查询状态 (Query/Web UI)      |                               |
+    |---------------------------------&gt;|                               |
+    |  10. 返回实时状态                 |                               |
+    |&lt;---------------------------------|                               |
+</code><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></pre>
+<p data-cid="142" class="commentable"><strong>关键特点</strong>：<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<ul data-cid="143" class="commentable">
+<li>主业务系统调用 <code>StartWorkflow</code> 仅需 <strong>&lt; 5ms</strong>（发一条 gRPC 指令即返回）</li>
+<li>主业务系统<strong>不持有任何长连接</strong>，彻底断开与下游第三方 API 的耦合</li>
+<li>Worker 以<strong>恒定速率</strong>消费任务，保护下游接口不被打垮</li>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></ul>
+<h3 data-cid="144" class="commentable">5.4 运维与发布架构优势<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<p data-cid="145" class="commentable">基于“控制面与数据面分离”的架构设计，Temporal 在生产环境运维和业务迭代上具备传统单体/微服务架构难以比拟的优势：<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<h4 data-cid="146" class="commentable">1. Temporal Server 一次部署，长期稳定<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h4>
+<p data-cid="147" class="commentable">Temporal Server 作为核心调度引擎，其职责是维护任务队列、持久化事件、分发任务。一旦部署完成并稳定运行，<strong>Temporal Server 本身不需要随业务迭代而频繁升级或重启</strong>。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<ul data-cid="148" class="commentable">
+<li><strong>稳定性</strong>：Temporal Server 是纯粹的基础设施组件，不包含任何业务逻辑，变更频率极低，确保了核心调度层的高可用性。</li>
+<li><strong>风险隔离</strong>：业务功能的新增、修改、迭代均不会波及 Temporal Server，即使业务代码出现问题，也不会导致调度系统崩溃。</li>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></ul>
+<h4 data-cid="149" class="commentable">2. 业务逻辑独立发布（Worker 驱动）<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h4>
+<p data-cid="150" class="commentable">所有业务逻辑（Workflow 定义、Activity 实现）均运行在独立的 Worker 进程中。业务迭代和功能更新完全转化为 <strong>Worker 代码的发布与更新</strong>。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<ul data-cid="151" class="commentable">
+<li><strong>Jenkins 驱动发布</strong>：可以通过 Jenkins 独立构建和部署 Worker 集群。当需要新增业务场景（如增加新的审批流程）或修改现有逻辑时，只需编写/修改对应的 Worker 代码，打包后滚动更新 Worker 节点即可。</li>
+<li><strong>零宕机更新</strong>：Temporal 支持 Workflow 的“版本控制（Versioning）”机制。当 Worker 更新时：<ul data-cid="152" class="commentable">
+<li><strong>新启动的 Workflow</strong> 会立即由新版本的 Worker 接管执行。</li>
+<li><strong>正在执行中的老 Workflow</strong>，Temporal 引擎会确保其继续由旧版本（或兼容版本）的 Worker 处理，直到流程结束。</li>
+<li>整个过程<strong>完全无感</strong>，不需要停机维护，也不会导致正在进行的业务流程中断或数据丢失。</li>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></ul>
+</li>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></ul>
+<h4 data-cid="153" class="commentable">3. 故障隔离与弹性伸缩<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h4>
+<ul data-cid="154" class="commentable">
+<li><strong>Worker 崩溃不影响全局</strong>：单个 Worker 进程的崩溃只会影响其正在执行的少量任务，Temporal 会自动将这些任务重新分配给其他健康的 Worker，其他正在运行的 Workflow 不受影响。</li>
+<li><strong>按需弹性扩容</strong>：在业务高峰期（如批量门禁下发），只需通过 Jenkins 或手动快速启动新的 Worker 实例，即可瞬间提升处理能力。流量回落时，可随时缩减 Worker 实例数量，实现资源的动态最优利用。</li>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></ul>
+<hr>
+<h2 data-cid="155" class="commentable">六、部署架构<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h2>
+<h3 data-cid="156" class="commentable">6.1 四层分离部署拓扑<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<p data-cid="157" class="commentable">采用<strong>四层分离</strong>架构，在保证性能的前提下实现故障隔离与弹性扩缩容：<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<table data-cid="158" class="commentable">
+<thead>
+<tr>
+<th>服务器</th>
+<th>部署组件</th>
+<th>角色</th>
+<th>资源建议</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>服务器 A</strong></td>
+<td>Nginx + 自研 UI 前端</td>
+<td>接入层（静态托管 + 反向代理）</td>
+<td>2核4G ×N</td>
+</tr>
+<tr>
+<td><strong>服务器 B</strong></td>
+<td>Temporal Server + BFF 后端</td>
+<td>核心控制面（调度 + BFF）</td>
+<td>8核16G+</td>
+</tr>
+<tr>
+<td><strong>服务器 C</strong></td>
+<td>Temporal 数据库（PostgreSQL）</td>
+<td>持久化层（与 B 同可用区）</td>
+<td>8核16G+ SSD</td>
+</tr>
+<tr>
+<td><strong>服务器 D/E/N</strong></td>
+<td>Worker（Runner）集群</td>
+<td>数据面（无状态，横向扩缩容）</td>
+<td>按峰值弹性</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<pre data-cid="159" class="commentable"><code>+---------------------------------------------------------------------------+
+|  服务器 A (接入层)                                                          |
+|  +------------------+   +------------------+                              |
+|  | 自研 UI 前端      |   | Nginx            |                              |
+|  | (Vue3 静态资源)   |--&gt;| (静态托管+反代)   |                              |
+|  +------------------+   +--------+---------+                              |
++----------------------------------|-----------------------------------------+
+                                   | HTTPS (REST/WS)
+                                   v
++---------------------------------------------------------------------------+
+|  服务器 B (核心控制面)                       服务器 C (持久化层, 同可用区)    |
+|  +------------------+   +------------------+   +-----------------------+   |
+|  | 自研 UI BFF 后端  |--&gt;| Temporal Server  |--&gt;|  PostgreSQL 数据库    |   |
+|  | (Java/Spring)    |   | :7233 (gRPC)     |   |  低延迟内网互通        |   |
+|  +------------------+   +--------+---------+   +-----------------------+   |
++----------------------------------|-----------------------------------------+
+                                   | gRPC 长轮询 (跨网络/跨机房均可)
+                                   v
++---------------------------------------------------------------------------+
+|  服务器 D/E/N (数据面 / Runner 集群, 可水平扩展)                            |
+|  [ Worker 实例 1 ]   [ Worker 实例 2 ]   [ Worker 实例 N ... ]             |
+|   纯业务执行 (Activity/Workflow), 无状态, 支持 HPA 横向扩容               |
++---------------------------------------------------------------------------+
+</code><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></pre>
+<h3 data-cid="160" class="commentable">6.2 部署架构设计原则<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<table data-cid="161" class="commentable">
+<thead>
+<tr>
+<th>原则</th>
+<th>技术依据</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Server 与 DB 必须同可用区</strong></td>
+<td>Temporal Server 对每一次事件都需要持久化读写，Server↔DB 延迟直接叠加到调度关键路径上，官方要求 RTT &lt; 1ms</td>
+</tr>
+<tr>
+<td><strong>DB 独立服务器优于同机</strong></td>
+<td>DB 拥有专属 I/O 与 CPU，避免与 Server 争抢；便于独立调优、备份、垂直扩容</td>
+</tr>
+<tr>
+<td><strong>BFF 与 Temporal Server 同机</strong></td>
+<td>BFF 通过 gRPC 调用 Server，走 localhost 延迟最低</td>
+</tr>
+<tr>
+<td><strong>Worker 独立集群部署</strong></td>
+<td>Worker 是无状态数据面，可按 Task Queue 积压自由横向扩容；与 Server/DB 同机会资源争抢、限制扩容</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<h3 data-cid="162" class="commentable">6.3 Worker 扩缩容机制<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<p data-cid="163" class="commentable">Temporal 的任务调度采用**长轮询（Long-Polling）**机制，Worker 的横向扩容极其简单：<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<ol data-cid="164" class="commentable">
+<li><strong>解耦与缓冲</strong>：业务系统瞬间涌入大批请求时，任务存入 Task Queue 排队，即使 Worker 不足也不会丢失或崩溃</li>
+<li><strong>无状态平滑扩容</strong>：Worker 完全无状态，发现积压时只需启动更多 Worker 容器</li>
+<li><strong>即插即用</strong>：新 Worker 只需指定 Server 地址和 Task Queue 名称，自动连上领走任务，<strong>无需在 Server 上做任何配置</strong></li>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></ol>
+<h3 data-cid="165" class="commentable">6.4 快速部署方案（开发/测试环境）<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<p data-cid="166" class="commentable">开发与测试环境可使用 Docker Compose 一键拉起：<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<pre data-cid="167" class="commentable"><code class="language-yaml"># docker-compose.yml (简化版)
+services:
+  postgresql:          # 数据库
+    image: postgres:15-alpine
+  temporal:            # Temporal Server
+    image: temporalio/auto-setup:1.24.2
+    ports: ["7233:7233"]
+  temporal-ui:         # Web UI 控制台
+    image: temporalio/ui:2.28.0
+    ports: ["8233:8233"]
+</code><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></pre>
+<p data-cid="168" class="commentable">启动后访问 <code>http://localhost:8233</code> 即可看到 Web UI 控制台。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<hr>
+<blockquote data-cid="169" class="commentable">
+<p data-cid="170" class="commentable"><strong>Web UI 二次开发与落地实施路径</strong>：自研 UI 的 BFF 架构设计、核心 API 设计、权限设计，以及分阶段实施计划和技术选型已独立整理至 <a href="file:///Users/apple/Desktop/AdapterService/docs/Temporal-WebUI%E4%B8%8E%E8%90%BD%E5%9C%B0%E5%AE%9E%E6%96%BD%E8%B7%AF%E5%BE%84.md">Temporal-WebUI与落地实施路径.md</a>，本文档不再重复。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<hr>
+<h2 data-cid="171" class="commentable">七、风险与应对<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h2>
+<table data-cid="172" class="commentable">
+<thead>
+<tr>
+<th>风险</th>
+<th>影响</th>
+<th>应对策略</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>DB 性能瓶颈</strong></td>
+<td>Worker 大量汇报状态导致 DB 读写压力</td>
+<td>DB 独立部署 + SSD + 充足连接池；监控慢查询与 IOPS</td>
+</tr>
+<tr>
+<td><strong>Server↔DB 跨可用区延迟</strong></td>
+<td>持久化链路延迟拖垮整体吞吐</td>
+<td>强制 Server 与 DB 同可用区部署；上线前验证 RTT &lt; 1ms</td>
+</tr>
+<tr>
+<td><strong>Worker 扩容冲击 Server</strong></td>
+<td>大量 Heartbeat 冲击 Server-&gt;DB 链路</td>
+<td>合理设置 Heartbeat 频率，避免过密</td>
+</tr>
+<tr>
+<td><strong>自研 UI 与官方版本脱节</strong></td>
+<td>Temporal 版本升级时 gRPC API 变更</td>
+<td>锁定 SDK 版本，建立回归测试</td>
+</tr>
+<tr>
+<td><strong>团队学习成本</strong></td>
+<td>Temporal 编程模型与传统不同</td>
+<td>编写最佳实践文档；PoC 阶段充分练手</td>
+</tr>
+<tr>
+<td><strong>加密 Payload 解密</strong></td>
+<td>BFF 需部署 Codec Server</td>
+<td>密钥管理（KMS）与权限隔离</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<hr>
+<h2 data-cid="173" class="commentable">八、成本与收益分析<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h2>
+<h3 data-cid="174" class="commentable">8.1 引入成本<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<table data-cid="175" class="commentable">
+<thead>
+<tr>
+<th>成本项</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>软件授权</strong></td>
+<td><strong>零成本</strong>（MIT 协议，自托管完全免费）</td>
+</tr>
+<tr>
+<td>基础设施</td>
+<td>3 台服务器（接入层 + 控制面 + DB），Worker 可复用现有服务器</td>
+</tr>
+<tr>
+<td>学习成本</td>
+<td>Temporal 编程模型需 1~2 周熟悉，SDK 使用简单</td>
+</tr>
+<tr>
+<td>开发成本</td>
+<td>PoC 验证 + 核心接入 + UI 二次开发</td>
+</tr>
+<tr>
+<td>运维成本</td>
+<td>Temporal Server + DB 需日常运维，有完善监控</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<h3 data-cid="176" class="commentable">8.2 收益<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<table data-cid="177" class="commentable">
+<thead>
+<tr>
+<th>收益项</th>
+<th>量化</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>代码量减少</strong></td>
+<td>可靠性代码（重试/补偿/幂等/状态机）减少 <strong>80%+</strong></td>
+</tr>
+<tr>
+<td><strong>Bug 率降低</strong></td>
+<td>消除手写重试/补偿逻辑中的边界情况 Bug</td>
+</tr>
+<tr>
+<td><strong>排障效率</strong></td>
+<td>Web UI 全链路可视化，排障时间从"小时级"降至"分钟级"</td>
+</tr>
+<tr>
+<td><strong>系统可靠性</strong></td>
+<td>断点续传 + 自动重试，任务丢失率从"可能丢失"降至"零丢失"</td>
+</tr>
+<tr>
+<td><strong>接口保护</strong></td>
+<td>内置限流，第三方接口被打垮的风险降至"零"</td>
+</tr>
+<tr>
+<td><strong>资源节省</strong></td>
+<td>持久化定时器休眠期间零资源占用，替代扫库 Job</td>
+</tr>
+<tr>
+<td><strong>运维简化</strong></td>
+<td>Worker 无状态扩缩容，无需维护状态表和补偿 Job</td>
+</tr>
+<tr>
+<td><strong>发布解耦</strong></td>
+<td>Temporal Server 一次部署长期稳定，业务迭代仅需通过 Jenkins 发布 Worker，实现零宕机业务更新</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<h3 data-cid="178" class="commentable">8.3 ROI 结论<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<blockquote data-cid="179" class="commentable">
+<p data-cid="180" class="commentable">对于当前业务（4 万+ 人员、500+ 门禁设备、1000+ 人批量下发 50 万+ 次 API 调用、7 个 Job Controller 的 35+ 个定时任务、30+ 个外部系统集成点），Temporal 带来的可靠性提升和开发效率提升<strong>远超引入成本</strong>。尤其是在"断点续传"和"自动重试"两个能力上，传统手写方案需要大量补偿代码且仍无法保证 100% 可靠，Temporal 从引擎层面根本性解决了这个问题。软件授权零成本（MIT 协议），且经 Netflix、Stripe、OpenAI 等顶级公司大规模生产验证，技术风险极低。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<hr>
+<h2 data-cid="181" class="commentable">九、总结与建议<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h2>
+<h3 data-cid="182" class="commentable">9.1 核心结论<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<ol data-cid="183" class="commentable">
+<li><p data-cid="184" class="commentable"><strong>我们的业务痛点是真实且紧迫的</strong>：4 万+ 人员海康分组同步限流、1000+ 人 × 500+ 门禁 50 万+ 次 API 调用、30+ 集成点仅 2 个有重试、7 个 Job Controller 的 35+ 定时任务无断点续传、入厂备案每 30 分钟扫库--每一个都是传统方案难以优雅解决的问题。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+</li>
+<li><p data-cid="185" class="commentable"><strong>Temporal 精准解决了全部六大痛点</strong>：内置限流、自动重试、断点续传、持久化定时器、可靠回调、控制面/数据面分离，每一个能力都直接对应一个业务痛点。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+</li>
+<li><p data-cid="186" class="commentable"><strong>发布运维实现解耦，业务迭代零宕机</strong>：Temporal Server 一次部署长期稳定，业务功能迭代只需通过 Jenkins 更新 Worker，配合版本控制机制，正在运行的老 Workflow 不受影响，实现了业务的无缝迭代。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+</li>
+<li><p data-cid="187" class="commentable"><strong>经过大规模生产验证</strong>：21,000+ GitHub Stars、MIT 开源协议、3,000+ 付费客户（含 Netflix、Stripe、OpenAI、NVIDIA），技术成熟度和社区活跃度均有保障。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+</li>
+<li><p data-cid="188" class="commentable"><strong>与现有方案不冲突</strong>：XXL-JOB 做简单定时任务、APISIX 做网关限流、Temporal 做复杂业务流程编排，各司其职，共存互补。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+</li>
+<li><p data-cid="189" class="commentable"><strong>引入成本极低</strong>：MIT 协议零授权费，自托管完全免费；PoC 验证 1~2 周即可确认可行性。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+</li>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></ol>
+<h3 data-cid="190" class="commentable">9.2 建议下一步<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<ol data-cid="191" class="commentable">
+<li><strong>启动 PoC 验证（1~2 周）</strong>：按 5 个验证场景在本地搭建环境，执行破坏性测试，用事实证明 Temporal 的可靠性</li>
+<li><strong>P0 优先迁移（3~4 周）</strong>：评审通过后优先迁移海康批量操作（评分 24/25）和入厂备案权限下发（评分 23/25）--这两个场景的可靠性债务最严重</li>
+<li><strong>P1 扩展迁移（3~4 周）</strong>：访客授权审批（22/25）和楼宇门禁权限管理（21/25，17 个定时任务）</li>
+<li><strong>同步推进 UI 二次开发（2~3 周）</strong>：将 Workflow 状态整合进现有管理后台</li>
+<li><strong>生产环境四层分离部署（1 周）</strong>：确保 Server 与 DB 同可用区，灰度切流</li>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></ol>
+<blockquote data-cid="192" class="commentable">
+<p data-cid="193" class="commentable">完整的迁移优先级矩阵和分阶段路线图详见 <a href="file:///Users/apple/Desktop/AdapterService/docs/Temporal%E8%BF%81%E7%A7%BB%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E6%8A%A5%E5%91%8A.md">Temporal迁移技术分析报告.md</a><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<hr>
+<h2 data-cid="194" class="commentable">十、术语表<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h2>
+<blockquote data-cid="195" class="commentable">
+<p data-cid="196" class="commentable">本章节对文档中出现的技术专业词汇进行集中解释，帮助非技术背景的读者理解相关概念。<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+<h3 data-cid="197" class="commentable">10.1 Java/JVM 相关<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<table data-cid="198" class="commentable">
+<thead>
+<tr>
+<th>术语</th>
+<th>补充说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>OOM</strong>（Out Of Memory）</td>
+<td>内存溢出错误。当 Java 程序申请的内存超过 JVM（Java 虚拟机）可用堆内存时抛出的致命错误，会导致应用崩溃重启。本文中海康 4 万人批量调用时大量 HTTP 请求对象堆积在内存中，就可能引发 OOM。</td>
+</tr>
+<tr>
+<td><strong>JVM 堆</strong>（JVM Heap）</td>
+<td>Java 虚拟机管理的内存区域，用于存放程序运行期间创建的对象实例。堆内存不足时会触发垃圾回收（GC），频繁 GC 会导致应用响应变慢，最终可能 OOM。</td>
+</tr>
+<tr>
+<td><strong>GC</strong>（Garbage Collection，垃圾回收）</td>
+<td>Java 虚拟机自动回收不再使用的对象所占内存的机制。当内存中积压大量未完成的请求对象时，GC 会频繁触发，导致 CPU 占用升高、应用卡顿。</td>
+</tr>
+<tr>
+<td><strong>@Async</strong></td>
+<td>Spring 框架提供的注解，标注后方法会在独立的线程池中异步执行，不阻塞主线程。但如果线程池容量不足且任务积压过多，反而会导致内存溢出。</td>
+</tr>
+<tr>
+<td><strong>Future</strong></td>
+<td>Java 中代表"异步计算结果"的对象。发起异步调用后立即返回一个 Future，后续通过它获取最终结果。大量未完成的 Future 会持续占用内存。</td>
+</tr>
+<tr>
+<td><strong>CallerRunsPolicy</strong></td>
+<td>Java 线程池的一种拒绝策略。当线程池队列满了之后，新任务不再被拒绝，而是由提交任务的线程（通常是主线程）自己执行。这会导致主线程被阻塞，影响整体响应。</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<h3 data-cid="199" class="commentable">10.2 接口与通信相关<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<table data-cid="200" class="commentable">
+<thead>
+<tr>
+<th>术语</th>
+<th>补充说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>API</strong>（Application Programming Interface）</td>
+<td>应用程序编程接口，不同系统之间交互的约定。本文中"海康 API""门禁 API"指调用对应系统功能的 HTTP 接口。</td>
+</tr>
+<tr>
+<td><strong>REST</strong>（Representational State Transfer）</td>
+<td>一种轻量级的 Web 服务接口风格，使用 HTTP 协议传输 JSON 格式数据，是目前最主流的 API 交互方式。</td>
+</tr>
+<tr>
+<td><strong>SOAP</strong>（Simple Object Access Protocol）</td>
+<td>一种较重的 Web 服务协议，使用 XML 格式封装数据，通常用于企业级系统集成。本文中 BPM 流程引擎使用 SOAP 协议。</td>
+</tr>
+<tr>
+<td><strong>gRPC</strong></td>
+<td>Google 开源的高性能远程调用框架，基于 HTTP/2 和 Protobuf 序列化协议。Temporal 主服务与 Worker 之间通过 gRPC 通信，调用延迟极低（&lt; 5ms）。</td>
+</tr>
+<tr>
+<td><strong>Webhook</strong></td>
+<td>一种"反向 API"机制--不是主系统主动去查询结果，而是任务完成后主动 HTTP 回调通知主系统。类似快递员送完快递后给你发短信通知。</td>
+</tr>
+<tr>
+<td><strong>429 限流</strong></td>
+<td>HTTP 状态码 429 表示"请求过多"（Too Many Requests）。当调用方请求频率超过接口提供方的承受能力时，对方会返回 429 拒绝服务。</td>
+</tr>
+<tr>
+<td><strong>Base64 编码</strong></td>
+<td>一种将二进制数据（如人脸图片）转换为纯文本字符串的编码方式，便于通过 HTTP 接口传输。但编码后体积会增大约 33%，增加网络传输和内存开销。</td>
+</tr>
+<tr>
+<td><strong>3DES 加密</strong></td>
+<td>一种对称加密算法（Triple DES），是 DES 的增强版。但由于已存在安全漏洞，业界已不推荐使用，建议升级为 AES-256。本文中新开普门禁接口使用 3DES 加密。</td>
+</tr>
+<tr>
+<td><strong>OAuth2</strong></td>
+<td>一种授权框架，允许第三方应用在用户授权下访问其资源，而不需要暴露用户密码。本文中 EHR 系统使用 OAuth2 的 client_credentials 模式获取访问令牌（Token）。</td>
+</tr>
+<tr>
+<td><strong>Token</strong>（令牌）</td>
+<td>身份验证凭证，类似"临时通行证"。客户端获取 Token 后，在后续请求中携带 Token 证明身份，无需每次传输用户名密码。</td>
+</tr>
+<tr>
+<td><strong>连接池</strong></td>
+<td>预先创建一组网络连接并复用的机制，避免每次请求都新建/销毁连接的开销。本文中 HttpWS 工具没有使用连接池，每次 SOAP 调用都新建连接，性能较差。</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<h3 data-cid="201" class="commentable">10.3 数据库与中间件相关<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<table data-cid="202" class="commentable">
+<thead>
+<tr>
+<th>术语</th>
+<th>补充说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>DB 慢查询</strong></td>
+<td>数据库中执行时间过长的 SQL 查询。高频定时扫库（如每 30 分钟全表扫描）会产生慢查询，占用数据库资源，影响其他正常业务查询。</td>
+</tr>
+<tr>
+<td><strong>Redis</strong></td>
+<td>一种内存级键值缓存数据库，读写速度极快。本文中用于缓存 SSO 登录 Token 和消息发送状态。</td>
+</tr>
+<tr>
+<td><strong>TTL</strong>（Time To Live，生存时间）</td>
+<td>数据在缓存/消息队列中的存活时间，过期后自动删除。MQ 延迟队列的消息有 TTL 限制，而 Temporal 的持久化定时器无 TTL 限制。</td>
+</tr>
+<tr>
+<td><strong>死信队列</strong>（Dead Letter Queue）</td>
+<td>消息队列中处理失败的消息会被自动转入的特殊队列，用于后续人工或自动处理。类似快递公司的"异常件仓库"。</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<h3 data-cid="203" class="commentable">10.4 架构与设计模式相关<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<table data-cid="204" class="commentable">
+<thead>
+<tr>
+<th>术语</th>
+<th>补充说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Event Sourcing</strong>（事件溯源）</td>
+<td>一种数据持久化模式：不存储最终状态，而是存储每一次状态变更事件（Event）。回放事件即可重建完整状态。Temporal 用此模式实现断点续传--Worker 崩溃后，从事件历史中恢复到崩溃前的进度继续执行。</td>
+</tr>
+<tr>
+<td><strong>Happy Path</strong>（快乐路径）</td>
+<td>程序在一切正常、没有异常情况下的执行路径。Temporal 的理念是让开发者只写正常流程代码，异常处理由引擎自动兜底。</td>
+</tr>
+<tr>
+<td><strong>幂等</strong>（Idempotency）</td>
+<td>同一操作执行一次和执行多次产生相同结果。例如"设置门禁权限为开启"是幂等的（重复设置无副作用），而"增加一条记录"不是幂等的（重复执行会产生多条）。</td>
+</tr>
+<tr>
+<td><strong>补偿</strong>（Compensation）</td>
+<td>当某个步骤失败后，执行一个"反向操作"来撤销已完成步骤的影响。例如"下发权限"失败后，执行"撤销已下发的权限"。</td>
+</tr>
+<tr>
+<td><strong>状态机</strong>（State Machine）</td>
+<td>描述业务对象在不同状态之间转换的模型。例如访客审批的状态流转：待审批 -&gt; 审批中 -&gt; 已通过 -&gt; 权限已下发。</td>
+</tr>
+<tr>
+<td><strong>BFF</strong>（Backend For Frontend）</td>
+<td>专为前端服务的后端中间层。前端不直接调用底层 API，而是通过 BFF 间接访问，BFF 负责数据格式转换、权限校验、聚合等。</td>
+</tr>
+<tr>
+<td><strong>RBAC</strong>（Role-Based Access Control，基于角色的访问控制）</td>
+<td>一种权限管理模型：用户被分配角色，角色拥有权限，用户通过角色间接获得权限。如"管理员"角色可以终止工作流，"访客"角色只能查看。</td>
+</tr>
+<tr>
+<td><strong>控制面/数据面分离</strong></td>
+<td>控制面负责调度和管理（Temporal Server），数据面负责实际业务执行（Worker 集群）。两者独立部署互不影响，类似于"指挥所"与"作战部队"分离。</td>
+</tr>
+<tr>
+<td><strong>长轮询</strong>（Long-Polling）</td>
+<td>Worker 主动向 Server 拉取任务的机制：Worker 发送请求后，如果没有任务，Server 会保持连接等待，直到有任务或超时才返回。避免了频繁轮询的无效请求。</td>
+</tr>
+<tr>
+<td><strong>HPA</strong>（Horizontal Pod Autoscaler，水平自动扩缩容）</td>
+<td>Kubernetes 的自动扩缩容机制，根据 CPU/内存或自定义指标（如队列积压量）自动增加或减少 Worker 实例数量。</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<h3 data-cid="205" class="commentable">10.5 Temporal 核心概念<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<table data-cid="206" class="commentable">
+<thead>
+<tr>
+<th>术语</th>
+<th>补充说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Workflow</strong>（工作流）</td>
+<td>Temporal 中一个完整的业务流程实例。由开发者用普通 Java 代码编写，定义了多个步骤的执行顺序。流程状态由引擎持久化，崩溃后可恢复。</td>
+</tr>
+<tr>
+<td><strong>Activity</strong>（活动）</td>
+<td>Workflow 中的一个具体执行步骤，通常是调用外部 API 或操作数据库的代码单元。Activity 失败后由引擎自动重试。</td>
+</tr>
+<tr>
+<td><strong>Worker</strong>（工作进程）</td>
+<td>运行在独立服务器上的进程，负责实际执行 Workflow 和 Activity 代码。Worker 无状态，可随时增减实现扩缩容。</td>
+</tr>
+<tr>
+<td><strong>Task Queue</strong>（任务队列）</td>
+<td>Workflow 和 Activity 任务的缓冲队列。主系统提交任务到队列，Worker 从队列拉取任务执行。即使 Worker 不足，任务也在队列中排队等待，不会丢失。</td>
+</tr>
+<tr>
+<td><strong>Signal</strong>（信号）</td>
+<td>外部系统向正在运行的 Workflow 发送的消息。可用于动态改期、取消、人工审批通过等场景。类似于给正在执行的任务"发送一条指令"。</td>
+</tr>
+<tr>
+<td><strong>RetryPolicy</strong>（重试策略）</td>
+<td>配置 Activity 失败后的重试行为：最大重试次数、初始间隔、退避系数（Backoff Coefficient）、最大间隔。引擎按策略自动执行重试，开发者无需写重试代码。</td>
+</tr>
+<tr>
+<td><strong>指数退避</strong>（Exponential Backoff）</td>
+<td>一种重试策略：每次重试的等待时间按指数增长（如 1s -&gt; 2s -&gt; 4s -&gt; 8s），避免短时间内大量重试冲击下游接口。</td>
+</tr>
+<tr>
+<td><strong>Heartbeat</strong>（心跳）</td>
+<td>Worker 在执行长时间 Activity 时定期向 Server 汇报"我还活着"的信号。如果心跳中断，Server 可判断 Worker 宕机并重新调度任务。</td>
+</tr>
+<tr>
+<td><strong>Codec Server</strong></td>
+<td>Temporal 的数据编解码服务，用于在 Web UI 展示前对加密的 Workflow Payload 进行解密，确保敏感数据不会明文暴露。</td>
+</tr>
+<tr>
+<td><strong>KMS</strong>（Key Management Service，密钥管理服务）</td>
+<td>集中管理加密密钥的服务，提供密钥的创建、存储、轮换、审计等能力，比硬编码密钥更安全。</td>
+</tr>
+<tr>
+<td><strong>版本控制（Versioning）</strong></td>
+<td>Temporal 用于实现 Workflow 代码平滑升级的机制。通过 <code>Workflow.getVersion</code> API，开发者可以在不中断正在运行的 Workflow 实例的情况下，引入新逻辑或修改旧逻辑。旧 Workflow 保持旧版本逻辑继续执行，新 Workflow 使用新版本逻辑，确保了向后兼容性和零宕机更新。</td>
+</tr>
+<tr>
+<td><strong>滚动更新（Rolling Update）</strong></td>
+<td>一种逐步替换旧版本实例为新版本实例的部署策略。Temporal Worker 集群的滚动更新允许在不停服的情况下，逐个或分批地用新版本 Worker 替换旧版本 Worker，新任务由新版本处理，老任务由旧版本继续处理直至完成，实现无缝过渡。</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<h3 data-cid="207" class="commentable">10.6 调度与并发相关<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></h3>
+<table data-cid="208" class="commentable">
+<thead>
+<tr>
+<th>术语</th>
+<th>补充说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>XXL-JOB</strong></td>
+<td>一个分布式定时任务调度平台，通过配置 Cron 表达式定时触发任务。适合简单的"到点执行一个动作"场景，但不支持多步骤编排和断点续传。</td>
+</tr>
+<tr>
+<td><strong>Cron 表达式</strong></td>
+<td>一种时间表达式，用于定义定时任务的触发时间。如 <code>0 */5 * * * ?</code> 表示每 5 分钟执行一次。</td>
+</tr>
+<tr>
+<td><strong>Quartz</strong></td>
+<td>另一个 Java 定时任务调度框架，功能与 XXL-JOB 类似，通过 Cron 表达式定时触发。</td>
+</tr>
+<tr>
+<td><strong>Semaphore</strong>（信号量）</td>
+<td>Java 并发编程中用于限制同时访问某资源的线程数量的机制。如 <code>Semaphore(15)</code> 表示最多允许 15 个线程同时执行。本文中需要手写信号量来限制 API 调用速率。</td>
+</tr>
+<tr>
+<td><strong>限流</strong>（Rate Limiting）</td>
+<td>控制请求发送速率的机制，防止短时间大量请求打垮下游接口。类似于"水龙头限流"--控制出水量防止水花四溅。</td>
+</tr>
+<tr>
+<td><strong>削峰</strong>（Peak Shaving）</td>
+<td>将瞬时高峰请求平滑分散到更长时间段处理，避免峰值压力。Temporal 的 Task Queue 天然实现削峰：高峰时排队，Worker 以恒定速率消费。</td>
+</tr>
+</tbody><button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></table>
+<hr>
+<blockquote data-cid="209" class="commentable">
+<p data-cid="210" class="commentable"><strong>附录</strong>：<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></p>
+<ul data-cid="211" class="commentable">
+<li>技术分析与迁移评估：参见 <a href="file:///Users/apple/Desktop/AdapterService/docs/Temporal%E8%BF%81%E7%A7%BB%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E6%8A%A5%E5%91%8A.md">Temporal迁移技术分析报告.md</a></li>
+<li>详细 PoC 验证方案：参见 <a href="file:///Users/apple/Desktop/AdapterService/docs/%E9%AA%8C%E8%AF%81%E5%9C%BA%E6%99%AF.md">验证场景.md</a></li>
+<li>Web UI 二次开发与落地实施路径：参见 <a href="file:///Users/apple/Desktop/AdapterService/docs/Temporal-WebUI%E4%B8%8E%E8%90%BD%E5%9C%B0%E5%AE%9E%E6%96%BD%E8%B7%AF%E5%BE%84.md">Temporal-WebUI与落地实施路径.md</a></li>
+<li>部署架构详细设计：参见 <a href="file:///Users/apple/Desktop/AdapterService/docs/Temporal-WebUI%E4%BA%8C%E6%AC%A1%E5%BC%80%E5%8F%91%E4%B8%8E%E9%83%A8%E7%BD%B2%E8%AE%BE%E8%AE%A1%E6%96%87%E6%A1%A3.md">Temporal-WebUI二次开发与部署设计文档.md</a></li>
+<li>定时任务方案对比：参见 <a href="file:///Users/apple/Desktop/AdapterService/docs/%E4%B8%9A%E5%8A%A1%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1.md">业务定时任务.md</a></li>
+<li>海康适配器设计：参见 <a href="file:///Users/apple/Desktop/AdapterService/docs/Hikvision_Batch_Adapter_Design.md">Hikvision_Batch_Adapter_Design.md</a></li>
+<li>基础部署指南：参见 <a href="file:///Users/apple/Desktop/AdapterService/docs/Temporal%E9%83%A8%E7%BD%B2.md">Temporal部署.md</a></li>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></ul>
+<button class="comment-add-btn" title="添加评论">+</button><div class="comment-badge" title="查看/编辑评论">!</div></blockquote>
+</div>
+
+<div id="sidebar" class="">
+  <div class="sidebar-header">
+    <h3>评论列表</h3>
+    <button class="sidebar-close" onclick="closeSidebar()">×</button>
+  </div>
+  <div class="sidebar-actions">
+    <button class="primary" onclick="copyAllComments()">复制全部</button>
+    <button onclick="exportComments()">导出 TXT</button>
+    <button onclick="clearAllComments()" style="color:#d73a49;">清空全部</button>
+  </div>
+  <div class="sidebar-list" id="sidebarList"><div class="sidebar-empty">暂无评论。点击文档中任意段落右侧的 "+" 按钮添加评论。</div></div>
+</div>
+
+<div id="toast" class="">已复制 0 条评论到剪贴板</div>
+
+<!-- Markdown 原文嵌入 -->
+<script type="text/markdown" id="md-source">
+# Temporal 业务解决方案介绍
+
+## 一、业务场景与痛点
+
+### 1.1 我们的业务现状
+
+我们的核心业务是**宇通安保管理平台**，涉及**门禁系统的人员权限批量管理**、**海康威视人脸识别中台同步**、**访客/外来人员入厂备案**等多个业务域。系统覆盖 **4 万+ 在职人员**，对接 **500+ 门禁设备**（分属**新开普**和**富士**两个门禁厂商接口），经常面临 **1000+ 人的权限数据批量下发**场景。
+
+经过对现有系统（`safety-service-master` 后端 4 模块 + `safety-web-master` 前端）的全面技术分析，识别出以下 **7 类核心业务场景**及各自存在的问题与痛点：
+
+| 场景 | 业务描述 | 规模 | 当前存在的问题与痛点 |
+| --- | --- | --- | --- |
+| **海康人脸分组批量同步** | 全量在职人员分组数据更新；外来人员人脸分组变更（每 30 分钟一次） | **4 万+人员**，逐人调用海康单人 API | `@Async` 线程池（5-10 线程）**无速率限制**，4 万次 API 瞬间冲击海康接口；**无重试**，失败即丢；大批量调用存在 **OOM 风险** |
+| **入厂备案权限定时下发** | 每 30 分钟扫库，下发"当前时间 +33 分钟"的备案人员权限；每天 17:00 过期提醒 | 批量备案人员 | 30 分钟扫库产生 **DB 慢查询**；**漏单风险**（新预约需等下个周期）；EHR OAuth2 Token **无缓存/刷新机制**，获取失败影响全局 |
+| **访客授权审批与定时下发** | 访客预约入场前 10 分钟自动下发门禁权限；审批流程多系统协作 | 批量访客 | 定时扫库实现"前 10 分钟下发"有**漏单风险**；CRK + 海康多系统调用**均无重试**；审批等待期间 `Thread.sleep()` **占用线程和内存** |
+| **楼宇门禁权限批量管理** | 17 个定时任务：设备同步、权限更新、长期未进出追踪、代办发送等 | **4 万+员工 × 500+门禁**（新开普 + 富士） | 17 个任务间存在**顺序依赖**但无事务保证，前序失败后续仍执行；新开普仅重试 1 次、富士**无重试**；调度配置分散在 XXL-JOB 后台，维护成本高 |
+| **新开普/富士门禁权限下发** | 1000+ 人批量权限下发，每人涉及 500+ 门禁设备 | **1000+人 × 500+设备 = 50 万+次** API 调用 | **50 万+ 次 API 调用无全局速率控制**，可能打垮门禁接口；3DES 加密已过时；5 种 HTTP 客户端并存，维护负担重 |
+| **BPM 流程编排** | 流程创建 -> 审批 -> 传阅，涉及人工审批等待（可能等数天） | 日常审批流程 | SOAP WebService **无重试**；HttpWS **无连接池**每次新建连接，性能差；人工审批等待无优雅机制，需轮询或 `Thread.sleep()` |
+| **CRK 出入口权限管理** | 访客二维码注册、卡下发、权限注销，失败需补偿 | 批量访客/备案 | 权限下发**无重试**，失败影响访客入场；**无补偿机制**，失败需人工干预；审计追踪困难 |
+
+> **注**：以上场景的 Temporal 迁移优先级评估详见第三章及 [Temporal迁移技术分析报告.md](file:///Users/apple/Desktop/AdapterService/docs/Temporal迁移技术分析报告.md)。
+
+### 1.2 业务场景中的六大痛点
+
+> 以下每个痛点均以技术分析报告中迁移评分 ≥ 17 的实际业务场景作为案例支撑。
+
+#### 痛点一：第三方接口被打垮（限流失控）
+
+> **案例场景**：海康人脸分组批量同步（迁移评分 24/25）+ 楼宇门禁权限批量管理（21/25）
+
+**海康人脸同步**：系统有 **4 万+ 在职人员**，定时任务（`SafetyHikJobController`）每 30 分钟执行一次外来人员人脸分组变更，另有全量在职人员分组数据更新任务。当前实现使用 `@Async` + `batchExecutorService` 线程池（核心 5 / 最大 10 / 队列 200），**无速率限制**，大批量调用时直接冲击海康 Artemis API。海康 SDK 仅提供单人操作接口，4 万人全量更新即 4 万次 API 调用，瞬间并发可能打垮海康中台或触发 429 限流。
+
+**楼宇门禁权限下发**：经常面临 **1000+ 人的权限数据批量下发**，每人涉及 **500+ 门禁设备**（新开普 + 富士两个厂商接口），单次批量操作即产生 **50 万+ 次** API 调用。当前新开普门禁接口仅重试 1 次，富士门禁接口**无任何重试**，且无全局速率控制。
+
+- 传统方案：手动维护信号量（Semaphore）、线程池，代码侵入性强
+- 问题：限流逻辑散落在业务代码中，难以统一管控和动态调整；不同接口限流策略不一致
+
+#### 痛点二：接口故障时重试逻辑复杂（代码膨胀）
+
+> **案例场景**：BPM 流程编排（17/25）+ CRK 出入口权限管理（17/25）+ 海康人脸同步（24/25）
+
+经技术分析发现，项目中 **30+ 个外部系统集成点**的重试机制严重不一致：
+
+| 集成系统 | API 模式 | 当前重试 | 问题 |
+| --- | --- | --- | --- |
+| 海康 Artemis SDK | REST | **无** | 人脸分组/添加/检索失败即丢，数据不一致 |
+| BPM 流程引擎 | SOAP | **无** | 流程创建/审批失败需人工干预 |
+| CRK 出入口系统 | REST | **无** | 权限下发失败影响访客入场 |
+| EHR 人力资源 | REST (OAuth2) | **无** | Token 获取失败影响后续所有操作 |
+| IAM 身份中台 | REST | **无** | 员工/组织/短信/邮件调用失败即丢 |
+| 新开普楼宇门禁 | REST (3DES) | 仅 1 次 | retcode != 200 时重试 1 次，不够 |
+| 文件上传 (zoffice) | HTTP multipart | 3 次 | 唯一有完整重试的组件 |
+
+- 传统方案：手写 try-catch + for 循环重试 + 指数退避
+- 问题：每个接口调用点都要写一遍，漏写就没有重试；30+ 个集成点中仅 2 个有重试逻辑，**可靠性债务极其严重**
+
+#### 痛点三：多步骤编排与顺序依赖难以保证（流程断裂）
+
+> **案例场景**：楼宇门禁权限管理（21/25）+ 入厂备案权限下发（23/25）
+
+**楼宇门禁 17 个定时任务**（`SafetyBuildJobController`）存在复杂的执行顺序依赖：
+```
+updateDeviceTask（每天更新设备）-> removeDevicePower（移除无效权限）
+updatePowerTask（按组织自动授权）-> autoConfirmChangePower（自动确认权限）
+modifyRecordsTask（更新出入记录）-> initBuildLongTerm（更新长期未进出）-> sendOwnerLongToDo（发送代办 9:10）-> closeOwnerLongToDo（超 7 天消除代办）
+```
+当前依赖 XXL-JOB 调度中心按 cron 顺序触发各 HTTP 端点，**任务间无事务保证**，前序任务失败后后续任务仍会执行，导致数据不一致。17 个端点的调度配置分散在 XXL-JOB 管理后台，维护成本极高。
+
+**入厂备案 6 个定时任务**（`SafetyEntryJobController`）同样存在数据依赖：EHR 黑名单同步 -> 权限下发 -> Redis 清理，任一步骤失败影响整体业务。
+
+- 传统方案：XXL-JOB 按 cron 顺序触发，或 DB 状态字段串联
+- 问题：无事务保证，前序失败后续仍执行；流程状态分散在 DB 和内存中，排查困难
+
+#### 痛点四：长耗时等待浪费资源（定时任务笨重）
+
+> **案例场景**：入厂备案权限定时下发（23/25）+ 访客授权审批与定时下发（22/25）
+
+**入厂备案权限下发**：`entryPermissionDelegationTask` 每 30 分钟执行一次，扫库查询"当前时间 +33 分钟"（预留 3 分钟时间差）内需要下发权限的备案人员。这意味着：
+- 每 30 分钟全表扫描一次，量大时产生 **DB 慢查询**
+- 扫库方式存在**漏单风险**：任务执行期间新预约的备案人员需等下一个 30 分钟周期
+- `entryOverdueTask` 每天 17:00 邮件提醒，需额外维护 cron 配置
+
+**访客授权定时下发**：访客预约入场前 10 分钟需自动下发门禁权限，当前依赖 XXL-JOB 定时扫库（每分钟扫 `status=PENDING` 且 `time <= 入场前10分钟`），问题同上。
+
+- 传统方案：Quartz/XXL-JOB 定时扫库（每分钟或每 30 分钟扫一次）
+- 问题：扫库产生 DB 慢查询；量大时容易漏单；`Thread.sleep()` 白白占用线程和内存；时间精度受扫描间隔限制
+
+#### 痛点五：异步结果通知不可靠（回调丢失）
+
+> **案例场景**：海康批量操作完成后的结果回传 + BPM 审批结果通知
+
+**海康批量操作结果回传**：批量人脸分组同步（4 万人）执行完后，需将成功/失败汇总结果回传给主业务系统并记录。当前 `SafetyHikJobController` 的任务通过 HTTP 触发，执行结果仅写入日志，**无主动回调通知机制**。如果主服务需要感知执行结果，需轮询查询或依赖宇信通消息推送，但宇信通消息推送本身也**无重试机制**。
+
+**BPM 审批结果**：BPM SOAP 接口无重试，流程审批状态更新失败后无补偿机制，需人工排查。
+
+- 传统方案：Webhook 回调 + 定时补偿 Job 兜底
+- 问题：补偿 Job 需要额外开发和维护；Webhook 重试逻辑需要手写；当前系统连补偿 Job 都未实现
+
+#### 痛点六：主服务内存溢出（OOM 风险）
+
+> **案例场景**：海康人脸分组批量同步（24/25）
+
+**海康人脸识别服务**（`SafetyArtemisService`）使用 `@Async` + `batchExecutorService` 线程池处理人脸操作。线程池配置为：核心 5 / 最大 10 / 队列 200 / CallerRunsPolicy。
+
+当执行 **4 万+ 人员全量分组更新**时：
+1. 大量人脸图片 Base64 编码的 HTTP 请求对象堆积在 JVM 堆中
+2. 海康 API 响应慢（socket 超时 10s），未完成的 Future 持续积压
+3. 队列满后 CallerRunsPolicy 在调用线程执行，阻塞主流程
+4. 频繁 GC 甚至 OOM，影响整个主服务的稳定性
+
+**楼宇门禁批量下发**：1000+ 人 × 500+ 设备 = 50 万+ 次 API 调用，如果同步循环或无界线程池执行，同样会导致 JVM 堆积压 HTTP 请求对象与 Future，引发 OOM。
+
+- 传统方案：自建独立中转服务 + 手动限流（参见 [Hikvision_Batch_Adapter_Design.md](file:///Users/apple/Desktop/AdapterService/docs/Hikvision_Batch_Adapter_Design.md)）
+- 问题：中转服务本身也需要处理重试、状态管理、补偿等全部可靠性问题；手写 Semaphore(15) + ThreadPoolExecutor + CompletableFuture 代码量大且易出错
+
+### 1.3 痛点总结
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                      传统方案的"可靠性债务"                                 │
+│                                                                          │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐                 │
+│  │ 手写重试  │  │ 手写幂等  │  │ 手写补偿  │  │ 手写定时  │                 │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘                 │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐                 │
+│  │ 手写限流  │  │ 手写状态机│  │ 手写回调  │  │ 手写兜底  │                 │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘                 │
+│                                                                          │
+│  -> 7 个 Job Controller、35+ 定时任务，每个场景都要重复实现一遍             │
+│  -> 30+ 个外部系统集成点，仅 2 个有重试逻辑                                │
+│  -> 4 万+ 人员、500+ 门禁设备、1000+ 人批量下发，代码量是业务逻辑的 1.5~2 倍 │
+│  -> 测试困难、Bug 频发、排查靠"看日志猜"                                   │
+│  -> 团队精力大量消耗在"非业务价值"的基础设施代码上                          │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+**核心矛盾**：团队 60% 以上的精力消耗在重试、补偿、状态管理等"非业务价值"的基础设施代码上，而可靠性仍然无法 100% 保证。7 个 Job Controller 的 35+ 个定时任务和 30+ 个外部系统集成点，每一个都是潜在的故障点和维护负担。
+
+---
+
+## 二、解决方案：引入 Temporal
+
+### 2.1 Temporal 是什么
+
+**Temporal 是一个开源的分布式持久化工作流引擎（Durable Execution Engine）**，它让开发者可以用普通代码编写复杂的多步骤业务流程，并**由引擎 100% 保证每个步骤的可靠执行**--无论过程中发生网络故障、服务器宕机、进程崩溃还是第三方接口超时。
+
+核心理念：**开发者只写业务逻辑（Happy Path），可靠性由引擎兜底**。
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    传统开发模式                           │
+│                                                         │
+│  业务代码(40%)  +  重试逻辑 + 幂等控制 + 状态管理 +      │
+│  定时补偿 + 异步回调 + 异常处理 + 并发控制 + ...(60%)    │
+│                                                         │
+│  -> 开发复杂、容易出 Bug、难以维护、排查困难               │
+└─────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────┐
+│                    Temporal 开发模式                      │
+│                                                         │
+│  业务代码(95%)  +  极少量配置(5%)                        │
+│                                                         │
+│  -> 重试、状态持久化、定时器、补偿 全部由引擎自动保证      │
+│  -> 开发极简、代码可读性强、可靠性大幅提升                 │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 2.2 开源与商业信息
+
+| 项目 | 信息 |
+| --- | --- |
+| **GitHub 地址** | https://github.com/temporalio/temporal |
+| **GitHub Stars** | **21,000+**（截至 2026 年 7 月） |
+| **开源协议** | **MIT License**（自托管完全免费，无任何商业限制） |
+| **创立时间** | 2019 年，由 Maxim Fateev 和 Samar Abbas 创立 |
+| **技术血统** | 创始人是 Uber Cadence 工作流引擎的作者，Temporal 是其演进版本 |
+| **付费客户** | **3,000+ 家**（含 NVIDIA、Netflix、Snap、Stripe 等） |
+| **开源用户** | 数万名开发者 |
+| **商业云服务** | Temporal Cloud：Essentials $100/月起、Business $500/月起、Enterprise 定制 |
+| **融资状态** | 多轮融资，资金充裕，社区活跃度高 |
+
+> **授权说明**：自托管版本采用 MIT 协议，**完全免费且无任何使用限制**，可放心用于商业生产环境。Temporal Cloud 为可选的托管服务，我们采用自托管方式，**无任何授权费用**。
+
+### 2.3 行业应用案例
+
+Temporal 已被全球顶级公司用于核心生产环境，覆盖金融、物流、基础设施、AI 等领域：
+
+| 公司 | 应用场景 | 与我们的相似度 |
+| --- | --- | --- |
+| **Stripe** | 支付处理（交易编排、重试、状态管理） | ★★★ 高（多步骤流程 + 重试） |
+| **Netflix** | 基础设施管理、CI/CD 编排（替代自研方案） | ★★★ 高（多步骤编排 + 可靠性） |
+| **OpenAI** | AI Agent 工作流、基础设施编排（2025 年开始使用，一年内增长 60 倍） | ★★☆ 中（长流程编排） |
+| **Snap** | 消息处理、基础设施服务 | ★★☆ 中（高并发处理） |
+| **NVIDIA** | GPU 资源调度、基础设施自动化 | ★★☆ 中（资源编排） |
+| **Coinbase** | 资金转账（交易可靠性保证） | ★★★ 高（零丢失要求） |
+| **Box** | 内容管理（文件处理流程编排） | ★★☆ 中（多步骤流程） |
+| **Turo** | 车辆预订（订单生命周期管理） | ★★★ 高（长耗时等待 + 状态机） |
+| **Maersk** | 物流订单（跨国多步骤流程编排） | ★★☆ 中（多步骤编排） |
+| **Airbnb** | 营销活动（用户旅程编排） | ★★☆ 中（流程编排） |
+| **Checkr** | 背景调查（人工审批 + 多步骤流程） | ★★★ 高（Human-in-the-Loop） |
+| **Datadog** | 数据库迁移、基础设施运维自动化 | ★★☆ 中（运维编排） |
+| **ANZ 银行** | 抵押贷款审批（长周期 + 人工介入） | ★★★ 高（长耗时 + 审批） |
+
+> **Netflix 工程师评价**："没有 Temporal，我们会远远落后于现在的位置。它提供的生产力让我们能比以前快得多地推进。如果 Temporal 不是解决方案的一部分，我负责的产品根本不可能成功。"
+
+> **OpenAI 评价**："Temporal 扩展性极好，它是少数真正能在大规模生产工作流中存活的系统之一。"
+
+**结论**：Temporal 不是实验性技术，而是经过全球顶级公司大规模生产验证的成熟方案。我们面临的问题（批量 API 调用限流、接口重试、断点续传、长耗时等待），正是 Temporal 的核心强项。
+
+---
+
+## 三、Temporal 如何解决我们的六大痛点
+
+### 3.0 迁移优先级评估
+
+基于工作流复杂度、容错需求、可扩展性需求、维护挑战、Temporal 契合度 5 个维度（各 1-5 分，满分 25）对 1.1 中的 7 类业务场景进行综合评定，评分 ≥ 17 的场景建议优先迁移：
+
+| 优先级 | 业务场景 | 评分 | 核心理由 |
+| --- | --- | --- | --- |
+| **P0** | 海康人脸分组批量同步 | **24/25** | 4 万人 API 调用无限流无重试、OOM 风险、完美匹配 Temporal 限流+重试+断点续传 |
+| **P0** | 入厂备案权限定时下发 | **23/25** | 每 30 分钟扫库有漏单风险、`Workflow.sleep()` 精确替代 |
+| **P1** | 访客授权审批与定时下发 | **22/25** | 多系统协作无重试、定时下发漏单风险、Signal 审批等待 |
+| **P1** | 楼宇门禁权限批量管理 | **21/25** | 17 个任务顺序依赖无事务、4 万人 × 500 门禁规模大 |
+| **P2** | 新开普/富士门禁权限下发 | **18/25** | 50 万次 API 无速率控制、3DES 过时、5 种 HTTP 客户端并存 |
+| **P2** | BPM 流程编排 | **17/25** | SOAP 无重试、无连接池、人工审批等待无优雅机制 |
+| **P2** | CRK 出出入口权限管理 | **17/25** | 权限下发无重试无补偿、审计追踪困难 |
+
+> 完整的评估方法论和分阶段迁移路线图详见 [Temporal迁移技术分析报告.md](file:///Users/apple/Desktop/AdapterService/docs/Temporal迁移技术分析报告.md)。
+
+---
+
+### 3.1 痛点一解决方案：内置限流与削峰
+
+> **对应场景**：海康人脸分组同步（4 万+ 人员）+ 楼宇门禁权限下发（1000+ 人 × 500+ 设备 = 50 万+ 次 API 调用）
+
+Temporal Worker 支持配置全局并发上限和每秒任务数限制，**限流参数一行代码搞定，无需手写信号量**：
+
+```java
+Worker worker = factory.newWorker("HIK_BATCH_TASK_QUEUE",
+    WorkerOptions.newBuilder()
+        .setMaxConcurrentActivityExecutionSize(15)  // 全局并发不超过 15
+        .setMaxWorkerActivityTasksPerSecond(20)     // 每秒最多 20 个任务
+        .build());
+```
+
+**效果**：无论是 4 万人海康分组同步还是 1000 人 × 500 门禁 = 50 万次 API 调用，存入 Task Queue 排队缓冲，Worker 以恒定速率消费，**绝不打垮新开普、富士或海康接口**。即使瞬间涌入再多的请求，任务也只是在队列中排队，**不会丢失、不会拒绝**。
+
+### 3.2 痛点二解决方案：自动指数退避重试（零代码）
+
+> **对应场景**：30+ 个外部系统集成点中仅 2 个有重试逻辑（海康/BPM/CRK/EHR/IAM 均无重试）
+
+Temporal Activity 执行失败后**自动**按配置的重试策略进行指数退避重试，**业务代码无需写一行重试逻辑**：
+
+```
+第1次失败 -> 等1秒 -> 第2次失败 -> 等2秒 -> 第3次失败 -> 等4秒 -> 第4次成功 ✓
+
+整个过程在 Web UI 上一目了然，业务系统完全无感知
+```
+
+超过最大重试次数后，Workflow 可优雅捕获并进入异常处理分支。**无论是海康 SDK 调用、BPM SOAP 接口还是 CRK 权限下发，统一由引擎保证重试**。
+
+### 3.3 痛点三解决方案：多步骤编排与断点续传（零丢失）
+
+> **对应场景**：楼宇门禁 17 个任务的顺序依赖 + 入厂备案 6 个任务的数据依赖
+
+Temporal 原生支持多步骤流程编排，**顺序、并行、子流程均可声明式定义**。Workflow 中的代码顺序即为执行顺序，前序 Activity 完成后才会执行后续 Activity，**天然保证顺序依赖**：
+
+```java
+// 楼宇门禁 Workflow 示例：步骤顺序即执行顺序
+@WorkflowMethod
+public void executeBuildPowerWorkflow(String date) {
+    // Step 1: 更新设备（完成后才执行 Step 2）
+    activities.updateDeviceTask();
+    activities.removeDevicePower();
+    
+    // Step 2: 更新权限（依赖 Step 1 的设备数据）
+    activities.updatePowerByDate(date);
+    activities.autoConfirmPower();
+    
+    // Step 3: 更新出入记录 -> 长期未进出 -> 发送代办（顺序依赖链）
+    activities.modifyRecords();
+    activities.initLongTerm();
+    activities.sendOwnerLongToDo();
+}
+```
+
+同时，Temporal 采用 Event Sourcing 模式，Workflow 的**每一步执行结果**都持久化到数据库。Worker 进程崩溃/服务器断电后重启，Temporal **自动从最后完成的步骤继续执行**，已完成的 Activity **绝不会重复执行**。
+
+```
+正常执行：  Step 1 ✓  ->  Step 2 (执行中) 💥崩溃
+                     ↓ 服务器重启
+恢复执行：  Step 1 (跳过)  ->  Step 2 (从头执行)  ->  Step 3 ✓
+
+不会从头重新跑，也不会漏掉任何步骤
+```
+
+**对比传统方案**：XXL-JOB 按 cron 顺序触发 17 个独立 HTTP 端点，前序失败后续仍执行；Temporal 在一个 Workflow 内编排，前序失败后续不执行，且自动重试前序步骤。
+
+### 3.4 痛点四解决方案：持久化定时器（零资源占用）
+
+> **对应场景**：入厂备案每 30 分钟扫库下发"当前时间+33分钟"权限 + 访客入场前 10 分钟下发权限
+
+`Workflow.sleep()` 是**持久化定时器**，休眠期间 Worker 进程**零 CPU、零内存占用**。即使休眠 30 天甚至 1 年，资源消耗也是 0。休眠期间服务器断电，恢复后**继续无缝倒计时**，绝无漏单风险。
+
+```java
+// 入厂备案权限定时下发：替代每 30 分钟扫库
+// 计算预约入场时间前 33 分钟的等待时间，直接休眠
+long delay = appointmentTime.minusMinutes(33).getTime() - Workflow.currentTimeMillis();
+Workflow.sleep(delay);
+// 时间一到，Temporal 自动唤醒，执行下发 Activity
+entryActivities.delegatePermission(entryId, doorIds);
+```
+
+```java
+// 访客入场前 10 分钟下发权限：替代每分钟扫库
+long delay = entryTime.minusMinutes(10).getTime() - Workflow.currentTimeMillis();
+Workflow.sleep(delay);
+visitorActivities.grantAccess(visitorId, doorIds);
+```
+
+**对比传统方案**：XXL-JOB 每 30 分钟扫库产生 DB 慢查询且有漏单风险；`Workflow.sleep()` 精确到毫秒，零资源占用，绝无漏单。
+
+**动态改期/取消**：访客临时改期或取消，业务系统发送一个 Signal（信号），Workflow 自动取消旧定时器并按新时间重新休眠，或直接结束流程。
+
+### 3.5 痛点五解决方案：可靠的 Webhook 回调
+
+> **对应场景**：海康批量操作完成后的结果回传 + BPM 审批结果通知
+
+Webhook 回调本身就是一个 Activity。如果主系统宕机返回异常，Temporal **自动重试发送**，直到主系统恢复返回 200。**无需手写补偿 Job**。当前系统中海康任务结果仅写日志、无主动回调的问题彻底解决。
+
+### 3.6 痛点六解决方案：控制面与数据面分离
+
+> **对应场景**：海康人脸识别 4 万人全量更新导致 OOM + 楼宇门禁 50 万次 API 调用
+
+引入 Temporal 后，主业务系统只需调用 `StartWorkflow`（一条 gRPC 指令，**< 5ms 即返回**），**不持有任何长连接**，彻底断开与海康/新开普/富士等下游 API 的耦合。真正消耗 CPU/内存的网络调用全部在独立的 Worker 集群中执行，**主服务零 OOM 风险**。
+
+### 3.7 痛点与方案对照总结
+
+| 痛点 | 传统方案 | Temporal 方案 | 代码量对比 |
+| --- | --- | --- | --- |
+| 限流失控 | 手写 Semaphore + 线程池 | Worker 配置一行参数 | **减少 90%** |
+| 接口重试 | 30+ 集成点仅 2 个有重试 | 配置 RetryPolicy，零代码 | **减少 100%** |
+| 多步骤编排与顺序依赖 | XXL-JOB cron 顺序触发，无事务 | Workflow 内声明式编排，天然有序 | **减少 90%** |
+| 断点续传 | 状态表 + 补偿 Job + 手动恢复 | 引擎自动保证，零代码 | **减少 100%** |
+| 长耗时等待 | XXL-JOB 每 30 分钟扫库 | `Workflow.sleep()` 一行代码 | **减少 95%** |
+| 回调丢失 | Webhook + 补偿 Job（当前未实现） | Activity 自动重试直到成功 | **减少 90%** |
+| 主服务 OOM | 自建中转服务 + 手动限流 | 控制面/数据面分离，主服务只发指令 | **减少 80%** |
+
+---
+
+> **PoC 验证方案**：具体的验证场景、代码骨架与操作步骤已独立整理至 [验证场景.md](file:///Users/apple/Desktop/AdapterService/docs/验证场景.md)，本文档不再重复。
+
+---
+
+## 四、与传统方案对比
+
+### 4.1 与 XXL-JOB / Quartz 对比
+
+> **定位差异**：XXL-JOB 和 Quartz 是**定时任务调度框架**，Temporal 是**持久化工作流引擎**。两者解决的不是同一类问题，但在"定时触发"和"任务可靠性"场景下有交集。
+
+| 对比维度 | XXL-JOB / Quartz | Temporal |
+| --- | --- | --- |
+| **核心定位** | 定时任务调度（Cron 触发） | 持久化工作流编排（全生命周期管理） |
+| **定时能力** | 基于 Cron 表达式定时触发 | `Workflow.sleep()` 持久化定时器，精确到毫秒 |
+| **长等待处理** | 需要线程一直 `sleep`，占用资源 | 休眠期间**零资源占用**，可等待数天/数月 |
+| **任务重试** | 需手写重试逻辑 | 自动指数退避重试，零代码 |
+| **断点续传** | 不支持，失败后需从头重跑 | 天然支持，从断点处自动恢复 |
+| **多步骤编排** | 不支持（每个任务是独立的） | 原生支持顺序/并行/子流程编排 |
+| **人工审批** | 不支持 | 原生支持 Signal 等待与唤醒 |
+| **状态可视化** | 只能看到任务执行日志 | 完整的 Event History + Web UI |
+| **动态取消/改期** | 需要手动停止任务 + 清理状态 | Signal 一行代码，自动处理 |
+| **扫库问题** | 高频扫库产生 DB 压力，可能漏单 | 无需扫库，定时器由引擎内部管理 |
+| **适用场景** | 简单的定时数据同步、报表生成 | 复杂业务流程、多步骤编排、长耗时任务 |
+
+**关键结论**：XXL-JOB 适合"到点执行一个动作"的简单场景；Temporal 适合"一个业务流程需要多个步骤、需要可靠保证、可能需要等待和人工介入"的复杂场景。**两者不冲突，可以共存**--简单定时任务用 XXL-JOB，复杂业务流程用 Temporal。
+
+### 4.2 与 MQ 延迟队列（RabbitMQ / RocketMQ）对比
+
+| 对比维度 | MQ 延迟队列 | Temporal |
+| --- | --- | --- |
+| **核心定位** | 消息延迟投递 | 完整的业务流程编排 |
+| **定时精度** | 固定延迟级别（RabbitMQ 插件）或任意延迟（RocketMQ） | 毫秒级精确定时 |
+| **流程编排** | 不支持，每条消息独立 | 原生支持多步骤顺序/并行编排 |
+| **失败处理** | 死信队列 + 手动补偿 | 自动重试 + 断点续传 |
+| **状态追踪** | 消息级别，无流程视角 | 完整的 Workflow 级别状态追踪 |
+| **动态改期** | 不支持（需消费后重新投递） | Signal 一行代码 |
+| **资源占用** | 消息在 MQ 中存储，有 TTL 限制 | 休眠期间零资源，无 TTL 限制 |
+| **适用场景** | 简单的延迟通知、超时取消 | 复杂业务流程、多步骤编排 |
+
+**关键结论**：MQ 延迟队列适合"延迟投递一条消息"的简单场景；Temporal 适合"延迟后还要执行一系列步骤"的复杂场景。用 MQ 做复杂流程编排，需要大量补偿代码，最终会退化成"手写版 Temporal"。
+
+### 4.3 与 APISIX / 网关限流对比
+
+> **定位差异**：APISIX 是 API 网关，主要职责是路由、鉴权、限流等流量治理。Temporal 的限流是 Worker 级别的任务消费速率控制。两者不在同一层面，但在"保护下游接口"场景下有交集。
+
+| 对比维度 | APISIX 网关限流 | Temporal Worker 限流 |
+| --- | --- | --- |
+| **限流层级** | HTTP 请求级别（网关层） | 任务消费级别（Worker 层） |
+| **限流策略** | QPS 限流 / 并发限流 / 令牌桶 | Worker 全局并发数 + 每秒任务数 |
+| **超限行为** | 直接返回 429 拒绝 | 任务在队列排队，不丢失不拒绝 |
+| **排队缓冲** | 不支持（超出即拒绝） | Task Queue 天然排队缓冲 |
+| **重试机制** | 需客户端自行重试 | 引擎自动指数退避重试 |
+| **状态管理** | 无状态 | 完整的 Workflow 状态管理 |
+| **适用场景** | 保护 HTTP 接口不被瞬时流量打垮 | 保护下游 API + 保证任务可靠执行 |
+
+**关键结论**：APISIX 解决的是"流量入口的限流"问题，超限即拒绝；Temporal 解决的是"任务执行的可靠性"问题，超限则排队，且保证最终一定执行。对于批量门禁下发这种**必须全部执行成功、不能拒绝丢弃**的场景，Temporal 的排队+重试模式远优于网关的拒绝模式。
+
+### 4.4 综合对比一览表
+
+| 能力维度 | 手写方案 | XXL-JOB | MQ 延迟队列 | APISIX 网关 | **Temporal** |
+| --- | --- | --- | --- | --- | --- |
+| 多步骤流程编排 | ✗ | ✗ | ✗ | ✗ | **✓ 原生** |
+| 自动重试 | 手写 | ✗ | 死信队列 | ✗ | **✓ 零代码** |
+| 断点续传 | 手写 | ✗ | ✗ | ✗ | **✓ 自动** |
+| 持久化定时器 | ✗ | Cron | ✓(有TTL) | ✗ | **✓(无TTL)** |
+| 休眠零资源 | ✗ | ✗ | ✓ | ✗ | **✓** |
+| 并发限流 | 手写 | ✗ | ✗ | ✓(超限拒绝) | **✓(超限排队)** |
+| 人工审批等待 | 手写 | ✗ | ✗ | ✗ | **✓ Signal** |
+| 动态改期/取消 | 手写 | 手动停止 | 重新投递 | ✗ | **✓ Signal** |
+| 全链路可视化 | 自建 | 日志 | ✗ | ✗ | **✓ Web UI** |
+| 任务不丢失 | 手写补偿 | ✗ | 消息持久化 | ✗ | **✓ 引擎保证** |
+
+---
+
+## 五、技术架构设计
+
+### 5.1 整体架构总览
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        业务系统层                                     │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐                 │
+│  │  主业务应用  │  │  自研 UI     │  │  管理后台    │                 │
+│  │ (发起Workflow)│  │ (Vue3+BFF)  │  │  (权限管理)  │                 │
+│  └──────┬──────┘  └──────┬──────┘  └─────────────┘                 │
+│         | gRPC            | REST/WS                                   │
+└─────────┼─────────────────┼──────────────────────────────────────────┘
+          |                 |
+          v                 v
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Temporal 控制面 (Server)                          │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐           │
+│  │ Frontend │  │ History  │  │ Matching │  │  Worker  │           │
+│  │ Service  │  │ Service  │  │ Service  │  │ Service  │           │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘           │
+│         |                 |                                          │
+│         | gRPC 7233       | 持久化                                    │
+└─────────┼─────────────────┼──────────────────────────────────────────┘
+          |                 |
+          v                 v
+┌──────────────────────┐  ┌──────────────────────────────────────────┐
+│  Temporal 数据库      │  │           Worker 集群 (数据面)             │
+│  (PostgreSQL)        │  │  ┌────────┐ ┌────────┐ ┌────────┐       │
+│  - 事件历史存储       │  │  │Worker 1│ │Worker 2│ │Worker N│       │
+│  - 任务队列状态       │  │  │(门禁)  │ │(校验)  │ │(通知)  │       │
+│  - 定时器管理         │  │  └────────┘ └────────┘ └────────┘       │
+└──────────────────────┘  │  无状态, 横向扩缩容, 独立部署             │
+                          └──────────────────────────────────────────┘
+                                     |
+                                     v
+                          ┌──────────────────────────┐
+                          │   下游第三方 API           │
+                          │  (海康威视/门禁/短信等)    │
+                          └──────────────────────────┘
+```
+
+### 5.2 核心设计原则
+
+| 原则 | 说明 |
+| --- | --- |
+| **控制面与数据面分离** | Temporal Server（调度）与 Worker（业务执行）独立部署，互不影响 |
+| **Worker 无状态** | Worker 可随时增减，扩缩容不影响正在执行的任务 |
+| **Server 与 DB 同可用区** | 保证持久化链路低延迟（RTT < 1ms），这是性能生命线 |
+| **业务代码与可靠性解耦** | 开发者只写 Activity 业务逻辑，重试/补偿/状态由引擎保证 |
+
+### 5.3 业务调用链路
+
+```
+主业务系统                         Temporal Server                    Worker 集群
+    |                                  |                               |
+    |  1. StartWorkflow (gRPC, <5ms)   |                               |
+    |--------------------------------->|                               |
+    |  2. 返回 WorkflowId              |                               |
+    |<---------------------------------|                               |
+    |                                  |  3. 任务入队 Task Queue       |
+    |                                  |  4. Worker 长轮询领取任务      |
+    |                                  |------------------------------>|
+    |                                  |                               |
+    |                                  |                               |  5. 执行 Activity
+    |                                  |                               |     (调海康API/发短信等)
+    |                                  |                               |  6. 限流(15QPS)/重试/补偿
+    |                                  |                               |     全部由引擎保证
+    |                                  |  7. 回传执行结果               |
+    |                                  |<------------------------------|
+    |                                  |  8. 持久化到数据库             |
+    |                                  |                               |
+    |  9. 查询状态 (Query/Web UI)      |                               |
+    |--------------------------------->|                               |
+    |  10. 返回实时状态                 |                               |
+    |<---------------------------------|                               |
+```
+
+**关键特点**：
+- 主业务系统调用 `StartWorkflow` 仅需 **< 5ms**（发一条 gRPC 指令即返回）
+- 主业务系统**不持有任何长连接**，彻底断开与下游第三方 API 的耦合
+- Worker 以**恒定速率**消费任务，保护下游接口不被打垮
+
+### 5.4 运维与发布架构优势
+
+基于“控制面与数据面分离”的架构设计，Temporal 在生产环境运维和业务迭代上具备传统单体/微服务架构难以比拟的优势：
+
+#### 1. Temporal Server 一次部署，长期稳定
+
+Temporal Server 作为核心调度引擎，其职责是维护任务队列、持久化事件、分发任务。一旦部署完成并稳定运行，**Temporal Server 本身不需要随业务迭代而频繁升级或重启**。
+
+- **稳定性**：Temporal Server 是纯粹的基础设施组件，不包含任何业务逻辑，变更频率极低，确保了核心调度层的高可用性。
+- **风险隔离**：业务功能的新增、修改、迭代均不会波及 Temporal Server，即使业务代码出现问题，也不会导致调度系统崩溃。
+
+#### 2. 业务逻辑独立发布（Worker 驱动）
+
+所有业务逻辑（Workflow 定义、Activity 实现）均运行在独立的 Worker 进程中。业务迭代和功能更新完全转化为 **Worker 代码的发布与更新**。
+
+- **Jenkins 驱动发布**：可以通过 Jenkins 独立构建和部署 Worker 集群。当需要新增业务场景（如增加新的审批流程）或修改现有逻辑时，只需编写/修改对应的 Worker 代码，打包后滚动更新 Worker 节点即可。
+- **零宕机更新**：Temporal 支持 Workflow 的“版本控制（Versioning）”机制。当 Worker 更新时：
+    - **新启动的 Workflow** 会立即由新版本的 Worker 接管执行。
+    - **正在执行中的老 Workflow**，Temporal 引擎会确保其继续由旧版本（或兼容版本）的 Worker 处理，直到流程结束。
+    - 整个过程**完全无感**，不需要停机维护，也不会导致正在进行的业务流程中断或数据丢失。
+
+#### 3. 故障隔离与弹性伸缩
+
+- **Worker 崩溃不影响全局**：单个 Worker 进程的崩溃只会影响其正在执行的少量任务，Temporal 会自动将这些任务重新分配给其他健康的 Worker，其他正在运行的 Workflow 不受影响。
+- **按需弹性扩容**：在业务高峰期（如批量门禁下发），只需通过 Jenkins 或手动快速启动新的 Worker 实例，即可瞬间提升处理能力。流量回落时，可随时缩减 Worker 实例数量，实现资源的动态最优利用。
+
+---
+
+## 六、部署架构
+
+### 6.1 四层分离部署拓扑
+
+采用**四层分离**架构，在保证性能的前提下实现故障隔离与弹性扩缩容：
+
+| 服务器 | 部署组件 | 角色 | 资源建议 |
+| --- | --- | --- | --- |
+| **服务器 A** | Nginx + 自研 UI 前端 | 接入层（静态托管 + 反向代理） | 2核4G ×N |
+| **服务器 B** | Temporal Server + BFF 后端 | 核心控制面（调度 + BFF） | 8核16G+ |
+| **服务器 C** | Temporal 数据库（PostgreSQL） | 持久化层（与 B 同可用区） | 8核16G+ SSD |
+| **服务器 D/E/N** | Worker（Runner）集群 | 数据面（无状态，横向扩缩容） | 按峰值弹性 |
+
+```
++---------------------------------------------------------------------------+
+|  服务器 A (接入层)                                                          |
+|  +------------------+   +------------------+                              |
+|  | 自研 UI 前端      |   | Nginx            |                              |
+|  | (Vue3 静态资源)   |-->| (静态托管+反代)   |                              |
+|  +------------------+   +--------+---------+                              |
++----------------------------------|-----------------------------------------+
+                                   | HTTPS (REST/WS)
+                                   v
++---------------------------------------------------------------------------+
+|  服务器 B (核心控制面)                       服务器 C (持久化层, 同可用区)    |
+|  +------------------+   +------------------+   +-----------------------+   |
+|  | 自研 UI BFF 后端  |-->| Temporal Server  |-->|  PostgreSQL 数据库    |   |
+|  | (Java/Spring)    |   | :7233 (gRPC)     |   |  低延迟内网互通        |   |
+|  +------------------+   +--------+---------+   +-----------------------+   |
++----------------------------------|-----------------------------------------+
+                                   | gRPC 长轮询 (跨网络/跨机房均可)
+                                   v
++---------------------------------------------------------------------------+
+|  服务器 D/E/N (数据面 / Runner 集群, 可水平扩展)                            |
+|  [ Worker 实例 1 ]   [ Worker 实例 2 ]   [ Worker 实例 N ... ]             |
+|   纯业务执行 (Activity/Workflow), 无状态, 支持 HPA 横向扩容               |
++---------------------------------------------------------------------------+
+```
+
+### 6.2 部署架构设计原则
+
+| 原则 | 技术依据 |
+| --- | --- |
+| **Server 与 DB 必须同可用区** | Temporal Server 对每一次事件都需要持久化读写，Server↔DB 延迟直接叠加到调度关键路径上，官方要求 RTT < 1ms |
+| **DB 独立服务器优于同机** | DB 拥有专属 I/O 与 CPU，避免与 Server 争抢；便于独立调优、备份、垂直扩容 |
+| **BFF 与 Temporal Server 同机** | BFF 通过 gRPC 调用 Server，走 localhost 延迟最低 |
+| **Worker 独立集群部署** | Worker 是无状态数据面，可按 Task Queue 积压自由横向扩容；与 Server/DB 同机会资源争抢、限制扩容 |
+
+### 6.3 Worker 扩缩容机制
+
+Temporal 的任务调度采用**长轮询（Long-Polling）**机制，Worker 的横向扩容极其简单：
+
+1. **解耦与缓冲**：业务系统瞬间涌入大批请求时，任务存入 Task Queue 排队，即使 Worker 不足也不会丢失或崩溃
+2. **无状态平滑扩容**：Worker 完全无状态，发现积压时只需启动更多 Worker 容器
+3. **即插即用**：新 Worker 只需指定 Server 地址和 Task Queue 名称，自动连上领走任务，**无需在 Server 上做任何配置**
+
+### 6.4 快速部署方案（开发/测试环境）
+
+开发与测试环境可使用 Docker Compose 一键拉起：
+
+```yaml
+# docker-compose.yml (简化版)
+services:
+  postgresql:          # 数据库
+    image: postgres:15-alpine
+  temporal:            # Temporal Server
+    image: temporalio/auto-setup:1.24.2
+    ports: ["7233:7233"]
+  temporal-ui:         # Web UI 控制台
+    image: temporalio/ui:2.28.0
+    ports: ["8233:8233"]
+```
+
+启动后访问 `http://localhost:8233` 即可看到 Web UI 控制台。
+
+---
+
+> **Web UI 二次开发与落地实施路径**：自研 UI 的 BFF 架构设计、核心 API 设计、权限设计，以及分阶段实施计划和技术选型已独立整理至 [Temporal-WebUI与落地实施路径.md](file:///Users/apple/Desktop/AdapterService/docs/Temporal-WebUI与落地实施路径.md)，本文档不再重复。
+
+---
+
+## 七、风险与应对
+
+| 风险 | 影响 | 应对策略 |
+| --- | --- | --- |
+| **DB 性能瓶颈** | Worker 大量汇报状态导致 DB 读写压力 | DB 独立部署 + SSD + 充足连接池；监控慢查询与 IOPS |
+| **Server↔DB 跨可用区延迟** | 持久化链路延迟拖垮整体吞吐 | 强制 Server 与 DB 同可用区部署；上线前验证 RTT < 1ms |
+| **Worker 扩容冲击 Server** | 大量 Heartbeat 冲击 Server->DB 链路 | 合理设置 Heartbeat 频率，避免过密 |
+| **自研 UI 与官方版本脱节** | Temporal 版本升级时 gRPC API 变更 | 锁定 SDK 版本，建立回归测试 |
+| **团队学习成本** | Temporal 编程模型与传统不同 | 编写最佳实践文档；PoC 阶段充分练手 |
+| **加密 Payload 解密** | BFF 需部署 Codec Server | 密钥管理（KMS）与权限隔离 |
+
+---
+
+## 八、成本与收益分析
+
+### 8.1 引入成本
+
+| 成本项 | 说明 |
+| --- | --- |
+| **软件授权** | **零成本**（MIT 协议，自托管完全免费） |
+| 基础设施 | 3 台服务器（接入层 + 控制面 + DB），Worker 可复用现有服务器 |
+| 学习成本 | Temporal 编程模型需 1~2 周熟悉，SDK 使用简单 |
+| 开发成本 | PoC 验证 + 核心接入 + UI 二次开发 |
+| 运维成本 | Temporal Server + DB 需日常运维，有完善监控 |
+
+### 8.2 收益
+
+| 收益项 | 量化 |
+| --- | --- |
+| **代码量减少** | 可靠性代码（重试/补偿/幂等/状态机）减少 **80%+** |
+| **Bug 率降低** | 消除手写重试/补偿逻辑中的边界情况 Bug |
+| **排障效率** | Web UI 全链路可视化，排障时间从"小时级"降至"分钟级" |
+| **系统可靠性** | 断点续传 + 自动重试，任务丢失率从"可能丢失"降至"零丢失" |
+| **接口保护** | 内置限流，第三方接口被打垮的风险降至"零" |
+| **资源节省** | 持久化定时器休眠期间零资源占用，替代扫库 Job |
+| **运维简化** | Worker 无状态扩缩容，无需维护状态表和补偿 Job |
+| **发布解耦** | Temporal Server 一次部署长期稳定，业务迭代仅需通过 Jenkins 发布 Worker，实现零宕机业务更新 |
+
+### 8.3 ROI 结论
+
+> 对于当前业务（4 万+ 人员、500+ 门禁设备、1000+ 人批量下发 50 万+ 次 API 调用、7 个 Job Controller 的 35+ 个定时任务、30+ 个外部系统集成点），Temporal 带来的可靠性提升和开发效率提升**远超引入成本**。尤其是在"断点续传"和"自动重试"两个能力上，传统手写方案需要大量补偿代码且仍无法保证 100% 可靠，Temporal 从引擎层面根本性解决了这个问题。软件授权零成本（MIT 协议），且经 Netflix、Stripe、OpenAI 等顶级公司大规模生产验证，技术风险极低。
+
+---
+
+## 九、总结与建议
+
+### 9.1 核心结论
+
+1. **我们的业务痛点是真实且紧迫的**：4 万+ 人员海康分组同步限流、1000+ 人 × 500+ 门禁 50 万+ 次 API 调用、30+ 集成点仅 2 个有重试、7 个 Job Controller 的 35+ 定时任务无断点续传、入厂备案每 30 分钟扫库--每一个都是传统方案难以优雅解决的问题。
+
+2. **Temporal 精准解决了全部六大痛点**：内置限流、自动重试、断点续传、持久化定时器、可靠回调、控制面/数据面分离，每一个能力都直接对应一个业务痛点。
+
+3. **发布运维实现解耦，业务迭代零宕机**：Temporal Server 一次部署长期稳定，业务功能迭代只需通过 Jenkins 更新 Worker，配合版本控制机制，正在运行的老 Workflow 不受影响，实现了业务的无缝迭代。
+
+4. **经过大规模生产验证**：21,000+ GitHub Stars、MIT 开源协议、3,000+ 付费客户（含 Netflix、Stripe、OpenAI、NVIDIA），技术成熟度和社区活跃度均有保障。
+
+5. **与现有方案不冲突**：XXL-JOB 做简单定时任务、APISIX 做网关限流、Temporal 做复杂业务流程编排，各司其职，共存互补。
+
+6. **引入成本极低**：MIT 协议零授权费，自托管完全免费；PoC 验证 1~2 周即可确认可行性。
+
+### 9.2 建议下一步
+
+1. **启动 PoC 验证（1~2 周）**：按 5 个验证场景在本地搭建环境，执行破坏性测试，用事实证明 Temporal 的可靠性
+2. **P0 优先迁移（3~4 周）**：评审通过后优先迁移海康批量操作（评分 24/25）和入厂备案权限下发（评分 23/25）--这两个场景的可靠性债务最严重
+3. **P1 扩展迁移（3~4 周）**：访客授权审批（22/25）和楼宇门禁权限管理（21/25，17 个定时任务）
+4. **同步推进 UI 二次开发（2~3 周）**：将 Workflow 状态整合进现有管理后台
+5. **生产环境四层分离部署（1 周）**：确保 Server 与 DB 同可用区，灰度切流
+
+> 完整的迁移优先级矩阵和分阶段路线图详见 [Temporal迁移技术分析报告.md](file:///Users/apple/Desktop/AdapterService/docs/Temporal迁移技术分析报告.md)
+
+---
+
+## 十、术语表
+
+> 本章节对文档中出现的技术专业词汇进行集中解释，帮助非技术背景的读者理解相关概念。
+
+### 10.1 Java/JVM 相关
+
+| 术语 | 补充说明 |
+| --- | --- |
+| **OOM**（Out Of Memory） | 内存溢出错误。当 Java 程序申请的内存超过 JVM（Java 虚拟机）可用堆内存时抛出的致命错误，会导致应用崩溃重启。本文中海康 4 万人批量调用时大量 HTTP 请求对象堆积在内存中，就可能引发 OOM。 |
+| **JVM 堆**（JVM Heap） | Java 虚拟机管理的内存区域，用于存放程序运行期间创建的对象实例。堆内存不足时会触发垃圾回收（GC），频繁 GC 会导致应用响应变慢，最终可能 OOM。 |
+| **GC**（Garbage Collection，垃圾回收） | Java 虚拟机自动回收不再使用的对象所占内存的机制。当内存中积压大量未完成的请求对象时，GC 会频繁触发，导致 CPU 占用升高、应用卡顿。 |
+| **@Async** | Spring 框架提供的注解，标注后方法会在独立的线程池中异步执行，不阻塞主线程。但如果线程池容量不足且任务积压过多，反而会导致内存溢出。 |
+| **Future** | Java 中代表"异步计算结果"的对象。发起异步调用后立即返回一个 Future，后续通过它获取最终结果。大量未完成的 Future 会持续占用内存。 |
+| **CallerRunsPolicy** | Java 线程池的一种拒绝策略。当线程池队列满了之后，新任务不再被拒绝，而是由提交任务的线程（通常是主线程）自己执行。这会导致主线程被阻塞，影响整体响应。 |
+
+### 10.2 接口与通信相关
+
+| 术语 | 补充说明 |
+| --- | --- |
+| **API**（Application Programming Interface） | 应用程序编程接口，不同系统之间交互的约定。本文中"海康 API""门禁 API"指调用对应系统功能的 HTTP 接口。 |
+| **REST**（Representational State Transfer） | 一种轻量级的 Web 服务接口风格，使用 HTTP 协议传输 JSON 格式数据，是目前最主流的 API 交互方式。 |
+| **SOAP**（Simple Object Access Protocol） | 一种较重的 Web 服务协议，使用 XML 格式封装数据，通常用于企业级系统集成。本文中 BPM 流程引擎使用 SOAP 协议。 |
+| **gRPC** | Google 开源的高性能远程调用框架，基于 HTTP/2 和 Protobuf 序列化协议。Temporal 主服务与 Worker 之间通过 gRPC 通信，调用延迟极低（< 5ms）。 |
+| **Webhook** | 一种"反向 API"机制--不是主系统主动去查询结果，而是任务完成后主动 HTTP 回调通知主系统。类似快递员送完快递后给你发短信通知。 |
+| **429 限流** | HTTP 状态码 429 表示"请求过多"（Too Many Requests）。当调用方请求频率超过接口提供方的承受能力时，对方会返回 429 拒绝服务。 |
+| **Base64 编码** | 一种将二进制数据（如人脸图片）转换为纯文本字符串的编码方式，便于通过 HTTP 接口传输。但编码后体积会增大约 33%，增加网络传输和内存开销。 |
+| **3DES 加密** | 一种对称加密算法（Triple DES），是 DES 的增强版。但由于已存在安全漏洞，业界已不推荐使用，建议升级为 AES-256。本文中新开普门禁接口使用 3DES 加密。 |
+| **OAuth2** | 一种授权框架，允许第三方应用在用户授权下访问其资源，而不需要暴露用户密码。本文中 EHR 系统使用 OAuth2 的 client_credentials 模式获取访问令牌（Token）。 |
+| **Token**（令牌） | 身份验证凭证，类似"临时通行证"。客户端获取 Token 后，在后续请求中携带 Token 证明身份，无需每次传输用户名密码。 |
+| **连接池** | 预先创建一组网络连接并复用的机制，避免每次请求都新建/销毁连接的开销。本文中 HttpWS 工具没有使用连接池，每次 SOAP 调用都新建连接，性能较差。 |
+
+### 10.3 数据库与中间件相关
+
+| 术语 | 补充说明 |
+| --- | --- |
+| **DB 慢查询** | 数据库中执行时间过长的 SQL 查询。高频定时扫库（如每 30 分钟全表扫描）会产生慢查询，占用数据库资源，影响其他正常业务查询。 |
+| **Redis** | 一种内存级键值缓存数据库，读写速度极快。本文中用于缓存 SSO 登录 Token 和消息发送状态。 |
+| **TTL**（Time To Live，生存时间） | 数据在缓存/消息队列中的存活时间，过期后自动删除。MQ 延迟队列的消息有 TTL 限制，而 Temporal 的持久化定时器无 TTL 限制。 |
+| **死信队列**（Dead Letter Queue） | 消息队列中处理失败的消息会被自动转入的特殊队列，用于后续人工或自动处理。类似快递公司的"异常件仓库"。 |
+
+### 10.4 架构与设计模式相关
+
+| 术语 | 补充说明 |
+| --- | --- |
+| **Event Sourcing**（事件溯源） | 一种数据持久化模式：不存储最终状态，而是存储每一次状态变更事件（Event）。回放事件即可重建完整状态。Temporal 用此模式实现断点续传--Worker 崩溃后，从事件历史中恢复到崩溃前的进度继续执行。 |
+| **Happy Path**（快乐路径） | 程序在一切正常、没有异常情况下的执行路径。Temporal 的理念是让开发者只写正常流程代码，异常处理由引擎自动兜底。 |
+| **幂等**（Idempotency） | 同一操作执行一次和执行多次产生相同结果。例如"设置门禁权限为开启"是幂等的（重复设置无副作用），而"增加一条记录"不是幂等的（重复执行会产生多条）。 |
+| **补偿**（Compensation） | 当某个步骤失败后，执行一个"反向操作"来撤销已完成步骤的影响。例如"下发权限"失败后，执行"撤销已下发的权限"。 |
+| **状态机**（State Machine） | 描述业务对象在不同状态之间转换的模型。例如访客审批的状态流转：待审批 -> 审批中 -> 已通过 -> 权限已下发。 |
+| **BFF**（Backend For Frontend） | 专为前端服务的后端中间层。前端不直接调用底层 API，而是通过 BFF 间接访问，BFF 负责数据格式转换、权限校验、聚合等。 |
+| **RBAC**（Role-Based Access Control，基于角色的访问控制） | 一种权限管理模型：用户被分配角色，角色拥有权限，用户通过角色间接获得权限。如"管理员"角色可以终止工作流，"访客"角色只能查看。 |
+| **控制面/数据面分离** | 控制面负责调度和管理（Temporal Server），数据面负责实际业务执行（Worker 集群）。两者独立部署互不影响，类似于"指挥所"与"作战部队"分离。 |
+| **长轮询**（Long-Polling） | Worker 主动向 Server 拉取任务的机制：Worker 发送请求后，如果没有任务，Server 会保持连接等待，直到有任务或超时才返回。避免了频繁轮询的无效请求。 |
+| **HPA**（Horizontal Pod Autoscaler，水平自动扩缩容） | Kubernetes 的自动扩缩容机制，根据 CPU/内存或自定义指标（如队列积压量）自动增加或减少 Worker 实例数量。 |
+
+### 10.5 Temporal 核心概念
+
+| 术语 | 补充说明 |
+| --- | --- |
+| **Workflow**（工作流） | Temporal 中一个完整的业务流程实例。由开发者用普通 Java 代码编写，定义了多个步骤的执行顺序。流程状态由引擎持久化，崩溃后可恢复。 |
+| **Activity**（活动） | Workflow 中的一个具体执行步骤，通常是调用外部 API 或操作数据库的代码单元。Activity 失败后由引擎自动重试。 |
+| **Worker**（工作进程） | 运行在独立服务器上的进程，负责实际执行 Workflow 和 Activity 代码。Worker 无状态，可随时增减实现扩缩容。 |
+| **Task Queue**（任务队列） | Workflow 和 Activity 任务的缓冲队列。主系统提交任务到队列，Worker 从队列拉取任务执行。即使 Worker 不足，任务也在队列中排队等待，不会丢失。 |
+| **Signal**（信号） | 外部系统向正在运行的 Workflow 发送的消息。可用于动态改期、取消、人工审批通过等场景。类似于给正在执行的任务"发送一条指令"。 |
+| **RetryPolicy**（重试策略） | 配置 Activity 失败后的重试行为：最大重试次数、初始间隔、退避系数（Backoff Coefficient）、最大间隔。引擎按策略自动执行重试，开发者无需写重试代码。 |
+| **指数退避**（Exponential Backoff） | 一种重试策略：每次重试的等待时间按指数增长（如 1s -> 2s -> 4s -> 8s），避免短时间内大量重试冲击下游接口。 |
+| **Heartbeat**（心跳） | Worker 在执行长时间 Activity 时定期向 Server 汇报"我还活着"的信号。如果心跳中断，Server 可判断 Worker 宕机并重新调度任务。 |
+| **Codec Server** | Temporal 的数据编解码服务，用于在 Web UI 展示前对加密的 Workflow Payload 进行解密，确保敏感数据不会明文暴露。 |
+| **KMS**（Key Management Service，密钥管理服务） | 集中管理加密密钥的服务，提供密钥的创建、存储、轮换、审计等能力，比硬编码密钥更安全。 |
+| **版本控制（Versioning）** | Temporal 用于实现 Workflow 代码平滑升级的机制。通过 `Workflow.getVersion` API，开发者可以在不中断正在运行的 Workflow 实例的情况下，引入新逻辑或修改旧逻辑。旧 Workflow 保持旧版本逻辑继续执行，新 Workflow 使用新版本逻辑，确保了向后兼容性和零宕机更新。 |
+| **滚动更新（Rolling Update）** | 一种逐步替换旧版本实例为新版本实例的部署策略。Temporal Worker 集群的滚动更新允许在不停服的情况下，逐个或分批地用新版本 Worker 替换旧版本 Worker，新任务由新版本处理，老任务由旧版本继续处理直至完成，实现无缝过渡。 |
+
+### 10.6 调度与并发相关
+
+| 术语 | 补充说明 |
+| --- | --- |
+| **XXL-JOB** | 一个分布式定时任务调度平台，通过配置 Cron 表达式定时触发任务。适合简单的"到点执行一个动作"场景，但不支持多步骤编排和断点续传。 |
+| **Cron 表达式** | 一种时间表达式，用于定义定时任务的触发时间。如 `0 */5 * * * ?` 表示每 5 分钟执行一次。 |
+| **Quartz** | 另一个 Java 定时任务调度框架，功能与 XXL-JOB 类似，通过 Cron 表达式定时触发。 |
+| **Semaphore**（信号量） | Java 并发编程中用于限制同时访问某资源的线程数量的机制。如 `Semaphore(15)` 表示最多允许 15 个线程同时执行。本文中需要手写信号量来限制 API 调用速率。 |
+| **限流**（Rate Limiting） | 控制请求发送速率的机制，防止短时间大量请求打垮下游接口。类似于"水龙头限流"--控制出水量防止水花四溅。 |
+| **削峰**（Peak Shaving） | 将瞬时高峰请求平滑分散到更长时间段处理，避免峰值压力。Temporal 的 Task Queue 天然实现削峰：高峰时排队，Worker 以恒定速率消费。 |
+
+---
+
+> **附录**：
+> - 技术分析与迁移评估：参见 [Temporal迁移技术分析报告.md](file:///Users/apple/Desktop/AdapterService/docs/Temporal迁移技术分析报告.md)
+> - 详细 PoC 验证方案：参见 [验证场景.md](file:///Users/apple/Desktop/AdapterService/docs/验证场景.md)
+> - Web UI 二次开发与落地实施路径：参见 [Temporal-WebUI与落地实施路径.md](file:///Users/apple/Desktop/AdapterService/docs/Temporal-WebUI与落地实施路径.md)
+> - 部署架构详细设计：参见 [Temporal-WebUI二次开发与部署设计文档.md](file:///Users/apple/Desktop/AdapterService/docs/Temporal-WebUI二次开发与部署设计文档.md)
+> - 定时任务方案对比：参见 [业务定时任务.md](file:///Users/apple/Desktop/AdapterService/docs/业务定时任务.md)
+> - 海康适配器设计：参见 [Hikvision_Batch_Adapter_Design.md](file:///Users/apple/Desktop/AdapterService/docs/Hikvision_Batch_Adapter_Design.md)
+> - 基础部署指南：参见 [Temporal部署.md](file:///Users/apple/Desktop/AdapterService/docs/Temporal部署.md)
+
+</script>
+
+<script>
+// ========== Markdown 渲染 ==========
+const mdSource = document.getElementById('md-source').textContent.trim();
+marked.setOptions({ breaks: true, gfm: true });
+document.getElementById('content').innerHTML = marked.parse(mdSource);
+
+// ========== 评论系统 ==========
+const STORAGE_KEY = 'temporal-doc-comments-v1';
+let comments = {};
+
+// 加载已保存的评论
+function loadComments() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    comments = raw ? JSON.parse(raw) : {};
+  } catch(e) {
+    comments = {};
+  }
+}
+
+// 保存评论到 localStorage
+function saveComments() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
+}
+
+// 获取元素的纯净文本（排除评论按钮/徽标）
+function getCleanText(el) {
+  const clone = el.cloneNode(true);
+  clone.querySelectorAll('.comment-add-btn, .comment-badge, .comment-popup').forEach(e => e.remove());
+  return clone.textContent.trim();
+}
+
+// 获取当前章节标题
+function getSectionTitle(el) {
+  // 先检查元素自身是否是标题
+  if (el.tagName && /^H[1-4]$/.test(el.tagName)) {
+    return getCleanText(el);
+  }
+  // 向前查找最近的标题
+  let cur = el.previousElementSibling;
+  while (cur) {
+    if (cur.tagName && /^H[1-4]$/.test(cur.tagName)) {
+      return getCleanText(cur);
+    }
+    cur = cur.previousElementSibling;
+  }
+  // 向上查找
+  cur = el.parentElement;
+  while (cur && cur !== document.getElementById('content')) {
+    let prev = cur.previousElementSibling;
+    while (prev) {
+      if (prev.tagName && /^H[1-4]$/.test(prev.tagName)) {
+        return getCleanText(prev);
+      }
+      prev = prev.previousElementSibling;
+    }
+    cur = cur.parentElement;
+  }
+  return '文档顶部';
+}
+
+// 获取元素预览文本
+function getPreviewText(el) {
+  const text = getCleanText(el).replace(/\n+/g, ' ');
+  return text.length > 80 ? text.substring(0, 80) + '...' : text;
+}
+
+// 为所有块级元素添加可评论功能
+function initCommentable() {
+  const content = document.getElementById('content');
+  const blocks = content.querySelectorAll('h1, h2, h3, h4, h5, h6, p, table, pre, blockquote, ul, ol');
+  let cid = 0;
+
+  blocks.forEach(el => {
+    cid++;
+    el.dataset.cid = cid;
+    el.classList.add('commentable');
+
+    // 添加评论按钮
+    const addBtn = document.createElement('button');
+    addBtn.className = 'comment-add-btn';
+    addBtn.innerHTML = '+';
+    addBtn.title = '添加评论';
+    addBtn.onclick = function(e) { e.stopPropagation(); openCommentPopup(el); };
+    el.appendChild(addBtn);
+
+    // 评论徽标
+    const badge = document.createElement('div');
+    badge.className = 'comment-badge';
+    badge.textContent = '!';
+    badge.title = '查看/编辑评论';
+    badge.onclick = function(e) { e.stopPropagation(); openCommentPopup(el); };
+    el.appendChild(badge);
+
+    // 如果已有评论，显示徽标
+    if (comments[cid]) {
+      el.classList.add('has-comment');
+    }
+  });
+}
+
+// 打开评论弹窗
+function openCommentPopup(el) {
+  // 关闭已有弹窗
+  closeCommentPopup();
+
+  const cid = el.dataset.cid;
+  const popup = document.createElement('div');
+  popup.className = 'comment-popup show';
+  popup.id = 'active-popup';
+
+  const section = getSectionTitle(el);
+  const preview = getPreviewText(el);
+  const existing = comments[cid] ? comments[cid].text : '';
+
+  popup.innerHTML = `
+    <div class="popup-section">章节：${section}</div>
+    <div class="popup-preview">${preview}</div>
+    <textarea id="popup-textarea" placeholder="在此输入你的评论..." rows="4">${existing}</textarea>
+    <div class="popup-actions">
+      ${existing ? '<button class="danger" onclick="deleteComment(' + cid + ')">删除</button>' : ''}
+      <button onclick="closeCommentPopup()">取消</button>
+      <button class="primary" onclick="saveComment(${cid})">保存</button>
+    </div>
+  `;
+
+  el.style.position = 'relative';
+  el.appendChild(popup);
+
+  // 点击外部关闭
+  setTimeout(() => {
+    document.addEventListener('click', closeOnOutsideClick);
+  }, 10);
+}
+
+function closeOnOutsideClick(e) {
+  const popup = document.getElementById('active-popup');
+  if (popup && !popup.contains(e.target) && !e.target.classList.contains('comment-add-btn') && !e.target.classList.contains('comment-badge')) {
+    closeCommentPopup();
+  }
+}
+
+function closeCommentPopup() {
+  const popup = document.getElementById('active-popup');
+  if (popup) popup.remove();
+  document.removeEventListener('click', closeOnOutsideClick);
+}
+
+// 保存评论
+function saveComment(cid) {
+  const textarea = document.getElementById('popup-textarea');
+  if (!textarea) return;
+  const text = textarea.value.trim();
+  if (!text) return;
+
+  const el = document.querySelector(`[data-cid="${cid}"]`);
+  comments[cid] = {
+    text: text,
+    section: getSectionTitle(el),
+    preview: getPreviewText(el),
+    timestamp: new Date().toISOString()
+  };
+  saveComments();
+  el.classList.add('has-comment');
+  closeCommentPopup();
+  updateCommentCount();
+  renderSidebar();
+}
+
+// 删除评论
+function deleteComment(cid) {
+  delete comments[cid];
+  saveComments();
+  const el = document.querySelector(`[data-cid="${cid}"]`);
+  if (el) el.classList.remove('has-comment');
+  closeCommentPopup();
+  updateCommentCount();
+  renderSidebar();
+}
+
+// 更新评论计数
+function updateCommentCount() {
+  const count = Object.keys(comments).length;
+  document.getElementById('commentCount').textContent = count;
+}
+
+// 渲染侧边栏评论列表
+function renderSidebar() {
+  const list = document.getElementById('sidebarList');
+  const keys = Object.keys(comments).sort((a, b) => parseInt(a) - parseInt(b));
+
+  if (keys.length === 0) {
+    list.innerHTML = '<div class="sidebar-empty">暂无评论。点击文档中任意段落右侧的 "+" 按钮添加评论。</div>';
+    return;
+  }
+
+  list.innerHTML = keys.map(cid => {
+    const c = comments[cid];
+    const time = new Date(c.timestamp).toLocaleString('zh-CN');
+    return `
+      <div class="sidebar-comment-item" onclick="scrollToElement(${cid})">
+        <div class="sci-section">${c.section}</div>
+        <div class="sci-preview">${c.preview}</div>
+        <div class="sci-text">${escapeHtml(c.text)}</div>
+        <div class="sci-time">${time}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// 滚动到指定元素
+function scrollToElement(cid) {
+  const el = document.querySelector(`[data-cid="${cid}"]`);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.style.transition = 'background 0.5s';
+    const origBg = el.style.background;
+    el.style.background = '#fff8c5';
+    setTimeout(() => { el.style.background = origBg; }, 1500);
+  }
+}
+
+// 侧边栏开关
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('overlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('show');
+  if (sb.classList.contains('open')) renderSidebar();
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// 生成所有评论的纯文本
+function generateCommentsText() {
+  const keys = Object.keys(comments).sort((a, b) => parseInt(a) - parseInt(b));
+  if (keys.length === 0) return '【暂无评论】';
+
+  let text = '========== Temporal 业务解决方案介绍 - 评论汇总 ==========\n';
+  text += `导出时间：${new Date().toLocaleString('zh-CN')}\n`;
+  text += `评论总数：${keys.length}\n\n`;
+
+  keys.forEach((cid, i) => {
+    const c = comments[cid];
+    text += `----------------------------------------\n`;
+    text += `【评论 ${i + 1}】\n`;
+    text += `章节：${c.section}\n`;
+    text += `原文预览：${c.preview}\n`;
+    text += `评论内容：\n${c.text}\n`;
+    text += `时间：${new Date(c.timestamp).toLocaleString('zh-CN')}\n\n`;
+  });
+
+  text += '========================================\n';
+  return text;
+}
+
+// 一键复制全部评论
+function copyAllComments() {
+  const text = generateCommentsText();
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('已复制 ' + Object.keys(comments).length + ' 条评论到剪贴板');
+  }).catch(() => {
+    // 降级方案
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('已复制 ' + Object.keys(comments).length + ' 条评论到剪贴板');
+  });
+}
+
+// 导出评论为 TXT 文件
+function exportComments() {
+  const text = generateCommentsText();
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Temporal评论_${new Date().toISOString().slice(0, 10)}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// 清空所有评论
+function clearAllComments() {
+  if (!confirm('确定要清空所有评论吗？此操作不可撤销。')) return;
+  comments = {};
+  saveComments();
+  document.querySelectorAll('.has-comment').forEach(el => el.classList.remove('has-comment'));
+  updateCommentCount();
+  renderSidebar();
+  showToast('已清空所有评论');
+}
+
+// Toast 提示
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// HTML 转义
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ========== 初始化 ==========
+loadComments();
+initCommentable();
+updateCommentCount();
+renderSidebar();
+</script>
+
+
+
+</body></html>

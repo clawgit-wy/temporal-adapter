@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.risk.mapper.YtsafetyRiskDataMapper">
+    <!-- 列表分页查询：安全员/安全主管名称由服务层回填 -->
+    <select id="queryPageList" resultType="com.yutong.modules.risk.vo.YtsafetyRiskDataVO">
+        SELECT tmp.* FROM (
+            SELECT
+                t.*,
+                CONCAT(t.org_code, '_', t.safety_role_code) as depart_safety_code,
+                CONCAT(t.org_code, '_', t.manager_role_code) as depart_manager_code,
+                CASE WHEN TIMESTAMPDIFF(MONTH, t.update_time, NOW()) >= 6 THEN 1 ELSE 0 END AS updateStatus
+            FROM ytsafety_risk_data t
+            ${ew.customSqlSegment}
+        ) tmp
+        <!-- 安全员：原 IN(CONCAT(...)) 改为按 depart_code + role_code 原始列 JOIN，
+             子查询结果仅为该人员负责的部门+角色（行数很少），避免全表拼接字符串比较 -->
+        <if test="query.safetyStaffName != null and query.safetyStaffName != ''">
+            INNER JOIN (
+                SELECT DISTINCT depart_code, role_code
+                FROM ytsafety_sys_responsible_mapping
+                WHERE depart_code IS NOT NULL
+                AND role_code IS NOT NULL
+                AND (emp_name LIKE CONCAT('%', #{query.safetyStaffName}, '%')
+                OR emp_no LIKE CONCAT('%', #{query.safetyStaffName}, '%'))
+            ) staff_mapping
+            ON staff_mapping.depart_code = tmp.org_code
+            AND staff_mapping.role_code = tmp.safety_role_code
+        </if>
+        <if test="query.safetyManagerName != null and query.safetyManagerName != ''">
+            INNER JOIN (
+                SELECT DISTINCT depart_code, role_code
+                FROM ytsafety_sys_responsible_mapping
+                WHERE depart_code IS NOT NULL
+                AND role_code IS NOT NULL
+                AND (emp_name LIKE CONCAT('%', #{query.safetyManagerName}, '%')
+                OR emp_no LIKE CONCAT('%', #{query.safetyManagerName}, '%'))
+            ) manager_mapping
+            ON manager_mapping.depart_code = tmp.org_code
+            AND manager_mapping.role_code = tmp.manager_role_code
+        </if>
+        <if test="query.keyword != null and query.keyword != ''">
+            LEFT JOIN (
+                SELECT DISTINCT depart_code, role_code
+                FROM ytsafety_sys_responsible_mapping
+                WHERE depart_code IS NOT NULL
+                AND role_code IS NOT NULL
+                AND (emp_name LIKE CONCAT('%', #{query.keyword}, '%')
+                OR emp_no LIKE CONCAT('%', #{query.keyword}, '%'))
+            ) keyword_mapping
+            ON keyword_mapping.depart_code = tmp.org_code
+            AND keyword_mapping.role_code = tmp.safety_role_code
+        </if>
+        WHERE tmp.del_flag=0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (
+                CONCAT_WS(',', tmp.risk_code, tmp.location_name, tmp.risk_factor_name) LIKE CONCAT('%', #{query.keyword}, '%')
+                OR keyword_mapping.depart_code IS NOT NULL
+            )
+        </if>
+        order by tmp.update_time desc
+    </select>
+
+    <!-- 单行查询：安全员/安全主管名称由服务层回填 -->
+    <select id="queryByDataId" resultType="com.yutong.modules.risk.vo.YtsafetyRiskDataVO">
+        SELECT tmp.* FROM (
+            SELECT
+                t.*
+            FROM ytsafety_risk_data t
+            WHERE t.id = #{id}
+        ) tmp
+        WHERE tmp.del_flag=0
+    </select>
+
+    <!-- 列表查询：安全员/安全主管名称由服务层回填 -->
+    <select id="queryList" resultType="com.yutong.modules.risk.vo.YtsafetyRiskDataVO">
+        SELECT tmp.* FROM (
+            SELECT
+                t.*,
+                CONCAT(t.org_code, '_', t.safety_role_code) as depart_safety_code,
+                CONCAT(t.org_code, '_', t.manager_role_code) as depart_manager_code,
+                CASE WHEN TIMESTAMPDIFF(MONTH, t.update_time, NOW()) >= 6 THEN 1 ELSE 0 END AS updateStatus
+            FROM ytsafety_risk_data t
+            ${ew.customSqlSegment}
+        ) tmp
+        <!-- 安全员：同 queryPageList，改为按原始列 JOIN -->
+        <if test="query.safetyStaffName != null and query.safetyStaffName != ''">
+            INNER JOIN (
+                SELECT DISTINCT depart_code, role_code
+                FROM ytsafety_sys_responsible_mapping
+                WHERE depart_code IS NOT NULL
+                AND role_code IS NOT NULL
+                AND (emp_name LIKE CONCAT('%', #{query.safetyStaffName}, '%')
+                OR emp_no LIKE CONCAT('%', #{query.safetyStaffName}, '%'))
+            ) staff_mapping
+            ON staff_mapping.depart_code = tmp.org_code
+            AND staff_mapping.role_code = tmp.safety_role_code
+        </if>
+        <if test="query.safetyManagerName != null and query.safetyManagerName != ''">
+            INNER JOIN (
+                SELECT DISTINCT depart_code, role_code
+                FROM ytsafety_sys_responsible_mapping
+                WHERE depart_code IS NOT NULL
+                AND role_code IS NOT NULL
+                AND (emp_name LIKE CONCAT('%', #{query.safetyManagerName}, '%')
+                OR emp_no LIKE CONCAT('%', #{query.safetyManagerName}, '%'))
+            ) manager_mapping
+            ON manager_mapping.depart_code = tmp.org_code
+            AND manager_mapping.role_code = tmp.manager_role_code
+        </if>
+        WHERE tmp.del_flag=0
+        order by tmp.update_time desc
+    </select>
+
+    <!-- 当前组织查不到责任人时向上级组织递归：取组织路径上最近一级有责任人的部门的人员名称 -->
+    <select id="queryResponsibleNames" resultType="java.lang.String">
+        SELECT t.names FROM (
+            SELECT
+                GROUP_CONCAT(DISTINCT m.emp_name SEPARATOR ',') AS names,
+                FIND_IN_SET(m.depart_code, gi.org_code_path) AS depth
+            FROM safety_group_info gi
+            INNER JOIN ytsafety_sys_responsible_mapping m
+                ON FIND_IN_SET(m.depart_code, gi.org_code_path) > 0
+                AND m.role_code = #{roleCode}
+            WHERE gi.status = 'Y' AND gi.code = #{orgCode}
+            GROUP BY m.depart_code, gi.org_code_path
+        ) t
+        ORDER BY t.depth DESC
+        LIMIT 1
+    </select>
+
+</mapper>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.spot.SafetySpotCheckDeviceInfoDOBizMapper">
+  <resultMap id="BaseResultVOMap" type="com.yutong.safety.common.vo.web.SpotCheckDeviceInfoVO">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="device_code" jdbcType="VARCHAR" property="deviceCode" />
+    <result column="device_name" jdbcType="VARCHAR" property="deviceName" />
+    <result column="factory_id" jdbcType="INTEGER" property="factoryId" />
+    <result column="factory_name" jdbcType="INTEGER" property="factoryName" />
+    <result column="device_type" jdbcType="VARCHAR" property="deviceType" />
+    <result column="team_id" jdbcType="INTEGER" property="teamId" />
+    <result column="team_name" jdbcType="VARCHAR" property="teamName" />
+    <result column="location" jdbcType="VARCHAR" property="location" />
+    <result column="duty_name" jdbcType="VARCHAR" property="dutyName" />
+    <result column="check_emp_no" jdbcType="VARCHAR" property="checkEmpNo" />
+    <result column="check_emp" jdbcType="VARCHAR" property="checkEmp" />
+    <result column="pro_tem_check_emp_no" jdbcType="VARCHAR" property="proTemCheckEmpNo" />
+    <result column="pro_tem_check_emp" jdbcType="VARCHAR" property="proTemCheckEmp" />
+    <result column="pro_tem_begin_date" jdbcType="VARCHAR" property="proTemBeginDate" />
+    <result column="pro_tem_end_date" jdbcType="VARCHAR" property="proTemEndDate" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_emp" jdbcType="VARCHAR" property="updateEmp" />
+    <result column="update_emp_no" jdbcType="VARCHAR" property="updateEmpNo" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="fault_total" jdbcType="INTEGER" property="faultTotal" />
+    <result column="rule_id" jdbcType="VARCHAR" property="ruleIds" />
+    <result column="rule_name" jdbcType="VARCHAR" property="ruleNames" />
+    <result column="device_field_code" jdbcType="VARCHAR" property="deviceFieldCode" />
+    <result column="device_status" jdbcType="VARCHAR" property="deviceStatus" />
+  </resultMap>
+
+  <sql id="search">
+    <if test="param.factoryId !=null">
+      and t.factory_id = #{param.factoryId}
+    </if>
+    <if test="param.deviceType !=null">
+      and t.device_type like concat('%',#{param.deviceType},'%')
+    </if>
+    <if test="param.teamId !=null">
+      and t.team_id = #{param.teamId}
+    </if>
+    <if test="param.teamName !=null">
+      and t.team_name like concat('%',#{param.teamName},'%')
+    </if>
+    <if test="param.deviceName !=null">
+      and t.device_name like concat('%',#{param.deviceName},'%')
+    </if>
+    <if test="param.location !=null">
+      and t.location like concat('%',#{param.location},'%')
+    </if>
+    <if test="param.deviceCode !=null">
+      and t.device_code like concat('%',#{param.deviceCode},'%')
+    </if>
+    <if test="param.dutyName !=null">
+      and t.duty_name like concat('%',#{param.dutyName},'%')
+    </if>
+    <if test="param.checkEmp !=null">
+      and t.check_emp like concat('%',#{param.checkEmp},'%')
+    </if>
+    <if test="param.factoryIds != null">
+      and t.factory_id in
+      <foreach item="item" index="index" collection="param.factoryIds.split(',')"  open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
+  </sql>
+
+  <select id="queryPageList" resultMap="BaseResultVOMap">
+    SELECT * FROM (
+    SELECT t.id, t.device_code, t.device_name, t.factory_id, m.field_name AS factory_name, t.device_type, t.team_id,
+          t.team_name, t.location, t.duty_name, t.check_emp_no, t.check_emp,t.pro_tem_check_emp_no,t.pro_tem_check_emp,
+          t.pro_tem_begin_date,t.pro_tem_end_date, t.remark, t.create_time, t.update_emp, t.update_emp_no, t.update_time,
+          IFNULL(cr.fault_total,0) fault_total, k.rule_id, k.rule_name, t.device_field_code,
+          CASE WHEN t3.device_status is null then 0 WHEN t3.validate_status is null THEN 0 WHEN t3.validate_status = 1 THEN 0 ELSE
+          IFNULL(t3.device_status,0) END device_status
+    FROM safety_spot_check_device_info t
+    left join safety_field_manage m on t.factory_id = m.id
+    left join (SELECT p.spot_id, GROUP_CONCAT(r.id) AS rule_id, GROUP_CONCAT(r.rule_name) AS rule_name
+                FROM safety_spot_check_rule r, safety_spot_rule_perm p
+                WHERE r.id = p.rule_id GROUP BY p.spot_id) k on t.id = k.spot_id
+    left join (SELECT device_id,sum(device_status) fault_total FROM	safety_spot_check_record group by device_id) cr ON cr.device_id = t.id
+    left join (select max(t1.device_id) device_id,max(t1.device_status) device_status,max(t1.check_time) check_time,max(t1.validate_status) validate_status,max(t1.is_reform) is_reform
+              from safety_spot_check_record t1
+              where (t1.device_id,t1.check_time) in (select device_id,MAX(check_time) check_time
+                                                      from safety_spot_check_record
+                                                      where status=1
+                                                      group by device_id) GROUP BY device_id) t3 on t.id = t3.device_id
+    WHERE t.delete_falg = 0
+
+    <include refid="search"></include>
+    ) AS CUR_TMP
+    WHERE 1 = 1
+    <if test="param.deviceStatus != null">
+      and device_status = #{param.deviceStatus}
+    </if>
+    ORDER BY update_time DESC
+    limit #{start}, #{end}
+  </select>
+
+  <select id="exportList" resultMap="BaseResultVOMap">
+    SELECT * FROM (
+    SELECT t.id, t.device_code, t.device_name, t.factory_id, m.field_name AS factory_name, t.device_type, t.team_id,
+          t.team_name, t.location, t.duty_name, t.check_emp_no, t.check_emp,t.pro_tem_check_emp_no,t.pro_tem_check_emp,
+          t.pro_tem_begin_date,t.pro_tem_end_date, t.remark, t.create_time, t.update_emp, t.update_emp_no, t.update_time,
+          IFNULL(cr.fault_total,0) fault_total, k.rule_id, k.rule_name, t.device_field_code,
+          CASE WHEN t3.device_status is null then 0 WHEN t3.validate_status is null THEN 0 WHEN t3.validate_status = 1 THEN 0 ELSE
+          IFNULL(t3.device_status,0) END device_status
+    FROM safety_spot_check_device_info t
+    left join safety_field_manage m on t.factory_id = m.id
+    left join (SELECT p.spot_id, GROUP_CONCAT(r.id) AS rule_id, GROUP_CONCAT(r.rule_name) AS rule_name
+                FROM safety_spot_check_rule r, safety_spot_rule_perm p
+                WHERE r.id = p.rule_id GROUP BY p.spot_id) k on t.id = k.spot_id
+    left join (SELECT device_id,sum(device_status) fault_total FROM	safety_spot_check_record group by device_id) cr ON cr.device_id = t.id
+    left join (select max(t1.device_id) device_id,max(t1.device_status) device_status,max(t1.check_time) check_time,max(t1.validate_status) validate_status,max(t1.is_reform) is_reform
+              from safety_spot_check_record t1
+              where (t1.device_id,t1.check_time) in (select device_id,MAX(check_time) check_time
+                                                      from safety_spot_check_record
+                                                      where status=1
+                                                      group by device_id) GROUP BY device_id) t3 on t.id = t3.device_id
+    WHERE t.delete_falg = 0
+
+    <include refid="search"></include>
+    ) AS CUR_TMP
+    WHERE 1 = 1
+    <if test="param.deviceStatus != null">
+      and device_status = #{param.deviceStatus}
+    </if>
+    ORDER BY update_time DESC
+  </select>
+
+  <select id="pageListCount" resultType="java.lang.Integer">
+      SELECT count(1) FROM (
+          SELECT t.id, t.device_code, t.device_name, t.factory_id, m.field_name AS factory_name, t.device_type, t.team_id,
+                  t.team_name, t.location, t.duty_name, t.check_emp_no, t.check_emp,t.pro_tem_check_emp_no,t.pro_tem_check_emp,
+                  t.pro_tem_begin_date,t.pro_tem_end_date, t.remark, t.create_time, t.update_emp, t.update_emp_no, t.update_time,
+                  IFNULL(cr.fault_total,0) fault_total, k.rule_id, k.rule_name, t.device_field_code,
+                  CASE WHEN t3.device_status is null then 0 WHEN t3.validate_status is null THEN 0 WHEN t3.validate_status = 1 THEN 0 ELSE
+                  IFNULL(t3.device_status,0) END device_status
+          FROM safety_spot_check_device_info t
+          left join safety_field_manage m on t.factory_id = m.id
+          left join (SELECT p.spot_id, GROUP_CONCAT(r.id) AS rule_id, GROUP_CONCAT(r.rule_name) AS rule_name
+          FROM safety_spot_check_rule r, safety_spot_rule_perm p
+          WHERE r.id = p.rule_id GROUP BY p.spot_id) k on t.id = k.spot_id
+          left join (SELECT device_id,sum(device_status) fault_total FROM	safety_spot_check_record group by device_id) cr ON cr.device_id = t.id
+          left join (select max(t1.device_id) device_id,max(t1.device_status) device_status,max(t1.check_time) check_time,max(t1.validate_status) validate_status,max(t1.is_reform) is_reform
+                      from safety_spot_check_record t1
+                      where (t1.device_id,t1.check_time) in (select device_id,MAX(check_time) check_time
+                      from safety_spot_check_record
+                      where status=1
+                      group by device_id) GROUP BY device_id) t3 on t.id = t3.device_id
+          WHERE t.delete_falg = 0
+          <include refid="search"></include>
+      ) AS CUR_TMP
+      WHERE 1 = 1
+      <if test="param.deviceStatus != null">
+          and device_status = #{param.deviceStatus}
+      </if>
+  </select>
+</mapper>

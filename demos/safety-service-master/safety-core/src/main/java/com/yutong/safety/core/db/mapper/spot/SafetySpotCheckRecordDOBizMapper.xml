@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.spot.SafetySpotCheckRecordDOBizMapper">
+  <resultMap id="BaseResultMap" type="com.yutong.safety.core.dto.SpotCheckRecordDTO">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="task_id" jdbcType="INTEGER" property="taskId" />
+    <result column="device_id" jdbcType="INTEGER" property="deviceId" />
+    <result column="plan_check_emp_no" jdbcType="VARCHAR" property="planCheckEmpNo" />
+    <result column="check_emp_no" jdbcType="VARCHAR" property="checkEmpNo" />
+    <result column="check_time" jdbcType="TIMESTAMP" property="checkTime" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="plan_reform_date" jdbcType="VARCHAR" property="planReformDate" />
+    <result column="is_reform" jdbcType="INTEGER" property="isReform" />
+    <result column="reform_img" jdbcType="VARCHAR" property="reformImg" />
+    <result column="reform_time" jdbcType="TIMESTAMP" property="reformTime" />
+    <result column="reform_emp_no" jdbcType="VARCHAR" property="reformEmpNo" />
+    <result column="validate_time" jdbcType="TIMESTAMP" property="validateTime" />
+    <result column="validate_emp_no" jdbcType="VARCHAR" property="validateEmpNo" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="task_begin_date" jdbcType="VARCHAR" property="taskBeginDate" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="update_emp_no" jdbcType="VARCHAR" property="updateEmpNo" />
+    <result column="update_emp" jdbcType="VARCHAR" property="updateEmp" />
+
+    <result column="validate_status" jdbcType="INTEGER" property="validateStatus"/>
+    <result column="device_status" jdbcType="INTEGER" property="deviceStatus"/>
+    <result column="task_end_date" jdbcType="VARCHAR" property="taskEndDate" />
+    <result column="device_type" jdbcType="VARCHAR" property="deviceType" />
+    <result column="team_id" jdbcType="INTEGER" property="teamId" />
+    <result column="team_name" jdbcType="INTEGER" property="teamName" />
+    <result column="factory_id" jdbcType="INTEGER" property="factoryId" />
+    <result column="factory_code" jdbcType="INTEGER" property="factoryCode" />
+    <result column="factory_name" jdbcType="INTEGER" property="factoryName" />
+    <result column="location" jdbcType="INTEGER" property="location" />
+    <result column="device_code" jdbcType="INTEGER" property="deviceCode" />
+    <result column="reform_num" jdbcType="INTEGER" property="reformNum" />
+    <result column="record_status" jdbcType="VARCHAR" property="recordStatus" />
+    <result column="flow_id" jdbcType="VARCHAR" property="flowId" />
+    <result column="flow_url" jdbcType="VARCHAR" property="flowUrl" />
+    <result column="device_eip_status" jdbcType="VARCHAR" property="deviceEipStatus" />
+  </resultMap>
+
+  <sql id="search">
+    <if test="taskBeginDate != null and taskBeginDate !=''">
+      <![CDATA[ and t.task_end_date >= #{taskBeginDate} ]]>
+    </if>
+    <if test="taskEndDate != null and taskEndDate !=''">
+      <![CDATA[
+        and r.task_begin_date <= #{taskEndDate}
+        ]]>
+    </if>
+    <if test="planId != null">
+      and t.plan_id = #{planId}
+    </if>
+    <if test="deviceId != null">
+      and r.device_id = #{deviceId}
+    </if>
+    <if test="taskId != null">
+      and r.task_id = #{taskId}
+    </if>
+    <if test="teamId != null">
+      and t.team_id = #{teamId}
+    </if>
+    <if test="teamName != null and teamName != '' ">
+      and m1.field_name like CONCAT('%',#{teamName},'%')
+    </if>
+    <if test="factoryId != null">
+      and DI.factory_id = #{factoryId}
+    </if>
+    <if test="status != null">
+      and R.`status` = #{status}
+    </if>
+    <if test="deviceType != null and deviceType != '' ">
+      and DI.device_type like CONCAT('%',#{deviceType},'%')
+    </if>
+    <if test="location != null and location != ''">
+      and di.location like CONCAT('%',#{location},'%')
+    </if>
+    <if test="deviceCode != null and deviceCode != '' ">
+      and DI.device_code like CONCAT('%',#{deviceCode},'%')
+    </if>
+    <if test="spotBeginDate != null and spotBeginDate != ''">
+      <![CDATA[and r.check_time >= #{spotBeginDate}]]>
+    </if>
+    <if test="spotEndDate != null and spotEndDate != ''">
+      <![CDATA[and r.check_time < #{spotEndDate}]]>
+    </if>
+    <if test="dutyName != null and dutyName != '' ">
+      and DI.duty_name like CONCAT('%',#{dutyName},'%')
+    </if>
+    <if test="deviceStatus != null">
+      and r.device_status = #{deviceStatus}
+    </if>
+    <if test="spotEmp != null and spotEmp !=''">
+      and r.check_emp = #{spotEmp}
+    </if>
+    <if test="spotEmpNo != null and spotEmpNo !=''">
+      and (r.check_emp_no = #{spotEmpNo} or c.plan_validate_emp_no = #{spotEmpNo})
+    </if>
+    <if test="planEmpNo != null and planEmpNo !=''">
+      and r.plan_check_emp_no like concat('%',#{planEmpNo},'%')
+    </if>
+    <if test="checkOrgName != null and checkOrgName !=''">
+      and em.org_name = #{checkOrgName}
+    </if>
+    <if test="planReformBegin != null and planReformBegin != ''">
+      <![CDATA[and r.plan_reform_date >= #{planReformBegin}]]>
+    </if>
+    <if test="planReformEnd != null and planReformEnd != ''">
+      <![CDATA[and r.plan_reform_date < #{planReformEnd}]]>
+    </if>
+    <if test="isReform != null">
+      and r.is_reform = #{isReform}
+    </if>
+    <if test="reformNum != null">
+      and rh.reform_num = #{reformNum}
+    </if>
+    <if test="validateStatus != null">
+      and r.validate_status = #{validateStatus}
+    </if>
+    <if test="validateBegin != null and validateBegin != ''">
+      <![CDATA[and r.validate_time >= #{validateBegin}]]>
+    </if>
+    <if test="validateEnd != null and validateEnd != ''">
+      <![CDATA[and r.validate_time < #{validateEnd}]]>
+    </if>
+    <if test="validateEmp != null and validateEmp !='' ">
+      and r.validate_emp = #{validateEmp}
+    </if>
+    <if test="factoryIds != null and factoryIds != '' ">
+      and DI.factory_id in
+      <foreach item="item" index="index" collection="factoryIds.split(',')"  open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
+    <if test="deviceEipStatus != null and deviceEipStatus !='' and deviceEipStatus == '/'.toString() ">
+      and (R.device_status = 0 or R.validate_status = 1)
+    </if>
+    <if test="deviceEipStatus != null and deviceEipStatus !='' and deviceEipStatus == '待报修'.toString() ">
+      and R.device_status = 1 and R.eip_flow_id is null
+    </if>
+    <if test="deviceEipStatus != null and deviceEipStatus !='' and deviceEipStatus != '待报修'.toString() and deviceEipStatus != '/'.toString() ">
+      and R.device_status = 1 and R.eip_flow_id is not null and date_format(R.eip_time,'%Y-%m-%d') = #{deviceEipStatus}
+    </if>
+  </sql>
+
+  <select id="selectRecordHistory" parameterType="com.yutong.safety.common.param.web.spot.SpotCheckRecordListParam"
+          resultMap="BaseResultMap">
+<![CDATA[
+    SELECT R.id,R.task_id,R.device_id,R.plan_check_emp,R.plan_check_emp_no,R.check_emp_no,R.check_emp,r.device_status,
+          r.check_img,DATE_FORMAT(R.check_time,'%Y-%m-%d %H:%i:%s') check_time_str,R.`status`,R.plan_reform_date,
+          R.is_reform,R.reform_img,DATE_FORMAT(R.reform_time,'%Y-%m-%d %H:%i:%s') reform_time_str,R.reform_emp_no,
+          R.reform_emp,R.validate_status,r.exception_desc,DATE_FORMAT(R.validate_time,'%Y-%m-%d %H:%i:%s') validate_time_str,
+          R.validate_emp,R.validate_emp_no,R.remark,R.task_begin_date,R.create_time,R.update_time,t.task_end_date,
+          R.update_emp_no,R.update_emp,DI.device_type,t.team_id,m1.field_name team_name,DI.factory_id,M.field_code AS factory_code,
+          M.field_name AS factory_name,DI.location,DI.device_code,DI.duty_name,RH.reform_num,em.org_name as check_org_Name,r.flow_id,
+          case when r.device_status = 1 and r.is_reform = 0 then '待整改'
+          when r.is_reform = 1 and r.validate_status = 0 then '待验证'
+          when r.`status` = 1 and r.validate_status = 1 then '已验证'
+          when r.`status` = 0 then '待点检' else '已点检' end record_status,
+          c.plan_validate_emp,c.plan_validate_emp_no,c.plan_validate_emp_login,
+          CONCAT(#{bpmUrlPre},'&formInstanceId=',r.id,'&processId=',r.flow_id) flow_url,
+
+          case
+          when R.device_status = 0 or R.validate_status = 1  then '/'
+          when R.device_status = 1 and R.eip_flow_id is not null then date_format(R.eip_time,'%Y-%m-%d')
+          when R.device_status = 1 and R.eip_flow_id is null then '待报修'
+          end device_eip_status
+
+    FROM safety_spot_check_record R
+    LEFT JOIN safety_spot_check_task t on r.task_id = t.id
+    LEFT JOIN safety_spot_check_device_info DI ON R.device_id = DI.id
+    LEFT JOIN safety_field_manage M ON DI.factory_id = M.id
+    LEFT JOIN safety_field_manage m1 ON t.team_id = m1.id
+    LEFT JOIN SAFETY_SPOT_CHECK_PROCESS C ON C.ID = R.FLOW_ID
+    LEFT JOIN (select record_id,count(1) as reform_num from safety_spot_check_result group by record_id) AS RH ON R.ID = RH.record_id
+    LEFT JOIN safety_employee_message em on em.emp_no = r.check_emp_no
+
+    WHERE 1= 1
+   ]]>
+    <include refid="search"></include>
+
+    order by IFNULL(r.check_time,r.create_time) desc
+
+    <if test="pageFlag != null and pageFlag">
+      <if test="limit != null">
+        <if test="offset != null">
+          limit ${offset}, ${limit}
+        </if>
+        <if test="offset == null">
+          limit ${limit}
+        </if>
+      </if>
+    </if>
+
+  </select>
+
+  <select id="selectRecordHistoryCount" parameterType="com.yutong.safety.common.param.web.spot.SpotCheckRecordListParam"
+          resultType="java.lang.Long">
+    SELECT count(1) FROM safety_spot_check_record R
+    LEFT JOIN safety_spot_check_task t on r.task_id = t.id
+    LEFT JOIN safety_spot_check_device_info DI ON R.device_id = DI.id
+    LEFT JOIN safety_field_manage M ON DI.factory_id = M.id
+    LEFT JOIN safety_field_manage m1 ON t.team_id = m1.id
+    LEFT JOIN (select record_id,count(1) as reform_num from safety_spot_check_result group by record_id) AS RH ON R.ID = RH.record_id
+    LEFT JOIN safety_employee_message em on em.emp_no = r.check_emp_no
+    LEFT JOIN SAFETY_SPOT_CHECK_PROCESS C ON C.ID = R.FLOW_ID
+    WHERE 1= 1
+
+    <include refid="search"></include>
+
+  </select>
+
+  <!-- 批量更新点检记录的更新字段 -->
+  <update id="updatePlanEmpBatch" parameterType="com.yutong.safety.common.param.web.spot.SpotCheckRecordListParam">
+    UPDATE safety_spot_check_record R
+      JOIN safety_spot_check_device_info D ON D.ID = R.DEVICE_ID
+       SET R.plan_check_emp_no = D.check_emp_no,
+           R.plan_check_emp = D.check_emp
+     WHERE R.device_id in
+    <foreach item="item" index="index" collection="deviceIdList"  open="(" separator="," close=")">
+      #{item}
+    </foreach>
+       and R.`status` = #{status}
+     <![CDATA[
+       AND R.task_begin_date<=#{spotEndDate}
+       AND R.task_end_date>=#{spotEndDate}
+     ]]>
+  </update>
+
+  <update id="updatePlanEmpBatchNew" parameterType="com.yutong.safety.common.param.web.spot.SpotCheckRecordListParam">
+    UPDATE safety_spot_check_record R
+    JOIN safety_spot_check_device_info D ON D.ID = R.DEVICE_ID
+    SET R.plan_check_emp_no = D.check_emp_no,
+        R.plan_check_emp = D.check_emp
+    WHERE R.device_id in
+    <foreach item="item" index="index" collection="deviceIdList"  open="(" separator="," close=")">
+      #{item}
+    </foreach>
+    and R.`status` = #{status}
+    <![CDATA[
+       AND R.task_begin_date >= #{spotEndDate}
+     ]]>
+  </update>
+
+  <update id="batchUpdateTaskId" parameterType="java.util.List">
+    <if test="taskIdList != null">
+      <foreach collection="taskIdList" separator=";">
+        update safety_spot_check_record
+        set
+            task_id = #{latestTaskId}
+        where
+            id = #{id}
+      </foreach>
+    </if>
+  </update>
+
+  <update id="batchUpdateRecord" parameterType="java.util.List">
+    <if test="taskIdList != null">
+      <foreach collection="taskIdList" separator=";"  item="record">
+        update safety_spot_check_record
+            <set>
+              <if test="record.taskId != null">
+                task_id = #{record.taskId,jdbcType=INTEGER},
+              </if>
+              <if test="record.deviceId != null">
+                device_id = #{record.deviceId,jdbcType=INTEGER},
+              </if>
+              <if test="record.planCheckEmp != null">
+                plan_check_emp = #{record.planCheckEmp,jdbcType=VARCHAR},
+              </if>
+              <if test="record.planCheckEmpNo != null">
+                plan_check_emp_no = #{record.planCheckEmpNo,jdbcType=VARCHAR},
+              </if>
+              <if test="record.checkEmp != null">
+                check_emp = #{record.checkEmp,jdbcType=VARCHAR},
+              </if>
+              <if test="record.checkEmpNo != null">
+                check_emp_no = #{record.checkEmpNo,jdbcType=VARCHAR},
+              </if>
+              <if test="record.checkTime != null">
+                check_time = #{record.checkTime,jdbcType=TIMESTAMP},
+              </if>
+              <if test="record.checkImg != null">
+                check_img = #{record.checkImg,jdbcType=VARCHAR},
+              </if>
+              <if test="record.deviceStatus != null">
+                device_status = #{record.deviceStatus,jdbcType=INTEGER},
+              </if>
+              <if test="record.delayCheckFlag != null">
+                delay_check_flag = #{record.delayCheckFlag,jdbcType=INTEGER},
+              </if>
+              <if test="record.exceptionDesc != null">
+                exception_desc = #{record.exceptionDesc,jdbcType=VARCHAR},
+              </if>
+              <if test="record.status != null">
+                status = #{record.status,jdbcType=INTEGER},
+              </if>
+              <if test="record.planReformDate != null">
+                plan_reform_date = #{record.planReformDate,jdbcType=VARCHAR},
+              </if>
+              <if test="record.delayReformDate != null">
+                delay_reform_date = #{record.delayReformDate,jdbcType=VARCHAR},
+              </if>
+              <if test="record.isReform != null">
+                is_reform = #{record.isReform,jdbcType=INTEGER},
+              </if>
+              <if test="record.delayReformFlag != null">
+                delay_reform_flag = #{record.delayReformFlag,jdbcType=INTEGER},
+              </if>
+              <if test="record.reformImg != null">
+                reform_img = #{record.reformImg,jdbcType=VARCHAR},
+              </if>
+              <if test="record.reformTime != null">
+                reform_time = #{record.reformTime,jdbcType=TIMESTAMP},
+              </if>
+              <if test="record.reformEmp != null">
+                reform_emp = #{record.reformEmp,jdbcType=VARCHAR},
+              </if>
+              <if test="record.reformEmpNo != null">
+                reform_emp_no = #{record.reformEmpNo,jdbcType=VARCHAR},
+              </if>
+              <if test="record.validateStatus != null">
+                validate_status = #{record.validateStatus,jdbcType=INTEGER},
+              </if>
+              <if test="record.validateTime != null">
+                validate_time = #{record.validateTime,jdbcType=TIMESTAMP},
+              </if>
+              <if test="record.validateEmp != null">
+                validate_emp = #{record.validateEmp,jdbcType=VARCHAR},
+              </if>
+              <if test="record.validateEmpNo != null">
+                validate_emp_no = #{record.validateEmpNo,jdbcType=VARCHAR},
+              </if>
+              <if test="record.remark != null">
+                remark = #{record.remark,jdbcType=VARCHAR},
+              </if>
+              <if test="record.taskBeginDate != null">
+                task_begin_date = #{record.taskBeginDate,jdbcType=VARCHAR},
+              </if>
+              <if test="record.taskEndDate != null">
+                task_end_date = #{record.taskEndDate,jdbcType=VARCHAR},
+              </if>
+              <if test="record.createTime != null">
+                create_time = #{record.createTime,jdbcType=TIMESTAMP},
+              </if>
+              <if test="record.updateTime != null">
+                update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+              </if>
+              <if test="record.updateEmpNo != null">
+                update_emp_no = #{record.updateEmpNo,jdbcType=VARCHAR},
+              </if>
+              <if test="record.updateEmp != null">
+                update_emp = #{record.updateEmp,jdbcType=VARCHAR},
+              </if>
+              <if test="record.flowId != null">
+                flow_id = #{record.flowId,jdbcType=VARCHAR},
+              </if>
+
+            </set>
+        where
+          id = #{record.id,jdbcType=INTEGER}
+      </foreach>
+    </if>
+  </update>
+</mapper>

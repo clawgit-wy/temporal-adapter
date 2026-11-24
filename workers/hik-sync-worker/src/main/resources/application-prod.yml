@@ -1,0 +1,17 @@
+# 生产环境配置
+spring:
+  datasource:
+    mysql:
+      url: jdbc:mysql://10.66.139.220:33306/safety?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
+      username: BP_QUERY
+      password: SdkWCNQ9
+      driver-class-name: com.mysql.cj.jdbc.Driver
+    pg:
+      url: jdbc:postgresql://10.40.0.1:7092/ctm02brss_ctm02brssdb
+      username: hikface
+      password: zjk@111++
+      driver-class-name: org.postgresql.Driver
+
+temporal:
+  server:
+    address: ${TEMPORAL_ADDRESS:prod-temporal:7233}

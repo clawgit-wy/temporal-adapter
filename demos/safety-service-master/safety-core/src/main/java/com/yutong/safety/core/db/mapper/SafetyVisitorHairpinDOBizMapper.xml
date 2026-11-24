@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.SafetyVisitorHairpinDOBizMapper">
+  <resultMap id="BaseResultMap" type="com.yutong.safety.core.dto.VisitorHirpinAppDTO">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="visitor_name" jdbcType="VARCHAR" property="visitorName" />
+    <result column="visitor_phone" jdbcType="VARCHAR" property="visitorPhone" />
+    <result column="visitor_id_card" jdbcType="VARCHAR" property="visitorIdCard" />
+    <result column="vendor_factory" jdbcType="VARCHAR" property="vendorFactory" />
+    <result column="vendor_region" jdbcType="VARCHAR" property="vendorRegion" />
+    <result column="visited_name" jdbcType="VARCHAR" property="visitedName" />
+    <result column="visited_phone" jdbcType="VARCHAR" property="visitedPhone" />
+    <result column="vendor_matter" jdbcType="VARCHAR" property="vendorMatter" />
+    <result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
+    <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
+    <result column="vendor_unit" jdbcType="VARCHAR" property="vendorUnit" />
+    <result column="card_no" jdbcType="VARCHAR" property="cardNo" />
+    <result column="photo" jdbcType="VARCHAR" property="photo" />
+    <result column="vendor_state" jdbcType="INTEGER" property="vendorState" />
+    <result column="hairpin_no" jdbcType="VARCHAR" property="hairpinNo" />
+    <result column="recovery_no" jdbcType="VARCHAR" property="recoveryNo" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="delete_falg" jdbcType="BIT" property="deleteFalg" />
+    <result column="eip_flow_id" jdbcType="VARCHAR" property="eipFlowId" />
+    <result column="secret_state" jdbcType="INTEGER" property="secretState" />
+    <result column="secret_region" jdbcType="VARCHAR" property="secretRegion" />
+    <result column="hairpin_time" jdbcType="TIMESTAMP" property="hairpinTime" />
+    <result column="recovery_time" jdbcType="TIMESTAMP" property="recoveryTime" />
+    <result column="factory_id" jdbcType="VARCHAR" property="factoryId" />
+    <result column="region_id" jdbcType="VARCHAR" property="regionId" />
+    <result column="wx_phone" jdbcType="VARCHAR" property="wxPhone" />
+    <result column="qr_code" jdbcType="VARCHAR" property="qrCode" />
+    <result column="now_time" jdbcType="TIMESTAMP" property="nowTime" />
+    <result column="visited_dept" jdbcType="VARCHAR" property="visitedDept" />
+    <result column="eip_create_time" jdbcType="TIMESTAMP" property="eipCreateTime" />
+    <result column="user_id" jdbcType="INTEGER" property="userId" />
+    <result column="act_in_factory" jdbcType="VARCHAR" property="actInFactory" />
+    <result column="in_factory_process" jdbcType="VARCHAR" property="inFactoryProcess" />
+    <result column="issue_factory" jdbcType="VARCHAR" property="issueFactory" />
+    <result column="un_issue_factory" jdbcType="VARCHAR" property="unIssueFactory" />
+
+    <result column="authorized_no" jdbcType="VARCHAR" property="authorizedNo" />
+    <result column="authorized_name" jdbcType="VARCHAR" property="authorizedName" />
+    <result column="authorized_by_no" jdbcType="VARCHAR" property="authorizedByNo" />
+    <result column="authorized_by_name" jdbcType="VARCHAR" property="authorizedByName" />
+    <result column="id_card_photo" jdbcType="VARCHAR" property="idCardPhoto" />
+    <result column="is_save_card_photo" jdbcType="INTEGER" property="isSaveCardPhoto" />
+
+  </resultMap>
+
+  <sql id="search">
+    <if test="sh.visitorName!=null and sh.visitorName!=''">
+      AND t.visitor_name LIKE CONCAT(CONCAT('%', #{sh.visitorName}),'%')
+    </if>
+    <if test="sh.visitorPhone!=null and sh.visitorPhone!=''">
+      AND t.visitor_phone LIKE CONCAT(CONCAT('%', #{sh.visitorPhone}),'%')
+    </if>
+    <if test="sh.visitorIdCard!=null and sh.visitorIdCard!=''">
+      AND t.visitor_id_card LIKE CONCAT(CONCAT('%', #{sh.visitorIdCard}),'%')
+    </if>
+    <if test="sh.visitedName!=null and sh.visitedName!=''">
+      AND t.visited_name LIKE CONCAT(CONCAT('%', #{sh.visitedName}),'%')
+    </if>
+    <if test="sh.visitedPhone!=null and sh.visitedPhone!=''">
+      AND t.visited_phone LIKE CONCAT(CONCAT('%', #{sh.visitedPhone}),'%')
+    </if>
+    <if test="sh.inFactoryProcess!=null and sh.inFactoryProcess!=''">
+      AND t.in_factory_process = #{sh.inFactoryProcess}
+    </if>
+    <if test="sh.vendorState!=null">
+      AND t.vendor_state = #{sh.vendorState}
+    </if>
+    <if test="sh.secretState!=null">
+      AND t.secret_state = #{sh.secretState}
+    </if>
+    <if test="sh.factoryId!=null">
+      AND t.factory_id LIKE CONCAT(CONCAT('%', #{sh.factoryId}),'%')
+    </if>
+    <if test='sh.equalFactory != null and sh.equalFactory=="1"'>
+      AND (t.un_issue_factory is not null and t.un_issue_factory != '')
+    </if>
+    <if test='sh.equalFactory != null and sh.equalFactory=="0"'>
+      AND (t.un_issue_factory is null or t.un_issue_factory = '')
+    </if>
+  </sql>
+  <update id="updateStates">
+    UPDATE safety_visitor_hairpin SET vendor_state = 5 WHERE end_time &lt; now() AND vendor_state = 0
+  </update>
+
+  <update id="allSendCardToEnd">
+    UPDATE safety_visitor_hairpin SET vendor_state = 2, recovery_no = #{hairpinNo}, update_time = now(), recovery_time = now(), update_time = now() WHERE vendor_state in (1,8,9) and hairpin_no=#{hairpinNo}
+  </update>
+
+  <update id="cancelPermissionByPerson">
+    UPDATE safety_visitor_hairpin
+    SET in_factory_process = #{inFactoryProcess},
+        update_time        = now(),
+        vendor_state       = #{vendorState},
+        recovery_time      = now()
+    WHERE id = #{id}
+  </update>
+
+  <select id="pageList" parameterType="java.util.Map" resultMap="BaseResultMap">
+    SELECT t.id, t.visitor_name, t.visitor_phone, t.visitor_id_card, t.vendor_factory, t.vendor_region, t.visited_name, t.visited_phone,
+    t.vendor_matter, t.start_time, t.end_time, t.vendor_unit, t.card_no, t.photo, t.vendor_state, t.hairpin_no, t.recovery_no, t.create_time,
+    t.update_time, t.delete_falg, t.eip_flow_id, t.secret_state, t.secret_region, t.hairpin_time, t.recovery_time, t.factory_id, t.region_id,
+    t.wx_phone, t.qr_code, NOW() as now_time, t.visited_dept, t.eip_create_time, t.user_id,t.act_in_factory,t.in_factory_process,t.issue_factory,t.un_issue_factory,
+    t.authorized_no, t.authorized_name, t.authorized_by_no, t.authorized_by_name, t.id_card_photo
+    FROM safety_visitor_hairpin t WHERE t.delete_falg = 0 and t.end_time >= NOW()
+    and t.vendor_state &lt;> 7
+    <include refid="search" />
+    <if test="authFactory!=null and authFactory!=''">
+      AND (${authFactory})
+    </if>
+    ORDER BY t.create_time desc
+    limit #{startRowNum},#{endRowNum}
+  </select>
+
+  <select id="pageListCount" parameterType="java.util.Map" resultType="java.lang.Long">
+    SELECT count(*) FROM safety_visitor_hairpin t WHERE t.delete_falg = 0 AND t.end_time >= NOW() and t.vendor_state &lt;> 7
+    <include refid="search" />
+    <if test="authFactory!=null and authFactory!=''">
+      AND (${authFactory})
+    </if>
+  </select>
+
+  <update id="updateByKafka" parameterType="com.yutong.safety.core.dto.VisitorHirpinAppDTO">
+    <foreach collection="ids" item="ite" separator=";">
+      update safety_visitor_hairpin
+      set
+        vendor_state = #{vendorState},
+        act_in_factory = #{ite.actInFactory},
+        update_time = now()
+      where
+        id = #{ite.id}
+    </foreach>
+  </update>
+
+  <select id="queryByKafka" parameterType="com.yutong.safety.core.dto.VisitorHirpinAppDTO" resultType="com.yutong.safety.core.db.entity.SafetyVisitorDO">
+        select id,act_in_factory, visitor_phone, visitor_id_card, id_card_photo from safety_visitor_hairpin
+        where
+          visitor_phone = #{visitorPhone}
+      <![CDATA[
+          and start_time <= #{startTime}
+          and end_time >= #{endTime}
+      ]]>
+          and vendor_state in (1,11,8,9)
+      and factory_id like concat('%',#{factoryId},'%')
+  </select>
+
+  <select id="queryByKafkaInFactory" parameterType="com.yutong.safety.core.dto.VisitorHirpinAppDTO" resultType="com.yutong.safety.core.dto.VisitorHirpinAppDTO">
+    select v.id,v.visited_name,v.vendor_unit,v.visitor_name,v.start_time,v.end_time,m.emp_no
+    from safety_visitor_hairpin v
+    left join safety_employee_message m on v.visited_phone = m.phone_no
+    where
+      v.visitor_phone = #{visitorPhone}
+      <![CDATA[
+      and v.start_time <= #{startTime}
+      and v.end_time >= #{endTime}
+      ]]>
+          and v.vendor_state in (1,11,8,9)
+      and v.factory_id like concat('%',#{factoryId},'%')
+  </select>
+
+  <select id="queryByKafkaOutFactory" parameterType="com.yutong.safety.core.dto.VisitorHirpinAppDTO" resultType="com.yutong.safety.core.dto.VisitorHirpinAppDTO">
+    select v.id,v.visited_name,v.vendor_unit,v.visitor_name,v.start_time,v.end_time,m.emp_no
+    from safety_visitor_hairpin v
+    left join safety_employee_message m on v.visited_phone = m.phone_no
+    where
+      v.visitor_phone = #{visitorPhone}
+      <![CDATA[
+      and v.start_time <= #{startTime}
+      and v.end_time >= #{endTime}
+      and v.vendor_state is not null
+      and v.vendor_state <> 3
+      ]]>
+      and v.factory_id like concat('%',#{factoryId},'%')
+  </select>
+
+  <update id="updateZLStates">
+    update safety_visitor_hairpin set
+          vendor_state = '10',
+          update_time = now()
+    where vendor_state = '8'
+      <![CDATA[
+      and end_time <= now()
+      ]]>
+  </update>
+
+  <select id="selectByPrimaryKeyList" parameterType="java.util.List" resultType="com.yutong.safety.core.db.entity.SafetyVisitorHairpinDO">
+    select * from safety_visitor_hairpin where id in
+                                         <foreach collection="ids" open="(" close=")" item="id" separator=",">
+                                           #{id}
+                                         </foreach>
+  </select>
+
+  <select id="selectListByUpdateTime" resultType="com.yutong.safety.core.db.entity.SafetyVisitorHairpinDO">
+        select *
+        from safety_visitor_hairpin
+        where update_time between #{start} and #{end}
+          and delete_falg = 0
+          and vendor_state in (1, 5, 8, 9, 10, 11)
+  </select>
+</mapper>

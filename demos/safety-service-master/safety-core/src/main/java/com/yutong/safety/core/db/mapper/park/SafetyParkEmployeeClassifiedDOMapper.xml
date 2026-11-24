@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.park.SafetyParkEmployeeClassifiedDOMapper">
+
+  <resultMap id="BaseResultMap" type="com.yutong.safety.core.db.entity.park.vo.ParkEmployeeClassifiedVo">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="emp_no" jdbcType="VARCHAR" property="empNo" />
+    <result column="emp_name" jdbcType="VARCHAR" property="empName" />
+    <result column="org_code_path" jdbcType="VARCHAR" property="orgCodePath" />
+    <result column="org_name_path" jdbcType="VARCHAR" property="orgNamePath" />
+    <result column="org_code" jdbcType="VARCHAR" property="orgCode" />
+    <result column="org_name" jdbcType="VARCHAR" property="orgName" />
+    <result column="user_type" jdbcType="VARCHAR" property="userType" />
+    <result column="car_no" jdbcType="VARCHAR" property="carNo" />
+    <result column="lock_car_no" jdbcType="VARCHAR" property="lockCarNo" />
+    <result column="factory_name" jdbcType="VARCHAR" property="factoryName" />
+    <result column="factory_code" jdbcType="VARCHAR" property="factoryCode" />
+    <result column="begin_date" jdbcType="VARCHAR" property="beginDate" />
+    <result column="end_date" jdbcType="VARCHAR" property="endDate" />
+    <result column="target_id" jdbcType="INTEGER" property="targetId" />
+    <result column="not_in_out_day" jdbcType="TIMESTAMP" property="notInOutDay" />
+    <result column="whether_white" jdbcType="VARCHAR" property="whetherWhite" />
+    <result column="white_role" jdbcType="VARCHAR" property="whiteRole" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    id, emp_no, emp_name, org_code_path, org_name_path, org_code, org_name, user_type, car_no, lock_car_no, factory_name, factory_code, begin_date,
+    end_date, target_id, not_in_out_day, whether_white, white_role, create_time, update_time
+  </sql>
+
+
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+
+
+  <sql id="base_where_sql">
+    <if test="id != null">
+      and id = #{id,jdbcType=INTEGER}
+    </if>
+    <if test="empNo != null and empNo != ''">
+      and emp_no = #{empNo}
+    </if>
+    <if test="empName != null and empName != ''">
+      and emp_name = #{empName}
+    </if>
+    <if test="userType != null and userType != ''">
+      and user_type = #{userType}
+    </if>
+    <if test="carNo != null and carNo != ''">
+      and car_no = #{carNo}
+    </if>
+    <if test="orgNamePath != null and orgNamePath != ''">
+      and org_name_path = like concat('%', #{orgNamePath},'%')
+    </if>
+    <if test="factoryName != null and factoryName != ''">
+      and factory_name = #{factoryName}
+    </if>
+    <if test="whetherWhite != null and whetherWhite != ''">
+      and whether_white = #{whetherWhite}
+    </if>
+    <if test="whiteRole != null and whiteRole != ''">
+      and white_role = #{whiteRole}
+    </if>
+    <if test="dayBegin != null and dayBegin != ''">
+      <![CDATA[ and not_in_out_day >= #{dayBegin} ]]>
+    </if>
+    <if test="dayEnd != null and dayEnd != ''">
+      <![CDATA[ and not_in_out_day <= #{dayEnd} ]]>
+    </if>
+    <if test="beginDate != null and beginDate != ''">
+      <![CDATA[ and begin_date >= #{beginDate} ]]>
+    </if>
+    <if test="endDate != null and endDate != ''">
+      <![CDATA[ and end_date <= #{endDate} ]]>
+    </if>
+  </sql>
+
+
+  <select id="selectList" parameterType="com.yutong.safety.core.db.entity.park.param.ParkEmployeeClassifiedParam" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM safety_park_employee_classified_business
+    WHERE 1 = 1
+    <include refid="base_where_sql"/>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="pageFlag">
+      <if test="limit != null">
+        <if test="offset != null">
+          limit ${offset}, ${limit}
+        </if>
+        <if test="offset == null">
+          limit ${limit}
+        </if>
+      </if>
+    </if>
+  </select>
+
+
+  <select id="selectCount" parameterType="com.yutong.safety.core.db.entity.park.param.ParkEmployeeClassifiedParam" resultType="java.lang.Long">
+    SELECT count(1) FROM safety_park_employee_classified_business WHERE 1 = 1
+    <include refid="base_where_sql"/>
+  </select>
+
+  <select id="selectParkPowerByFactoryName" parameterType="java.util.List" resultType="com.yutong.safety.core.db.entity.park.ParkEmployeeClassifiedDO">
+    SELECT
+      a.emp_no as empNo,
+      a.emp_name as empName,
+      a.org_name_path as orgNamePath,
+      a.org_code_path as orgCodePath,
+      a.org_code as orgCode,
+      a.org_name as orgName,
+      a.user_type as userType,
+      b.factory_name as factoryName,
+      b.FACTORY_ID as factoryCode,
+      b.POWER_BEGIN_TIME as beginDate,
+      b.POWER_END_TIME as endDate
+    FROM
+      safety_employee_message a
+      LEFT JOIN safety_park_employee_power_info b ON a.emp_no = b.EMPLOYEE_CODE
+    WHERE
+      a.STATUS = 'NORMAL'
+      AND b.IS_DELETE = 0
+      and b.FACTORY_ID in
+      <foreach collection="list" item="item" open="(" close=")" separator=",">
+        #{item}
+      </foreach>
+  </select>
+
+  <delete id="deleteInfo">
+    delete from safety_park_employee_classified_business
+  </delete>
+
+  <delete id="deleteInfoById">
+    delete from safety_park_employee_classified_business where id = #{id}
+  </delete>
+
+  <select id="selectBuildPowerByEmpNo" parameterType="java.util.List" resultType="com.yutong.safety.core.db.entity.park.ParkEmployeeClassifiedDO">
+    SELECT
+        a.EMPLOYEE_CODE as empNo, b.AN_FACTORY_CODE as factoryCode
+    FROM
+        safety_build_employee_power a
+    LEFT JOIN (
+        SELECT DEVICE_CODE, AN_FACTORY_CODE FROM safety_build_device WHERE DEVICE_STATUS = 1 AND REMOVE_FLAG = 0 AND IS_DELETE = 0 AND AN_FACTORY_CODE IN
+        <foreach collection="factoryCodeList" item="item" open="(" close=")" separator=",">
+          #{item}
+        </foreach>
+    ) b ON a.DEVICE_CODE = b.DEVICE_CODE
+    WHERE  a.EMPLOYEE_CODE IN
+    <foreach collection="empNoList" item="item" open="(" close=")" separator=",">
+      #{item}
+    </foreach>
+    GROUP BY a.EMPLOYEE_CODE, b.AN_FACTORY_CODE
+  </select>
+
+  <insert id="batchInsert">
+    INSERT INTO safety_park_employee_classified_business (emp_no, emp_name, org_code_path, org_name_path, org_code, org_name, user_type, car_no, lock_car_no, factory_name, factory_code, begin_date,
+    end_date, target_id, not_in_out_day, whether_white, white_role, create_time, update_time) VALUES
+    <foreach collection="list" item="item" separator=",">
+      (#{item.empNo}, #{item.empName}, #{item.orgCodePath}, #{item.orgNamePath}, #{item.orgCode}, #{item.orgName}, #{item.userType}, #{item.carNo},#{item.lockCarNo}, #{item.factoryName}, #{item.factoryCode}, #{item.beginDate},
+      #{item.endDate}, #{item.targetId},#{item.notInOutDay}, #{item.whetherWhite}, #{item.whiteRole}, now(), now())
+    </foreach>
+  </insert>
+
+
+  <select id="selectInfoById" parameterType="java.lang.String" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM safety_park_employee_classified_business
+    WHERE id = #{id,jdbcType=INTEGER}
+  </select>
+
+</mapper>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.build.SafetyBuildWhiteRuleDTOMapper">
+  <select id="selectRuleUser" resultType="com.yutong.safety.core.dto.SafetyEmployeeMessageDTO">
+      select *
+      from (select m.*, r.update_time as white_time,r.remark as white_reason,r.id as white_id,r.create_user as white_create_by
+            from safety_build_white_rule r
+                     left join safety_employee_message m
+                               on m.position_name like concat('%',r.post_name,'%') and r.delete_flag = '0'
+            where m.status = 'NORMAL'
+              and r.post_name is not null
+            union all
+            select m.*, r.update_time as white_time,r.remark as white_reason,r.id as white_id,r.create_user as white_create_by
+            from safety_build_white_rule r
+                     left join safety_employee_message m
+                               on r.delete_flag = '0' and find_in_set(r.org_code, m.org_code_path) > 0
+            where m.status = 'NORMAL'
+              and r.org_code is not null) s
+      order by s.white_time desc
+  </select>
+</mapper>

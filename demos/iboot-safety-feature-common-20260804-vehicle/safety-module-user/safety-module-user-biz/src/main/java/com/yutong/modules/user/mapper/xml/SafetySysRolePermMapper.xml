@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.user.mapper.SafetySysRolePermMapper">
+    <select id="queryAuth" resultType="com.yutong.modules.user.model.AuthItem">
+        select  distinct code `action`,perm_name `describe`,'1' `type`,'1' `status`
+        from safety_sys_perm where cate=3
+        and id in (select distinct perm_id from safety_sys_role_perm
+        where del_flag=0 and role_id in
+            <foreach collection="roleIds" item="roleId" open="(" separator="," close=")">
+                #{roleId}
+            </foreach>
+        )
+    </select>
+</mapper>

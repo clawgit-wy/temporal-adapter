@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.user.mapper.YtsafetyResponsibleProcessMapper">
+    <select id="queryChangePerson" resultType="com.yutong.modules.user.vo.YtsafetyResponsibleChangeVO">
+        select
+        sr.id,
+        sr.user_id,
+        em.emp_name,
+        sr.user_type,
+        em.phone_no phone,
+        em.org_name_path org_name,
+        sr.valid_period,
+        em.emp_no,
+        em.emp_login user_name,
+        em.position_name,
+        em.email
+        from ytsafety_sys_responsible sr
+        inner join safety_employee_message em on sr.emp_no = em.emp_no
+        inner join safety_sys_user su on sr.user_id=su.id
+        where sr.del_flag = 0 and su.delete_falg=0
+        and (em.emp_no like CONCAT('%',#{userInfo},'%') or em.emp_name like CONCAT('%',#{userInfo},'%'))
+        limit 100
+    </select>
+
+    <select id="querySuperApprove" resultType="com.yutong.modules.user.vo.YtsafetyResponsibleChangeVO">
+        select
+        sr.id,
+        sr.user_id,
+        em.emp_name,
+        sr.user_type,
+        em.phone_no phone,
+        em.org_name_path org_name,
+        sr.valid_period,
+        em.emp_no,
+        em.emp_login user_name,
+        em.position_name,
+        em.email
+        from ytsafety_sys_responsible sr
+        inner join safety_employee_message em on sr.emp_no = em.emp_no
+        where sr.del_flag=0 and sr.status=0
+        and sr.user_id in(select distinct user_id from safety_sys_user_role where role_code=#{roleCode} and del_flag=0)
+        and sr.user_id in(select distinct user_id from ytsafety_sys_user_depart where depart_code=#{orgCode})
+    </select>
+
+    <select id="querySuperApproves" resultType="com.yutong.modules.user.vo.SafetyEmployeeMessageVO">
+        SELECT
+        sem.emp_no,
+        sem.emp_name,
+        sem.emp_login as user_name,
+        sem.phone_no,
+        sem.email,
+        sem.org_name_path org_name,
+        sem.org_code,
+        (case when jrm.is_security>=1 then 1 else 0 end) as user_type
+        FROM
+        safety_employee_message sem
+        left join (select job_code,count(1) is_security from ytsafety_sys_job_role_mapping where del_flag=0 group by job_code) jrm on jrm.job_code=sem.position_code
+        where sem.emp_login in
+        <foreach collection="empLogins" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+
+
+</mapper>

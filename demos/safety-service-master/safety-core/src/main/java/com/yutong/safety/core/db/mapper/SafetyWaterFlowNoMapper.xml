@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.SafetyWaterFlowNoMapper">
+  <insert id="insertNew">
+    insert into safety_water_flow_no (type, date, num) values (#{type}, now(), #{next})
+  </insert>
+
+  <insert id="updateNew">
+    update safety_water_flow_no set num = #{next} where type = #{type} and date = CURDATE()
+  </insert>
+
+  <select id="getNowByType" resultType="java.lang.Integer">
+    select IFNULL(MAX(num), 0) from safety_water_flow_no where type = #{type} and date = CURDATE()
+  </select>
+
+  <select id="getNowByTypeNoDay" resultType="java.lang.Integer">
+    select IFNULL(MAX(num), 0) from safety_water_flow_no where type = #{type}
+  </select>
+</mapper>

@@ -1,0 +1,24 @@
+server:
+  port: 19090
+
+spring:
+  application:
+    name: mokapi
+  jackson:
+    default-property-inclusion: non_null
+
+# 模拟接口配置
+mokapi:
+  # 默认延迟(毫秒)
+  default-delay-ms: 0
+  # 错误率(0.0~1.0)，默认0表示不随机报错
+  error-rate: 0.0
+  # 慢响应延迟(毫秒)
+  slow-delay-ms: 3000
+
+logging:
+  level:
+    com.hik.mokapi: DEBUG
+    com.hik.mokapi.config.RequestLoggingFilter: DEBUG
+  file:
+    path: logs

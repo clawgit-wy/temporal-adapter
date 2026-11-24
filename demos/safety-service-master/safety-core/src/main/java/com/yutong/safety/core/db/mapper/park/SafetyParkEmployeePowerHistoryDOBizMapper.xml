@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.park.SafetyParkEmployeePowerHistoryDOBizMapper">
+    <sql id="Base_Where_Query1">
+        <if test="empNo != null and empNo != ''">
+            and sop.EMPLOYEE_CODE = #{empNo}
+        </if>
+        <if test="empName != null and empName != ''">
+            and SEM.emp_name = #{empName}
+        </if>
+        <if test="userType != null and userType != ''">
+            and SEM.user_type = #{userType}
+        </if>
+        <if test="carNo != null and carNo != ''">
+            and sepc1.car_infos like concat('%',#{carNo},'%')
+        </if>
+        <if test="carNo != null and carNo != ''">
+            and FIND_IN_SET(#{carNo},sepc1.car_infos)
+        </if>
+        <if test="factoryCode != null and factoryCode != ''">
+            and FIND_IN_SET(#{factoryCode},sop.FACTORY_ID)
+        </if>
+        <if test="lockCar != null and lockCar != ''">
+            and FIND_IN_SET(#{lockCar},sepc1.lock_cars)
+        </if>
+        <if test="empStatus != null and empStatus !=''">
+            <if test='empStatus == "在职"'>
+                and sem.status = 'NORMAL'
+            </if>
+            <if test='empStatus != "在职"'>
+                and (sem.status != 'NORMAL' or sem.satus == '')
+            </if>
+        </if>
+    </sql>
+
+    <select id="selectList" resultType="com.yutong.safety.core.db.entity.park.vo.ParkEmployeePowerVO"
+            parameterType="com.yutong.safety.core.db.entity.park.param.ParkEmployeePowerListParam">
+        select CUR_TABLE.* from (
+            SELECT SEM.emp_name,SEM.user_type,SEM.org_code,SEM.org_name,SEM.org_code_path,
+                   SEM.org_name_path,sop.EMPLOYEE_CODE AS emp_no,sepc1.car_infos, sepc1.lock_cars,
+                   sop.FACTORY_ID factory_code,sop.FACTORY_NAME,sop.update_time,sop.REMARK,
+                   CONVERT(DETAILS USING utf8) details_str
+              FROM safety_park_employee_power_history sop
+              LEFT JOIN safety.safety_employee_message sem ON sem.emp_no = sop.EMPLOYEE_CODE
+              LEFT JOIN (SELECT employee_no,
+                              GROUP_CONCAT( sepc.car_no ) car_infos,
+                              GROUP_CONCAT( CASE WHEN lock_flag = '是' THEN car_no END ) lock_cars
+                         FROM safety.safety_employee_private_car sepc GROUP BY employee_no) sepc1
+                    ON sop.EMPLOYEE_CODE = sepc1.employee_no
+             WHERE 1 = 1
+        <include refid="Base_Where_Query1"/>
+        ) CUR_TABLE
+        where 1= 1
+        <if test="orderByClause != null and orderByClause != ''">
+            order by ${orderByClause}
+        </if>
+        <if test="pageFlag != null and pageFlag">
+            <if test="limit != null">
+                <if test="offset != null">
+                    limit ${offset}, ${limit}
+                </if>
+                <if test="offset == null">
+                    limit ${limit}
+                </if>
+            </if>
+        </if>
+    </select>
+
+    <select id="selectCount" parameterType="com.yutong.safety.core.db.entity.park.param.ParkEmployeePowerListParam"
+            resultType="java.lang.Long">
+        select count(1) from (
+            SELECT SEM.emp_name,SEM.user_type,SEM.org_code,SEM.org_name,SEM.org_code_path,
+                   SEM.org_name_path,sop.EMPLOYEE_CODE AS emp_no,sepc1.car_infos, sepc1.lock_cars,
+                   sop.FACTORY_ID factory_code,sop.update_time,sop.REMARK
+              FROM safety_park_employee_power_history sop
+              LEFT JOIN safety.safety_employee_message sem ON sem.emp_no = sop.EMPLOYEE_CODE
+              LEFT JOIN (SELECT employee_no,
+                                GROUP_CONCAT( sepc.car_no ) car_infos,
+                                GROUP_CONCAT( CASE WHEN lock_flag = '是' THEN car_no END ) lock_cars
+                           FROM safety.safety_employee_private_car sepc GROUP BY employee_no) sepc1
+                ON sop.EMPLOYEE_CODE = sepc1.employee_no
+             WHERE 1 = 1
+        <include refid="Base_Where_Query1"/>
+        ) CUR_TABLE
+    </select>
+
+    <insert id="batchUpdate" keyColumn="EMPLOYEE_CODE">
+        insert into safety_park_employee_power_history (EMPLOYEE_CODE, FACTORY_ID, REMARK,
+        CREATE_TIME, UPDATE_TIME, factory_name,
+        EMPLOYEE_NAME, DETAILS) values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.employeeCode},#{item.factoryId},#{item.remark},CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP,#{item.factoryName},#{item.employeeName},#{item.details})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        EMPLOYEE_CODE = VALUES(EMPLOYEE_CODE),
+        FACTORY_ID = VALUES(FACTORY_ID),
+        REMARK = VALUES(REMARK),
+        factory_name = VALUES(factory_name),
+        EMPLOYEE_NAME = VALUES(EMPLOYEE_NAME),
+        DETAILS = VALUES(DETAILS),
+        update_time = CURRENT_TIMESTAMP
+    </insert>
+</mapper>

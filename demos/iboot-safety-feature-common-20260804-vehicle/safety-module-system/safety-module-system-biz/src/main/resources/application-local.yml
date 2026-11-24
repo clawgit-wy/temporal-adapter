@@ -1,0 +1,292 @@
+server:
+  port: 7001
+  tomcat:
+    max-swallow-size: -1
+  error:
+    include-exception: true
+    include-stacktrace: ALWAYS
+    include-message: ALWAYS
+  compression:
+    enabled: true
+    min-response-size: 1024
+    mime-types: application/javascript,application/json,application/xml,text/html,text/xml,text/plain,text/css,image/*
+management:
+  health:
+    mail:
+      enabled: false
+  endpoints:
+    jmx:
+      exposure:
+        exclude: "*"
+    web:
+      exposure:
+        include: health,prometheus # 只允许通过HTTP暴露应用健康状态、指标信息
+  endpoint:
+    health:
+      show-details: always # 显示明细
+  metrics:
+    tags:
+      application: ${spring.application.name}
+spring:
+  application:
+    name: iboot-safety-system
+  cloud:
+    nacos:
+      username: nacos
+      password: nacos
+      server-addr: 10.66.228.170:8142,10.66.228.171:8142,10.66.228.172:8142
+      config:
+        enabled: false
+        server-addr: ${spring.cloud.nacos.server-addr}
+        namespace: safetytest
+        group: DEFAULT_GROUP
+      discovery:
+        server-addr: ${spring.cloud.nacos.server-addr}
+        namespace: safetytest
+        group: DEFAULT_GROUP
+    stream:
+      kafka:
+        binder:
+          type: kafka
+          brokers: 10.66.229.167:9092,10.66.229.168:9092,10.66.229.169:9092
+          #zk-nodes: 10.66.229.10:2181,10.66.229.11:2181
+          auto-create-topics: true
+          auto-add-partitions: true
+          min-partition-count: 3
+        #kafka生产者线程池配置
+        #核心线程数
+        thread-core-pool-size: 8
+        #最大线程数
+        thread-max-pool-size: 8
+        #阻塞队列大小
+        thread-queue-capacity: 200
+        #线程的名称前缀
+        thread-name-prefix: IBoot-kafka-producer
+        #线程活跃时间（秒）
+        thread-keep-alive-seconds: 300
+        #线程等待超时时间（秒）
+        thread-await-termination-seconds: 60
+      # function:
+      #   definition: receiveOpenFeignLog
+      bindings:
+        sendOpenFeignLog-out-0:
+          destination: iboot-sergo-openfeign-log
+        sendRunTimeLog-out-0:
+          destination: iboot-sergo-runtime-log
+  datasource:
+    druid:
+      stat-view-servlet:
+        enabled: false
+        loginUsername: admin
+        loginPassword: 123456
+        allow:
+      web-stat-filter:
+        enabled: false
+    dynamic:
+      druid:
+        initial-size: 5
+        min-idle: 5
+        maxActive: 20
+        maxWait: 60000
+        timeBetweenEvictionRunsMillis: 60000
+        minEvictableIdleTimeMillis: 300000
+        validationQuery: SELECT 1 FROM DUAL
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        poolPreparedStatements: true
+        maxPoolPreparedStatementPerConnectionSize: 20
+        filters: stat,wall,slf4j
+        connectionProperties: druid.stat.mergeSql\=true;druid.stat.slowSqlMillis\=5000
+      datasource:
+        master:
+          url: jdbc:mysql://10.66.229.187:33306/yt_safety_20260520?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
+          username: root
+          password: root
+          driver-class-name: com.mysql.cj.jdbc.Driver
+  redis:
+    host: 10.66.231.200
+    port: 6379
+    password:
+    lettuce:
+      pool:
+        max-active: 8   #最大连接数据库连接数，设 0 为没有限制
+        max-idle: 8     #最大等待连接中的数量，设 0 为没有限制
+        max-wait: -1ms  #最大建立连接等待时间。如果超过此时间将接到异常。设为 -1 表示无限制。
+        min-idle: 0     #最小等待连接中的数量，设 0 为没有限制
+      shutdown-timeout: 100ms
+  rabbitmq:
+    host: jeecg-boot-rabbitmq
+    username: guest
+    password: guest
+    port: 5672
+    publisher-confirms: true
+    publisher-returns: true
+    virtual-host: /
+    listener:
+      simple:
+        acknowledge-mode: manual
+        concurrency: 1
+        max-concurrency: 1
+        retry:
+          enabled: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  mail:
+    host:
+    username:
+    password: ??
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+  quartz:
+    job-store-type: jdbc
+    initialize-schema: embedded
+    auto-startup: false
+    startup-delay: 1s
+    overwrite-existing-jobs: true
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: MyScheduler
+            instanceId: AUTO
+          jobStore:
+            class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            tablePrefix: QRTZ_
+            isClustered: true
+            misfireThreshold: 12000
+            clusterCheckinInterval: 15000
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 10
+            threadPriority: 5
+            threadsInheritContextClassLoaderOfInitializingThread: true
+  jackson:
+    date-format:   yyyy-MM-dd HH:mm:ss
+    time-zone:   GMT+8
+  aop:
+    proxy-target-class: true
+  activiti:
+    check-process-definitions: false
+    async-executor-activate: false
+    job-executor-activate: false
+  jpa:
+    open-in-view: false
+  freemarker:
+    template-loader-path: classpath:/templates/views
+    cache: false
+    charset: UTF-8
+    check-template-location: true
+    content-type: text/html
+    expose-request-attributes: false
+    expose-session-attributes: false
+    request-context-attribute: request
+    suffix: .ftl
+  mvc:
+    static-path-pattern: /**
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  resource:
+    static-locations: classpath:/static/,classpath:/public/,classpath:/templates/views/
+  autoconfigure:
+    exclude: com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure
+mybatis-plus:
+  mapper-locations: classpath*:org/jeecg/modules/**/xml/*Mapper.xml,classpath*:com/yutong/modules/**/xml/*Mapper.xml
+  global-config:
+    banner: false
+    db-config:
+      id-type: ASSIGN_ID
+      table-underline: true
+  configuration:
+    # 这个配置会将执行的sql打印出来，在开发或测试的时候可以用
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    call-setters-on-nulls: true
+minidao:
+  base-package: org.jeecg.modules.jmreport.*,org.jeecg.modules.drag.*
+jeecg:
+  signatureSecret: dd05f1c54d63749eda95f9fa6d49v442a
+  signUrls: /sys/dict/getDictItems/*,/sys/dict/loadDict/*,/sys/dict/loadDictOrderByValue/*,/sys/dict/loadDictItem/*,/sys/dict/loadTreeData,/sys/api/queryTableDictItemsByCode,/sys/api/queryFilterTableDictInfo,/sys/api/queryTableDictByKeys,/sys/api/translateDictFromTable,/sys/api/translateDictFromTableByKeys
+  uploadType: local
+  domainUrl:
+    pc: http://localhost:3100
+    app: http://localhost:8051
+  path:
+    upload: /opt/upFiles
+    webapp: /opt/webapp
+  shiro:
+    excludeUrls: /test/jeecgDemo/demo3,/test/jeecgDemo/redisDemo/**,/category/**,/visual/**,/map/**,/jmreport/bigscreen2/**,/compare/**,/js/**,/favicon.ico,/favicon**
+  oss:
+    endpoint: oss-cn-beijing.aliyuncs.com
+    accessKey: ??
+    secretKey: ??
+    bucketName: jeecgdev
+    staticDomain: ??
+  elasticsearch:
+    cluster-name: jeecg-ES
+    cluster-nodes: jeecg-boot-es:9200
+    check-enabled: false
+  file-view-domain: 127.0.0.1:8012
+  minio:
+    minio_url: http://minio.jeecg.com
+    minio_name: ??
+    minio_pass: ??
+    bucketName: otatest
+  jmreport:
+    mode: dev
+    is_verify_token: false
+    verify_methods: remove,delete,save,add,update
+  wps:
+    domain: https://wwo.wps.cn/office/
+    appid: ??
+    appsecret: ??
+  xxljob:
+    enabled: true
+    adminAddresses: http://10.66.192.73:8080
+    appname: ${spring.application.name}
+    accessToken: ''
+    logPath:
+    logRetentionDays: 30
+  redisson:
+    address: mymaster,10.66.220.147:26379,10.66.220.148:26379,10.66.220.149:26379
+    password: sino_chainwork
+    type: SENTINEL
+    enabled: true
+logging:
+  level:
+    org.jeecg.modules.system.mapper : debug
+cas:
+  prefixUrl: https://mptest.yutong.com/mpapi/iam-web/authz/cas/p3/serviceValidate
+knife4j:
+  #开启增强配置
+  enable: true
+  production: false
+  basic:
+    enable: false
+    username: jeecg
+    password: jeecg1314
+springfox:
+  documentation:
+    enabled: true
+    auto-startup: true
+    swagger-ui:
+      enabled: true
+ytsafety:
+  excel:
+    importlimit: 500
+  yxt:
+    robotId: 220122
+    yxtCode: sys001
+  custom:
+    constant:
+      sysAdminRoleCode: ROLE_XTGLYAAA
+      sysGuestRoleCode: ROLE_FKJSEGLY
+      topParentCode: "50004002"

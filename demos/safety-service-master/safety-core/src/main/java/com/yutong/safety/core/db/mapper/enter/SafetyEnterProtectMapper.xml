@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.enter.SafetyEnterProtectMapper">
+    <resultMap id="EnterProtectMap" type="com.yutong.safety.core.db.entity.enter.result.SafetyEnterProtectRt">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="fd_car_no" jdbcType="VARCHAR" property="fdCarNo" />
+        <result column="fd_car_belong" jdbcType="VARCHAR" property="fdCarBelong" />
+        <result column="fd_driver_name" jdbcType="VARCHAR" property="fdDriverName" />
+        <result column="fd_protect_grade" jdbcType="VARCHAR" property="fdProtectGrade" />
+        <result column="fd_detailed_img" jdbcType="VARCHAR" property="fdDetailedImg" />
+        <result column="fd_vin" jdbcType="VARCHAR" property="fdVin" />
+        <result column="fd_engine" jdbcType="VARCHAR" property="fdEngine" />
+        <result column="fd_car_img" jdbcType="VARCHAR" property="fdCarImg" />
+        <result column="fd_car_date" jdbcType="VARCHAR" property="fdCarDate" />
+        <result column="fd_in_factory" jdbcType="VARCHAR" property="fdInFactory" />
+        <result column="create_time" jdbcType="VARCHAR" property="createTime" />
+        <result column="create_user" jdbcType="VARCHAR" property="createUser" />
+    </resultMap>
+    <sql id="EnterProtectSh">
+        1=1
+        <if test="fdCarNo!=null and fdCarNo!=''">
+            AND t.fd_car_no LIKE CONCAT(CONCAT('%', #{fdCarNo}),'%')
+        </if>
+        <if test="fdProtectGrade!=null and fdProtectGrade!=''">
+            AND t.fd_protect_grade = #{fdProtectGrade}
+        </if>
+        <if test="fdVin!=null and fdVin!=''">
+            AND t.fd_vin LIKE CONCAT(CONCAT('%', #{fdVin}),'%')
+        </if>
+        <if test="fdEngine!=null and fdEngine!=''">
+            AND t.fd_engine LIKE CONCAT(CONCAT('%', #{fdEngine}),'%')
+        </if>
+        <if test="fdDriverName!=null and fdDriverName!=''">
+            AND t.fd_driver_name LIKE CONCAT(CONCAT('%', #{fdDriverName}),'%')
+        </if>
+        <if test="fdInFactory!=null and fdInFactory!=''">
+            AND t.fd_in_factory = #{fdInFactory}
+        </if>
+    </sql>
+    <select id="selectEnterProtectById" resultMap="EnterProtectMap">
+        select id,fd_car_no,fd_car_belong,fd_driver_name,fd_protect_grade,fd_detailed_img,fd_vin,
+        fd_engine,fd_car_img,fd_car_date,fd_in_factory,
+        date_format(create_time,'%Y-%m-%d %H:%i:%s') create_time,create_user
+        from safety_enter_protect t
+        where t.id=#{id}
+    </select>
+    <select id="selectEnterProtectList" resultMap="EnterProtectMap"
+            parameterType="com.yutong.safety.core.db.entity.enter.search.SafetyEnterProtectSh">
+        select id,fd_car_no,fd_car_belong,fd_driver_name,fd_protect_grade,fd_detailed_img,fd_vin,
+        fd_engine,fd_car_img,fd_car_date,fd_in_factory,
+        date_format(create_time,'%Y-%m-%d %H:%i:%s') create_time,create_user
+        from safety_enter_protect t
+        where <include refid="EnterProtectSh"/>
+        order by t.create_time desc
+        <if test="export == null">
+            <if test="limit != null">
+                <if test="offset != null">
+                    limit #{offset}, #{limit}
+                </if>
+                <if test="offset == null">
+                    limit #{limit}
+                </if>
+            </if>
+        </if>
+        <if test="export != null">
+            limit 5000
+        </if>
+    </select>
+    <select id="selectEnterProtectCount" resultType="integer"
+            parameterType="com.yutong.safety.core.db.entity.enter.search.SafetyEnterProtectSh">
+        select count(*)
+        from safety_enter_protect t
+        where <include refid="EnterProtectSh"/>
+    </select>
+
+    <select id="selectEnterProtectByCarNo" resultMap="EnterProtectMap">
+        select id,fd_car_no,fd_car_belong,fd_driver_name,fd_protect_grade,fd_detailed_img,fd_vin,
+        fd_engine,fd_car_img,fd_car_date,fd_in_factory
+        from safety_enter_protect t
+        where fd_car_no=#{fdCarNo}
+    </select>
+
+    <insert id="insertEnterProtect" parameterType="com.yutong.safety.core.db.entity.enter.SafetyEnterProtect">
+        insert into safety_enter_protect(
+        fd_car_no,fd_car_belong,fd_driver_name,fd_protect_grade,fd_detailed_img,fd_vin,
+        fd_engine,fd_car_img,fd_car_date,fd_in_factory,create_time,create_user
+        )
+        values (
+        #{fdCarNo},#{fdCarBelong},#{fdDriverName},#{fdProtectGrade},#{fdDetailedImg},#{fdVin},
+        #{fdEngine},#{fdCarImg},#{fdCarDate},#{fdInFactory},#{createTime},#{createUser}
+        )
+    </insert>
+
+    <update id="updateEnterProtect" parameterType="com.yutong.safety.core.db.entity.enter.SafetyEnterProtect">
+        update safety_enter_protect
+        <set>
+            <if test="fdCarBelong!=null and fdCarBelong!=''">
+                fd_car_belong=#{fdCarBelong},
+            </if>
+            <if test="fdDriverName!=null and fdDriverName!=''">
+                fd_driver_name=#{fdDriverName},
+            </if>
+            <if test="fdProtectGrade!=null and fdProtectGrade!=''">
+                fd_protect_grade=#{fdProtectGrade},
+            </if>
+            <if test="fdDetailedImg!=null and fdDetailedImg!=''">
+                fd_detailed_img=#{fdDetailedImg},
+            </if>
+            <if test="fdVin!=null and fdVin!=''">
+                fd_vin=#{fdVin},
+            </if>
+            <if test="fdEngine!=null and fdEngine!=''">
+                fd_engine=#{fdEngine},
+            </if>
+            <if test="fdCarImg!=null and fdCarImg!=''">
+                fd_car_img=#{fdCarImg},
+            </if>
+            <if test="fdCarDate!=null and fdCarDate!=''">
+                fd_car_date=#{fdCarDate},
+            </if>
+            <if test="fdInFactory!=null and fdInFactory!=''">
+                fd_in_factory=#{fdInFactory},
+            </if>
+        </set>
+        where fd_car_no=#{fdCarNo}
+    </update>
+
+    <delete id="deleteEnterProtect">
+        delete from safety_enter_protect where id=#{id}
+    </delete>
+</mapper>

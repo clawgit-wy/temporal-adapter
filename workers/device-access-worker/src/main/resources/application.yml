@@ -1,0 +1,26 @@
+server:
+  port: 18091
+
+spring:
+  application:
+    name: device-access-worker
+  jackson:
+    default-property-inclusion: non_null
+  profiles:
+    active: @activatedProperties@
+
+temporal:
+  server:
+    address: ${TEMPORAL_ADDRESS:127.0.0.1:7233}
+
+worker:
+  scenarios: ${WORKER_SCENARIOS:all}
+
+webhook:
+  callback:
+    url: ${WEBHOOK_CALLBACK_URL:https://your-business-system.com/api/webhook/callback}
+
+logging:
+  level:
+    com.hik.worker: INFO
+    io.temporal: INFO

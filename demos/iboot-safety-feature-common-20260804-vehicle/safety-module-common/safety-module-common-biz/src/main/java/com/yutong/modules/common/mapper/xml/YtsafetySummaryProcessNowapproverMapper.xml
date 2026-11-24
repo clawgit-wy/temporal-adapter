@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.common.mapper.YtsafetySummaryProcessNowapproverMapper">
+
+    <select id="querynextApprover" resultType="com.yutong.modules.common.entity.YtsafetySummaryProcessNowapprover">
+        select #{processId} process_id, emp_no node_handler_no, emp_name node_handler_name,emp_login node_handler_login,now() create_time
+        from safety_employee_message
+        where emp_login in
+        <foreach collection="empLogins" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+</mapper>

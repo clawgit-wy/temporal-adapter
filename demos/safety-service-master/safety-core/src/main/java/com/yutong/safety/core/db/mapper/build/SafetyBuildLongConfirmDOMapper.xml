@@ -1,0 +1,586 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.build.SafetyBuildLongConfirmDOMapper">
+  <resultMap id="BaseResultMap" type="com.yutong.safety.core.db.entity.build.SafetyBuildLongConfirmDO">
+    <id column="ID" jdbcType="INTEGER" property="id" />
+    <result column="EMPLOYEE_CODE" jdbcType="VARCHAR" property="employeeCode" />
+    <result column="EMPLOYEE_NAME" jdbcType="VARCHAR" property="employeeName" />
+    <result column="DEVICE_CODE" jdbcType="VARCHAR" property="deviceCode" />
+    <result column="DEVICE_NAME" jdbcType="VARCHAR" property="deviceName" />
+    <result column="BEGIN_TIME" jdbcType="VARCHAR" property="beginTime" />
+    <result column="END_TIME" jdbcType="VARCHAR" property="endTime" />
+    <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+    <result column="UPDATE_TIME" jdbcType="VARCHAR" property="updateTime" />
+    <result column="DUTY_DEPT_CODE" jdbcType="VARCHAR" property="dutyDeptCode" />
+    <result column="DUTY_DEPT_NAME" jdbcType="VARCHAR" property="dutyDeptName" />
+    <result column="DUTY_EMP_LOGIN" jdbcType="VARCHAR" property="dutyEmpLogin" />
+    <result column="DUTY_EMP_NAME" jdbcType="VARCHAR" property="dutyEmpName" />
+    <result column="DUTY_EMP_NO" jdbcType="VARCHAR" property="dutyEmpNo" />
+    <result column="BPM_FLOW_ID" jdbcType="VARCHAR" property="bpmFlowId" />
+    <result column="ROLE_TYPE" jdbcType="VARCHAR" property="roleType" />
+    <result column="oper_time" jdbcType="VARCHAR" property="operTime" />
+    <result column="corres_flag" jdbcType="VARCHAR" property="corresFlag" />
+    <result column="confirm_flag" jdbcType="VARCHAR" property="confirmFlag" />
+    <result column="confirm_emp_no" jdbcType="VARCHAR" property="confirmEmpNo" />
+    <result column="confirm_emp_name" jdbcType="VARCHAR" property="confirmEmpName" />
+    <result column="confirm_role_type" jdbcType="VARCHAR" property="confirmRoleType" />
+    <result column="diff_day" jdbcType="INTEGER" property="diffDay" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, EMPLOYEE_CODE, EMPLOYEE_NAME, DEVICE_CODE, DEVICE_NAME, BEGIN_TIME, END_TIME, 
+    CREATE_TIME, UPDATE_TIME, DUTY_DEPT_CODE, DUTY_DEPT_NAME, DUTY_EMP_LOGIN, DUTY_EMP_NAME, 
+    DUTY_EMP_NO, BPM_FLOW_ID, ROLE_TYPE, oper_time, corres_flag, confirm_flag, confirm_emp_no, 
+    confirm_emp_name, confirm_role_type,diff_day
+  </sql>
+  <select id="selectByExample" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildLongConfirmDOExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from safety_build_long_confirm
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="filterDutyDept != null and filterDutyDept != ''">
+      and (
+      <foreach item="item" index="index" collection="filterDutyDept.split(';')" separator=" or ">
+        DUTY_DEPT_CODE like CONCAT(#{item},'%')
+      </foreach>
+      )
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from safety_build_long_confirm
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from safety_build_long_confirm
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildLongConfirmDOExample">
+    delete from safety_build_long_confirm
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildLongConfirmDO">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into safety_build_long_confirm (EMPLOYEE_CODE, EMPLOYEE_NAME, DEVICE_CODE, 
+      DEVICE_NAME, BEGIN_TIME, END_TIME, 
+      CREATE_TIME, UPDATE_TIME, DUTY_DEPT_CODE, 
+      DUTY_DEPT_NAME, DUTY_EMP_LOGIN, DUTY_EMP_NAME, 
+      DUTY_EMP_NO, BPM_FLOW_ID, ROLE_TYPE, 
+      oper_time, corres_flag, confirm_flag, 
+      confirm_emp_no, confirm_emp_name, confirm_role_type
+      )
+    values (#{employeeCode,jdbcType=VARCHAR}, #{employeeName,jdbcType=VARCHAR}, #{deviceCode,jdbcType=VARCHAR}, 
+      #{deviceName,jdbcType=VARCHAR}, #{beginTime,jdbcType=VARCHAR}, #{endTime,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=VARCHAR}, #{updateTime,jdbcType=VARCHAR }, #{dutyDeptCode,jdbcType=VARCHAR},
+      #{dutyDeptName,jdbcType=VARCHAR}, #{dutyEmpLogin,jdbcType=VARCHAR}, #{dutyEmpName,jdbcType=VARCHAR}, 
+      #{dutyEmpNo,jdbcType=VARCHAR}, #{bpmFlowId,jdbcType=VARCHAR}, #{roleType,jdbcType=VARCHAR}, 
+      #{operTime,jdbcType=VARCHAR}, #{corresFlag,jdbcType=VARCHAR}, #{confirmFlag,jdbcType=VARCHAR}, 
+      #{confirmEmpNo,jdbcType=VARCHAR}, #{confirmEmpName,jdbcType=VARCHAR}, #{confirmRoleType,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildLongConfirmDO">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into safety_build_long_confirm
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="employeeCode != null">
+        EMPLOYEE_CODE,
+      </if>
+      <if test="employeeName != null">
+        EMPLOYEE_NAME,
+      </if>
+      <if test="deviceCode != null">
+        DEVICE_CODE,
+      </if>
+      <if test="deviceName != null">
+        DEVICE_NAME,
+      </if>
+      <if test="beginTime != null">
+        BEGIN_TIME,
+      </if>
+      <if test="endTime != null">
+        END_TIME,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME,
+      </if>
+      <if test="dutyDeptCode != null">
+        DUTY_DEPT_CODE,
+      </if>
+      <if test="dutyDeptName != null">
+        DUTY_DEPT_NAME,
+      </if>
+      <if test="dutyEmpLogin != null">
+        DUTY_EMP_LOGIN,
+      </if>
+      <if test="dutyEmpName != null">
+        DUTY_EMP_NAME,
+      </if>
+      <if test="dutyEmpNo != null">
+        DUTY_EMP_NO,
+      </if>
+      <if test="bpmFlowId != null">
+        BPM_FLOW_ID,
+      </if>
+      <if test="roleType != null">
+        ROLE_TYPE,
+      </if>
+      <if test="operTime != null">
+        oper_time,
+      </if>
+      <if test="corresFlag != null">
+        corres_flag,
+      </if>
+      <if test="confirmFlag != null">
+        confirm_flag,
+      </if>
+      <if test="confirmEmpNo != null">
+        confirm_emp_no,
+      </if>
+      <if test="confirmEmpName != null">
+        confirm_emp_name,
+      </if>
+      <if test="confirmRoleType != null">
+        confirm_role_type,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="employeeCode != null">
+        #{employeeCode,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeName != null">
+        #{employeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceCode != null">
+        #{deviceCode,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceName != null">
+        #{deviceName,jdbcType=VARCHAR},
+      </if>
+      <if test="beginTime != null">
+        #{beginTime,jdbcType=VARCHAR},
+      </if>
+      <if test="endTime != null">
+        #{endTime,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=VARCHAR },
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=VARCHAR },
+      </if>
+      <if test="dutyDeptCode != null">
+        #{dutyDeptCode,jdbcType=VARCHAR},
+      </if>
+      <if test="dutyDeptName != null">
+        #{dutyDeptName,jdbcType=VARCHAR},
+      </if>
+      <if test="dutyEmpLogin != null">
+        #{dutyEmpLogin,jdbcType=VARCHAR},
+      </if>
+      <if test="dutyEmpName != null">
+        #{dutyEmpName,jdbcType=VARCHAR},
+      </if>
+      <if test="dutyEmpNo != null">
+        #{dutyEmpNo,jdbcType=VARCHAR},
+      </if>
+      <if test="bpmFlowId != null">
+        #{bpmFlowId,jdbcType=VARCHAR},
+      </if>
+      <if test="roleType != null">
+        #{roleType,jdbcType=VARCHAR},
+      </if>
+      <if test="operTime != null">
+        #{operTime,jdbcType=VARCHAR},
+      </if>
+      <if test="corresFlag != null">
+        #{corresFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="confirmFlag != null">
+        #{confirmFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="confirmEmpNo != null">
+        #{confirmEmpNo,jdbcType=VARCHAR},
+      </if>
+      <if test="confirmEmpName != null">
+        #{confirmEmpName,jdbcType=VARCHAR},
+      </if>
+      <if test="confirmRoleType != null">
+        #{confirmRoleType,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildLongConfirmDOExample" resultType="java.lang.Long">
+    select count(*) from safety_build_long_confirm
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="filterDutyDept != null and filterDutyDept != ''">
+      and (
+      <foreach item="item" index="index" collection="filterDutyDept.split(';')" separator=" or ">
+        DUTY_DEPT_CODE like CONCAT(#{item},'%')
+      </foreach>
+      <if test="curEmpNo != null and curEmpNo != ''">
+        or EMPLOYEE_CODE = #{curEmpNo}
+      </if>
+      )
+    </if>
+
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update safety_build_long_confirm
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.employeeCode != null">
+        EMPLOYEE_CODE = #{record.employeeCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.employeeName != null">
+        EMPLOYEE_NAME = #{record.employeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.deviceCode != null">
+        DEVICE_CODE = #{record.deviceCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.deviceName != null">
+        DEVICE_NAME = #{record.deviceName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.beginTime != null">
+        BEGIN_TIME = #{record.beginTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.endTime != null">
+        END_TIME = #{record.endTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null">
+        CREATE_TIME = #{record.createTime,jdbcType=VARCHAR },
+      </if>
+      <if test="record.updateTime != null">
+        UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR },
+      </if>
+      <if test="record.dutyDeptCode != null">
+        DUTY_DEPT_CODE = #{record.dutyDeptCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dutyDeptName != null">
+        DUTY_DEPT_NAME = #{record.dutyDeptName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dutyEmpLogin != null">
+        DUTY_EMP_LOGIN = #{record.dutyEmpLogin,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dutyEmpName != null">
+        DUTY_EMP_NAME = #{record.dutyEmpName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dutyEmpNo != null">
+        DUTY_EMP_NO = #{record.dutyEmpNo,jdbcType=VARCHAR},
+      </if>
+      <if test="record.bpmFlowId != null">
+        BPM_FLOW_ID = #{record.bpmFlowId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.roleType != null">
+        ROLE_TYPE = #{record.roleType,jdbcType=VARCHAR},
+      </if>
+      <if test="record.operTime != null">
+        oper_time = #{record.operTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.corresFlag != null">
+        corres_flag = #{record.corresFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="record.confirmFlag != null">
+        confirm_flag = #{record.confirmFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="record.confirmEmpNo != null">
+        confirm_emp_no = #{record.confirmEmpNo,jdbcType=VARCHAR},
+      </if>
+      <if test="record.confirmEmpName != null">
+        confirm_emp_name = #{record.confirmEmpName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.confirmRoleType != null">
+        confirm_role_type = #{record.confirmRoleType,jdbcType=VARCHAR},
+      </if>
+      <if test="record.eipTodoDate != null">
+        eip_todo_date = #{record.eipTodoDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.eipTodoStatus != null">
+        eip_todo_status = #{record.eipTodoStatus,jdbcType=INTEGER},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildLongConfirmDO">
+    update safety_build_long_confirm
+    <set>
+      <if test="employeeCode != null">
+        EMPLOYEE_CODE = #{employeeCode,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeName != null">
+        EMPLOYEE_NAME = #{employeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceCode != null">
+        DEVICE_CODE = #{deviceCode,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceName != null">
+        DEVICE_NAME = #{deviceName,jdbcType=VARCHAR},
+      </if>
+      <if test="beginTime != null">
+        BEGIN_TIME = #{beginTime,jdbcType=VARCHAR},
+      </if>
+      <if test="endTime != null">
+        END_TIME = #{endTime,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=VARCHAR },
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME = #{updateTime,jdbcType=VARCHAR },
+      </if>
+      <if test="dutyDeptCode != null">
+        DUTY_DEPT_CODE = #{dutyDeptCode,jdbcType=VARCHAR},
+      </if>
+      <if test="dutyDeptName != null">
+        DUTY_DEPT_NAME = #{dutyDeptName,jdbcType=VARCHAR},
+      </if>
+      <if test="dutyEmpLogin != null">
+        DUTY_EMP_LOGIN = #{dutyEmpLogin,jdbcType=VARCHAR},
+      </if>
+      <if test="dutyEmpName != null">
+        DUTY_EMP_NAME = #{dutyEmpName,jdbcType=VARCHAR},
+      </if>
+      <if test="dutyEmpNo != null">
+        DUTY_EMP_NO = #{dutyEmpNo,jdbcType=VARCHAR},
+      </if>
+      <if test="bpmFlowId != null">
+        BPM_FLOW_ID = #{bpmFlowId,jdbcType=VARCHAR},
+      </if>
+      <if test="roleType != null">
+        ROLE_TYPE = #{roleType,jdbcType=VARCHAR},
+      </if>
+      <if test="operTime != null">
+        oper_time = #{operTime,jdbcType=VARCHAR},
+      </if>
+      <if test="corresFlag != null">
+        corres_flag = #{corresFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="confirmFlag != null">
+        confirm_flag = #{confirmFlag,jdbcType=VARCHAR},
+      </if>
+      <if test="confirmEmpNo != null">
+        confirm_emp_no = #{confirmEmpNo,jdbcType=VARCHAR},
+      </if>
+      <if test="confirmEmpName != null">
+        confirm_emp_name = #{confirmEmpName,jdbcType=VARCHAR},
+      </if>
+      <if test="confirmRoleType != null">
+        confirm_role_type = #{confirmRoleType,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+
+  <!--以下是自定义SQL BIZ-begin -->
+  <sql id="Diy_Base_Column">
+    ID, EMPLOYEE_CODE, EMPLOYEE_NAME, DEVICE_CODE, DEVICE_NAME, BEGIN_TIME, END_TIME,
+    CREATE_TIME, UPDATE_TIME, DUTY_DEPT_CODE, DUTY_DEPT_NAME, DUTY_EMP_LOGIN, DUTY_EMP_NAME,
+    DUTY_EMP_NO, BPM_FLOW_ID, ROLE_TYPE, oper_time,datediff(now(),oper_time)  as diff_day
+  </sql>
+
+  <!-- 根据最近进出记录，获取长期为进出门禁信息的初步数据 -->
+  <select id="queryLongTermList" parameterType="com.yutong.safety.core.db.entity.build.param.BuildLongConfirmListParam"
+    resultMap="BaseResultMap">
+    SELECT <include refid="Diy_Base_Column"/> FROM (
+    select sbep.*,
+           sbioh.oper_time
+      from safety_build_employee_power sbep,
+           safety_build_in_out_history sbioh,
+           safety_employee_message sem
+    where sbep.EMPLOYEE_CODE = sbioh.emp_no
+       and sbep.DEVICE_CODE = sbioh.device_code
+       and sbep.DELETE_FLAG = 0
+       and sbep.EMPLOYEE_CODE  = sem.emp_no
+       and sem.status = 'NORMAL'
+       <![CDATA[
+        and BEGIN_TIME <= now() and END_TIME > now()
+       ]]>
+     <if test="operTimeEnd != null and operTimeEnd != ''">
+        <![CDATA[ and sbioh.oper_time< #{operTimeEnd} ]]>
+     </if>
+     <if test="deviceCodeList != null">
+        and sbep.DEVICE_CODE in
+        <foreach collection="deviceCodeList" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+     </if>
+    union all
+    select sbep.*, DATE_FORMAT(sbep.CREATE_TIME,'%Y-%m-%d %H:%i:%s') oper_time
+      from safety_build_employee_power sbep,
+           safety_employee_message sem
+     where sbep.DELETE_FLAG = 0
+       and sbep.EMPLOYEE_CODE  = sem.emp_no
+       and sem.status = 'NORMAL'
+       and NOT exists (select 1 from safety_build_in_out_history sbioh
+                        where sbep.EMPLOYEE_CODE = sbioh.emp_no
+                          and sbep.DEVICE_CODE = sbioh.device_code)
+        <![CDATA[
+        and BEGIN_TIME <= now() and END_TIME > now()
+       ]]>
+    <if test="operTimeEnd != null and operTimeEnd != ''">
+      <![CDATA[ and sbep.CREATE_TIME< #{operTimeEnd} ]]>
+    </if>
+    <if test="deviceCodeList != null">
+      and sbep.DEVICE_CODE in
+      <foreach collection="deviceCodeList" item="item" open="(" close=")" separator=",">
+        #{item}
+      </foreach>
+    </if>
+    ) CUR_TMP
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="pageFlag != null and pageFlag">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+
+  <insert id="insertBatch" keyColumn="EMPLOYEE_CODE,DEVICE_CODE">
+    insert into safety_build_long_confirm (employee_code, employee_name, device_code,
+        device_name, begin_time, end_time,CREATE_TIME, UPDATE_TIME, duty_dept_code,
+        duty_dept_name, duty_emp_name,duty_emp_no, BPM_FLOW_ID, ROLE_TYPE,diff_day,
+        oper_time, corres_flag, confirm_flag, confirm_emp_no, confirm_emp_name,
+        confirm_role_type,corres_duty_dept_code,corres_duty_emp_code
+    ) values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.employeeCode}, #{item.employeeName}, #{item.deviceCode}, #{item.deviceName}, #{item.beginTime}, #{item.endTime}
+      , now(), now(), #{item.dutyDeptCode}, #{item.dutyDeptName}, #{item.dutyEmpName},#{item.dutyEmpNo}
+      ,#{item.bpmFlowId},#{item.roleType},#{item.diffDay},#{item.operTime},#{item.corresFlag},'0',#{item.confirmEmpNo}
+      ,#{item.confirmEmpName},#{item.confirmRoleType},#{item.corresDutyDeptCode},#{item.corresDutyEmpCode})
+    </foreach>
+    ON DUPLICATE KEY UPDATE
+      begin_time = values(begin_time),
+      end_time = values(end_time),
+      update_time = now(),
+      duty_dept_code = values(duty_dept_code),
+      duty_dept_name = values(duty_dept_name),
+      duty_emp_name = values(duty_emp_name),
+      duty_emp_no = values(duty_emp_no),
+      bpm_flow_id = values(bpm_flow_id),
+      role_type = values(role_type),
+      oper_time = values(oper_time),
+      diff_day = values(diff_day),
+      corres_flag = values(corres_flag),
+      confirm_flag = case when safety_build_long_confirm.confirm_flag = '1' then '1' else '0' end,
+      confirm_emp_no = case when safety_build_long_confirm.confirm_flag = '1' then safety_build_long_confirm.confirm_emp_no else values(confirm_emp_no) end,
+      confirm_emp_name = case when safety_build_long_confirm.confirm_flag = '1' then safety_build_long_confirm.confirm_emp_name else values(confirm_emp_name) end,
+      confirm_role_type = case when safety_build_long_confirm.confirm_flag = '1' then safety_build_long_confirm.confirm_role_type else values(confirm_role_type) end,
+      corres_duty_dept_code = values(corres_duty_dept_code),
+      corres_duty_emp_code = values(corres_duty_emp_code)
+  </insert>
+
+  <delete id="deleteHistoryConfirm">
+    delete from safety_build_long_confirm
+     where 1 = 1
+  </delete>
+
+    <insert id="saveHistory">
+        insert into safety.safety_build_long_confirm_history select * from safety.safety_build_long_confirm
+    </insert>
+
+    <update id="updateOfHistoryInfo">
+        UPDATE safety.safety_build_long_confirm e
+            JOIN safety.safety_build_long_confirm_history su ON e.EMPLOYEE_CODE = su.EMPLOYEE_CODE and e.DEVICE_CODE = su.DEVICE_CODE
+        SET e.eip_todo_status = su.eip_todo_status,
+            e.eip_todo_date   = su.eip_todo_date
+        where 1 = 1
+    </update>
+
+    <delete id="deleteHistory">
+        delete from safety_build_long_confirm_history where 1 = 1
+    </delete>
+</mapper>

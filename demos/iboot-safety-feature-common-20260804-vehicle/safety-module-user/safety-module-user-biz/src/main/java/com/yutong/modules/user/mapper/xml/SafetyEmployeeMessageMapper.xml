@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.user.mapper.SafetyEmployeeMessageMapper">
+    <select id="selectDistinctPosition" resultType="com.yutong.modules.user.entity.SafetyEmployeeMessage">
+        SELECT
+            t1.position_code,
+            t1.position_name
+        FROM safety_employee_message t1
+        INNER JOIN (
+            SELECT MIN(id) AS id
+            FROM safety_employee_message
+            WHERE position_code IS NOT NULL
+            AND position_code != ''
+            AND position_name IS NOT NULL
+            AND position_name != ''
+            GROUP BY position_code
+        ) t2 ON t1.id = t2.id
+        ORDER BY t1.position_code;
+    </select>
+    
+    <update id="updateByEmpNoOfUnqualifiedRecord">
+        UPDATE safety_employee_message e
+            JOIN ytsafety_face_unqualified_record r ON e.emp_no = r.emp_no
+        SET e.photo       = r.recognize_photo,
+            e.photo_update_time = now()
+        where e.status = 'NORMAL' and r.del_flag = 0 and r.id in
+        <foreach collection="ids" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="selectListForUnqualified" resultType="com.yutong.modules.user.entity.SafetyEmployeeMessage">
+        SELECT *
+        FROM safety_employee_message a
+        WHERE a.status = 'NORMAL'
+          AND (
+                (
+                        a.user_type != 'WX'
+                        AND a.photo IS NOT NULL
+                        AND photo != ''
+                    )
+                OR
+                (
+                        a.user_type = 'WX'
+                        AND a.emp_login IS NOT NULL
+                        AND a.emp_login != ''
+                        AND a.photo IS NOT NULL
+                        AND a.photo != ''
+                    )
+            )
+          AND a.photo_update_time <![CDATA[ < ]]> (CURRENT_TIMESTAMP - INTERVAL 1 YEAR)
+          and NOT EXISTS(
+                select 1
+                from safety_build_in_out_history b
+                where b.oper_time <![CDATA[ > ]]> #{dateStr}
+                  and b.emp_no = a.emp_no
+                group by b.emp_no
+            )
+    </select>
+
+    
+    <select id="selectListByLowQuality" resultType="java.lang.Integer">
+        select id
+        from safety_employee_message a
+        where a.status = 'NORMAL'
+          AND a.photo IS NOT NULL
+          AND a.photo != ''
+          and not EXISTS(
+                select 1
+                from ytsafety_face_unqualified_record b
+                where b.record_date > #{dateStr}
+                  and b.emp_no = a.emp_no
+                  and b.del_flag = 0
+                group by b.emp_no
+            )
+    </select>
+    
+    <select id="selectListByLowQualityOfId" resultType="com.yutong.modules.user.entity.SafetyEmployeeMessage">
+        select *
+        from safety_employee_message a
+        where a.status = 'NORMAL'
+          AND a.photo IS NOT NULL
+          AND a.photo != ''
+          <if test="ids != null and !ids.isEmpty()">
+            AND a.id in
+            <foreach collection="ids" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+          </if>
+          and not EXISTS(
+                select 1
+                from ytsafety_face_unqualified_record b
+                where b.record_date > #{dateStr}
+                  and b.emp_no = a.emp_no
+                  and b.del_flag = 0
+                group by b.emp_no
+            )
+    </select>
+
+</mapper>

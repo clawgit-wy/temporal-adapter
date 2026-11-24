@@ -1,0 +1,31 @@
+##############################################################################
+# 简化版 Dockerfile - 仅运行时构建
+# 前提：Jar 包已在 Jenkins 上构建完成
+# 基础镜像需要预先加载到离线服务器
+##############################################################################
+FROM eclipse-temurin:8-jre
+
+# 设置时区
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+WORKDIR /app
+
+# 拷贝预构建的 Jar 包
+COPY target/hik-sync-worker-1.0.0.jar app.jar
+
+# 默认环境变量
+ENV JAVA_OPTS="-Xms256m -Xmx512m" \
+    TEMPORAL_ADDRESS="temporal:7233" \
+    WORKER_SCENARIOS="hikSync" \
+    MYSQL_URL="jdbc:mysql://mysql:3306/safety?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false" \
+    MYSQL_USERNAME="root" \
+    MYSQL_PASSWORD="root" \
+    PG_URL="jdbc:postgresql://postgres:5432/ctm02brss_ctm02brssdb" \
+    PG_USERNAME="hikface" \
+    PG_PASSWORD="zjk@111++"
+
+# 容器不直接暴露端口，通过 docker compose 网络内部通信
+# 如果需要直接访问可取消 EXPOSE 并在 compose 中配置 ports
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=prod -jar app.jar"]

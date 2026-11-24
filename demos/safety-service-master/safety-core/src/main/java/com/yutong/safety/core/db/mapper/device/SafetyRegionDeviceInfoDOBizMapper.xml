@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.device.SafetyRegionDeviceInfoDOBizMapper">
+  <insert id="batchSaveOrUpdate" parameterType="java.util.List" keyColumn="dev_no">
+    INSERT INTO safety_region_device_info
+    (
+    dev_no,
+    dev_addr,
+    comm_type,
+    dev_name,
+    dev_type_code,
+    gid,
+    rid,
+    face_device,
+    create_time,
+    update_time,
+    factory_id,
+    factory_name,
+    device_category,
+    delete_flag
+    )
+    VALUES
+    <foreach collection="list" item="ll" separator=",">
+      (
+      #{ll.devNo,jdbcType=VARCHAR},
+      #{ll.devAddr,jdbcType=VARCHAR},
+      #{ll.commType,jdbcType=VARCHAR},
+      #{ll.devName,jdbcType=VARCHAR},
+      #{ll.devTypeCode,jdbcType=VARCHAR},
+      #{ll.gid,jdbcType=VARCHAR},
+      #{ll.rid,jdbcType=VARCHAR},
+      #{ll.faceDevice,jdbcType=VARCHAR},
+      #{ll.createTime,jdbcType=TIMESTAMP},
+      #{ll.updateTime,jdbcType=TIMESTAMP},
+      #{ll.factoryId,jdbcType=VARCHAR},
+      #{ll.factoryName,jdbcType=VARCHAR},
+      #{ll.deviceCategory,jdbcType=VARCHAR},
+      #{ll.deleteFlag,jdbcType=VARCHAR}
+      )
+    </foreach>
+    ON DUPLICATE KEY UPDATE
+    dev_addr = VALUES(dev_addr),
+    comm_type = VALUES(comm_type),
+    dev_name = VALUES(dev_name),
+    dev_type_code = VALUES(dev_type_code),
+    gid = VALUES(gid),
+    rid = VALUES(rid),
+    face_device = VALUES(face_device),
+    update_time = VALUES(update_time),
+    factory_id = VALUES(factory_id),
+    factory_name = VALUES(factory_name),
+    device_category = VALUES(device_category),
+    delete_flag = VALUES(delete_flag)
+  </insert>
+
+  <insert id="batchSaveOrUpdateTwo" parameterType="java.util.List" keyColumn="dev_no">
+    INSERT INTO safety_region_device_info
+    (
+    dev_no,
+    dev_addr,
+    comm_type,
+    dev_name,
+    dev_type_code,
+    gid,
+    rid,
+    face_device,
+    create_time,
+    update_time,
+    factory_id,
+    factory_name,
+    device_category,
+    delete_flag
+    )
+    VALUES
+    <foreach collection="list" item="ll" separator=",">
+      (
+      #{ll.devNo,jdbcType=VARCHAR},
+      #{ll.devAddr,jdbcType=VARCHAR},
+      #{ll.commType,jdbcType=VARCHAR},
+      #{ll.devName,jdbcType=VARCHAR},
+      #{ll.devTypeCode,jdbcType=VARCHAR},
+      #{ll.gid,jdbcType=VARCHAR},
+      #{ll.rid,jdbcType=VARCHAR},
+      #{ll.faceDevice,jdbcType=VARCHAR},
+      #{ll.createTime,jdbcType=TIMESTAMP},
+      #{ll.updateTime,jdbcType=TIMESTAMP},
+      #{ll.factoryId,jdbcType=VARCHAR},
+      #{ll.factoryName,jdbcType=VARCHAR},
+      #{ll.deviceCategory,jdbcType=VARCHAR},
+      #{ll.deleteFlag,jdbcType=VARCHAR}
+      )
+    </foreach>
+    ON DUPLICATE KEY UPDATE
+    dev_addr = VALUES(dev_addr),
+    comm_type = VALUES(comm_type),
+    dev_name = VALUES(dev_name),
+    dev_type_code = VALUES(dev_type_code),
+    gid = VALUES(gid),
+    rid = VALUES(rid),
+    face_device = VALUES(face_device),
+    update_time = VALUES(update_time),
+    delete_flag = VALUES(delete_flag)
+  </insert>
+
+</mapper>

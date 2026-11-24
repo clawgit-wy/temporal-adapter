@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoder 默认配置为PatternLayoutEncoder -->
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{RequestId}] [%thread] %-5level %logger{36} [%F:%L] %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="info_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <prudent>true</prudent>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>/data/logs/safety/info.log.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <MaxHistory>30</MaxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{RequestId}] [%thread] %-5level %logger{36} [%F:%L] %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="warn_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <prudent>true</prudent>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>/data/logs/safety/warn.log.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <MaxHistory>60</MaxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{RequestId}] [%thread] %-5level %logger{36} [%F:%L] %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="error_log" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>/data/logs/safety/error.log.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <MaxHistory>60</MaxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{RequestId}] [%thread] %-5level %logger{36} [%F:%L] %msg%n</pattern>
+        </encoder>
+    </appender>
+    <logger name="info" additivity="false" level="INFO">
+        <appender-ref ref="info_log" />
+    </logger>
+    <logger name="warn" additivity="false" level="INFO">
+        <appender-ref ref="warn_log" />
+    </logger>
+    <logger name="error" additivity="false" level="INFO">
+        <appender-ref ref="error_log" />
+    </logger>
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>

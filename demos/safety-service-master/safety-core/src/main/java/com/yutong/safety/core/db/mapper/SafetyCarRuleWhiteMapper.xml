@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.SafetyCarRuleWhiteMapper">
+  <insert id="insert">
+    insert into safety.safety_car_rule_white (car_no, emp_no, remark, create_time, update_time, status) values
+    (#{carNo}, #{empNo}, #{remark}, now(), now(), 0)
+  </insert>
+
+  <insert id="batchInsert">
+    insert into safety.safety_car_rule_white (car_no, emp_no, remark, create_time, update_time, status) values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.carNo}, #{item.empNo}, #{item.remark}, now(), now(), 0)
+    </foreach>
+  </insert>
+
+  <update id="update">
+    update safety.safety_car_rule_white
+    set car_no = #{carNo},
+        <if test="empNo != null">
+          emp_no = #{empNo},
+        </if>
+        remark = #{remark}, update_time = now()
+    where id = #{id}
+  </update>
+
+  <update id="updateDelFlagByPrimaryKey">
+    update safety.safety_car_rule_white set status = 1
+    where id = #{id}
+  </update>
+
+  <update id="batchUpdate">
+    <foreach collection="list" item="item" separator=";">
+      update safety_car_rule_white
+          set car_no = #{item.carNo,jdbcType=VARCHAR},
+          remark = #{item.remark,jdbcType=VARCHAR},
+          update_time = now()
+      where emp_no = #{item.empNo}
+    </foreach>
+  </update>
+
+  <select id="selectList" resultType="com.yutong.safety.core.db.entity.SafetyCarRuleWhiteDO">
+    SELECT t.id, t.car_no, t.emp_no, e.emp_name, e.org_name dept, t.remark FROM safety.safety_car_rule_white t
+        left join safety.safety_employee_message e on e.emp_no = t.emp_no
+    where t.status = 0
+    <if test="param.carNo != null">
+      and t.car_no like concat('%',#{param.carNo},'%')
+    </if>
+    <if test="param.empNo != null">
+      and t.emp_no like concat('%',#{param.empNo},'%')
+    </if>
+    <if test="param.empName != null">
+      and e.emp_name like concat('%',#{param.empName},'%')
+    </if>
+    <if test="param.dept != null">
+      and e.org_name like concat('%',#{param.dept},'%')
+    </if>
+    order by t.create_time desc
+    limit #{start}, #{size}
+  </select>
+
+  <select id="countList" resultType="java.lang.Long">
+    select count(1) from safety.safety_car_rule_white t
+      left join safety.safety_employee_message e on e.emp_no = t.emp_no
+      where t.status = 0
+      <if test="carNo != null">
+        and t.car_no like concat('%',#{carNo},'%')
+      </if>
+      <if test="empNo != null">
+        and t.emp_no like concat('%',#{empNo},'%')
+      </if>
+      <if test="empName != null">
+        and e.emp_name like concat('%',#{empName},'%')
+      </if>
+      <if test="dept != null">
+        and e.org_name like concat('%',#{dept},'%')
+      </if>
+  </select>
+
+  <select id="findAll" resultType="java.lang.String">
+    SELECT t.emp_no FROM safety.safety_car_rule_white t where t.status = 0
+  </select>
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.vehicle.mapper.YtsafetyQueryPermInfoMapper">
+
+    <select id="getUserRoleCode" resultType="java.lang.String">
+        select role_code from safety_sys_user_role
+        where del_flag = '0'
+        and user_id = #{userId}
+    </select>
+
+    <select id="getEmployeeInfo" resultType="com.yutong.modules.vehicle.vo.SafetyEmployeeMessageVO">
+        select * from safety_employee_message
+        <where>
+            <if test="empNo!=null and empNo !=''" >
+                and emp_no = #{empNo}
+            </if>
+            <if test="phoneNo!=null and phoneNo !=''" >
+                and phone_no = #{empNo}
+            </if>
+        </where>
+        limit 1
+    </select>
+
+    <select id="getEmployeeCarList" resultType="com.yutong.modules.vehicle.vo.CarInfoVO">
+        select car_no,car_color,car_model,employee_no as empNo,vehicle_type,lock_flag from safety_employee_private_car
+        where delete_flag= '0'
+        <if test="empNo!=null and empNo !=''" >
+            and employee_no = #{empNo}
+        </if>
+        <if test="phoneNo!=null and phoneNo !=''" >
+            and phone_no = #{empNo}
+        </if>
+    </select>
+
+    <select id="getPersonnelAccess" resultType="com.yutong.modules.vehicle.vo.PersonnelAccessVO">
+        select t.oper_time ,t.io_flag,t1.AN_FACTORY_NAME as factoryName,t1.DEVICE_NAME from safety_build_in_out_history t
+        inner join safety_build_device t1 on t.device_code = t1.device_code
+        where t.emp_no= #{empNo}
+    </select>
+
+    <select id="getCarAccessList" resultType="com.yutong.modules.vehicle.vo.CarAccessVO">
+        select token_no,in_time,in_lane_name,in_operator_name,out_time,out_lane_name,out_operator_name,stay_lasts
+        from safety_crk_car_out_history
+        where token_no= #{carNo}
+    </select>
+
+</mapper>

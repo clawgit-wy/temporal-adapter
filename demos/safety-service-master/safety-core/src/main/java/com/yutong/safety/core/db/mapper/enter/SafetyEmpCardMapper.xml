@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.enter.SafetyEmpCardMapper">
+    <insert id="saveOrUpdate" keyColumn="emp_no" parameterType="java.util.List" useGeneratedKeys="false">
+        insert into safety_emp_card (emp_no, crk_id, token_id, ver, card_status, update_time) values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.empNo},#{item.crkId},#{item.tokenId},#{item.ver},#{item.cardStatus},now())
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+            token_id = values(token_id),
+            crk_id = values(crk_id),
+            ver = values(ver),
+            card_status = values(card_status),
+            update_time = now()
+    </insert>
+    <select id="selectMaxVer" resultType="java.lang.String">
+        select max(ver) from safety_emp_card
+    </select>
+    <select id="selectEmpCardDatas" resultType="com.yutong.safety.core.db.entity.enter.SafetyEmpCard">
+        select emp_no, crk_id, token_id from safety.safety_emp_card where emp_no in
+        <foreach collection="empNos" item="empNo" index="index" separator="," open="(" close=")">
+            #{empNo}
+        </foreach>
+    </select>
+
+    <select id="selectEmpCardDatasForParam" resultType="com.yutong.safety.core.db.entity.enter.SafetyEmpCard"
+            parameterType="com.yutong.safety.core.db.entity.enter.search.EmpCardParam">
+        select emp_no, crk_id, token_id from safety.safety_emp_card
+         where 1 = 1
+         <if test="updateTimeBeign != null and updateTimeBeign != ''">
+            and update_time > #{updateTimeBeign}
+         </if>
+        <if test="isNullTokenId != null and !isNullTokenId">
+            and (token_id is not null and token_id != '')
+        </if>
+        <if test="cardStatus != null and cardStatus != ''">
+            and card_status = #{cardStatus}
+        </if>
+        <if test="empNos != null">
+            and emp_no in
+            <foreach collection="empNos" item="empNo" index="index" separator="," open="(" close=")">
+                #{empNo}
+            </foreach>
+        </if>
+    </select>
+
+    <update id="updateByPrimary">
+        update safety_emp_card set
+        <if test="crkId != null">
+            crk_id = #{crkId},
+        </if>
+        <if test="tokenId != null">
+            token_id = #{tokenId},
+        </if>
+        <if test="ver != null">
+            ver = #{ver},
+        </if>
+        <if test="cardStatus != null">
+            card_status = #{cardStatus},
+        </if>
+        update_time = now()
+        where emp_no = #{empNo}
+    </update>
+
+    <update id="batchUpdate">
+        update safety_emp_card set
+        <if test="record.crkId != null">
+            crk_id = #{record.crkId},
+        </if>
+        <if test="record.tokenId != null">
+            token_id = #{record.tokenId},
+        </if>
+        <if test="record.ver != null">
+            ver = #{record.ver},
+        </if>
+        <if test="record.cardStatus != null">
+            card_status = #{record.cardStatus},
+        </if>
+        update_time = now()
+        where emp_no in
+        <foreach collection="empNoList" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="selectCrkIdByEmpNo" resultType="com.yutong.safety.core.db.entity.enter.SafetyEmpCard" parameterType="java.lang.String">
+        select emp_no, crk_id, token_id from safety.safety_emp_card where emp_no = #{empNo,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectListCrkIdByEmpNo" resultType="com.yutong.safety.core.db.entity.enter.SafetyEmpCard" parameterType="java.util.List">
+        select emp_no, crk_id, token_id from safety.safety_emp_card where emp_no in
+        <foreach collection="empNoList" item="item" open="(" close=")" separator=",">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+    </select>
+
+</mapper>

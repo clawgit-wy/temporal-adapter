@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.SafetySysPermDOBizMapper">
+
+  <sql id="table_name">safety_sys_perm</sql>
+  <!--查询perm集合-->
+  <select id="selectSysPermList" resultType="java.util.Map">
+    SELECT sp.id, sp.perm_name AS permName, sp.perm_url AS permUrl, sp.parent_id AS pid, sm.perm_name AS pName,
+    sp.`level`, sp.cate, sp.icon, sp.sort, sp.sys, sp.permission, sp.perm_cate AS permCate
+    FROM <include refid="table_name" /> sp LEFT JOIN <include refid="table_name" /> sm ON sp.parent_id=sm.id
+    WHERE sp.delete_falg = '0'
+    ORDER BY sp.sort
+  </select>
+</mapper>

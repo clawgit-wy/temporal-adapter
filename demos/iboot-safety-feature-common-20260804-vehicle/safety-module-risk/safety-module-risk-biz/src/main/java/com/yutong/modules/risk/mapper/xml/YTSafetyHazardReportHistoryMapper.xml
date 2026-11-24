@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.risk.mapper.YTSafetyHazardReportHistoryMapper">
+    <select id="listBYHazardReportId" resultType="com.yutong.modules.risk.vo.YTSafetyHazardReportHistoryVO">
+        SELECT
+            id,
+            process_id as processId,
+            change_time AS changeTime,
+            change_user_emp_no AS changeUserEmpNo,
+            change_user_name AS changeUserName,
+            before_snapshot AS beforeSnapshot,
+            after_snapshot AS afterSnapshot
+        FROM ytsafety_hazard_report_history
+        WHERE process_id = #{reportId}
+    </select>
+</mapper>

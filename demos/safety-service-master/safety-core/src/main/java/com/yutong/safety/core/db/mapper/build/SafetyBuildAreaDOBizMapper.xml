@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.build.SafetyBuildAreaDOBizMapper">
+  <resultMap id="BaseResultMap" type="com.yutong.safety.core.db.entity.build.SafetyBuildAreaDO">
+    <id column="area_id" jdbcType="INTEGER" property="areaId" />
+    <result column="full_area_id" jdbcType="VARCHAR" property="fullAreaId" />
+    <result column="area_name" jdbcType="VARCHAR" property="areaName" />
+    <result column="levf" jdbcType="INTEGER" property="levf" />
+    <result column="floor" jdbcType="INTEGER" property="floor" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+
+  <insert id="batchUpdate"  parameterType="java.util.List" useGeneratedKeys="true" keyColumn="area_id">
+    insert into safety_build_area (AREA_ID,FULL_AREA_ID,AREA_NAME,LEVF,FLOOR,CREATE_TIME,update_time)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.areaId},
+      #{item.fullAreaId},
+      #{item.areaName},
+      #{item.levf},
+      #{item.floor},
+      CURRENT_TIMESTAMP,
+      CURRENT_TIMESTAMP)
+    </foreach>
+    ON DUPLICATE KEY UPDATE
+    FULL_AREA_ID = VALUES(FULL_AREA_ID),
+    AREA_NAME = VALUES(AREA_NAME),
+    LEVF = VALUES(LEVF),
+    FLOOR = VALUES(FLOOR),
+    UPDATE_TIME = CURRENT_TIMESTAMP
+  </insert>
+
+  <select id="selectFactoryList" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+      from safety.safety_build_area sba
+     where (LENGTH(sba.full_area_id) - LENGTH(REPLACE(sba.full_area_id, ',', ''))) = 3
+       and sba.full_area_id like '0,6,%'
+  </select>
+
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    area_id, full_area_id, area_name, levf, floor, create_time, update_time
+  </sql>
+  <select id="selectByExample" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildAreaDOExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from safety_build_area
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from safety_build_area
+    where area_id = #{areaId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from safety_build_area
+    where area_id = #{areaId,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildAreaDOExample">
+    delete from safety_build_area
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildAreaDO">
+    insert into safety_build_area (area_id, full_area_id, area_name,
+      levf, floor, create_time, 
+      update_time)
+    values (#{areaId,jdbcType=INTEGER}, #{fullAreaId,jdbcType=VARCHAR}, #{areaName,jdbcType=VARCHAR}, 
+      #{levf,jdbcType=INTEGER}, #{floor,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildAreaDO">
+    insert into safety_build_area
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="areaId != null">
+        area_id,
+      </if>
+      <if test="fullAreaId != null">
+        full_area_id,
+      </if>
+      <if test="areaName != null">
+        area_name,
+      </if>
+      <if test="levf != null">
+        levf,
+      </if>
+      <if test="floor != null">
+        floor,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="areaId != null">
+        #{areaId,jdbcType=INTEGER},
+      </if>
+      <if test="fullAreaId != null">
+        #{fullAreaId,jdbcType=VARCHAR},
+      </if>
+      <if test="areaName != null">
+        #{areaName,jdbcType=VARCHAR},
+      </if>
+      <if test="levf != null">
+        #{levf,jdbcType=INTEGER},
+      </if>
+      <if test="floor != null">
+        #{floor,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildAreaDOExample" resultType="java.lang.Long">
+    select count(*) from safety_build_area
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update safety_build_area
+    <set>
+      <if test="record.areaId != null">
+        area_id = #{record.areaId,jdbcType=INTEGER},
+      </if>
+      <if test="record.fullAreaId != null">
+        full_area_id = #{record.fullAreaId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.areaName != null">
+        area_name = #{record.areaName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.levf != null">
+        levf = #{record.levf,jdbcType=INTEGER},
+      </if>
+      <if test="record.floor != null">
+        floor = #{record.floor,jdbcType=INTEGER},
+      </if>
+      <if test="record.createTime != null">
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.updateTime != null">
+        update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update safety_build_area
+    set area_id = #{record.areaId,jdbcType=INTEGER},
+      full_area_id = #{record.fullAreaId,jdbcType=VARCHAR},
+      area_name = #{record.areaName,jdbcType=VARCHAR},
+      levf = #{record.levf,jdbcType=INTEGER},
+      floor = #{record.floor,jdbcType=INTEGER},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      update_time = #{record.updateTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildAreaDO">
+    update safety_build_area
+    <set>
+      <if test="fullAreaId != null">
+        full_area_id = #{fullAreaId,jdbcType=VARCHAR},
+      </if>
+      <if test="areaName != null">
+        area_name = #{areaName,jdbcType=VARCHAR},
+      </if>
+      <if test="levf != null">
+        levf = #{levf,jdbcType=INTEGER},
+      </if>
+      <if test="floor != null">
+        floor = #{floor,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where area_id = #{areaId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildAreaDO">
+    update safety_build_area
+    set full_area_id = #{fullAreaId,jdbcType=VARCHAR},
+      area_name = #{areaName,jdbcType=VARCHAR},
+      levf = #{levf,jdbcType=INTEGER},
+      floor = #{floor,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where area_id = #{areaId,jdbcType=INTEGER}
+  </update>
+</mapper>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.SafetyFieldManageDOBizMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.yutong.safety.common.vo.web.FieldManageVO">
+        <id column="id" property="id" />
+        <result column="parent_id" property="parentId" />
+        <result column="field_name" property="fieldName" />
+    </resultMap>
+
+    <update id="updateBatchById">
+        <foreach collection="fieldList" item="item" separator=";">
+            update
+                safety_field_manage
+            set
+                field_sort = #{item.fieldSort}
+            where
+                id = #{item.id}
+        </foreach>
+    </update>
+    <!--联动列表数据查询-->
+    <select id="selectLinkageList" resultMap="BaseResultMap" >
+        SELECT t.id, t.parent_id, t.field_name FROM safety_field_manage t where t.delete_falg = 0 and t.field_type in ('factory','region') and t.remark is null ORDER BY t.field_sort
+    </select>
+
+    <select id="selectLinkageListNew" resultMap="BaseResultMap" >
+        SELECT t.id, t.parent_id, t.field_name FROM safety_field_manage t where t.delete_falg = 0 and t.field_type in ('factory','region') ORDER BY t.field_sort
+    </select>
+
+    <select id="selectLinkageListNewName" resultType="java.lang.String" >
+        SELECT t.field_name FROM safety_field_manage t where t.delete_falg = 0 and t.field_type in ('factory') ORDER BY t.field_sort
+    </select>
+
+    <update id="updateBatchByParentId">
+        update safety_field_manage set delete_falg = 1
+        <where>
+            parent_id=#{parentId}
+        </where>
+    </update>
+
+    <select id="fieldTypeList">
+        select distinct t.field_type from safety_field_manage t where t.delete_falg = 0 and t.parent_id is null
+    </select>
+
+
+    <select id="getParentFieldById" resultType="com.yutong.safety.core.db.entity.SafetyFieldManageDO">
+        select f2.id, f2.field_name, f2.field_sort, f2.field_type, f2.create_time, f2.update_time,
+                f2.delete_falg, f2.parent_id, f2.field_code, f2.field_level
+          from safety_field_manage f1,safety_field_manage f2 where f1.parent_id = f2.id and f1.id = #{filedId}
+    </select>
+</mapper>

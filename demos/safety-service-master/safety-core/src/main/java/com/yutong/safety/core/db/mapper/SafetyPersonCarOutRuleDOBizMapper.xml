@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.SafetyPersonCarOutRuleDOBizMapper">
+    <resultMap id="BaseResultMap" type="com.yutong.safety.core.dto.SafetyPersonCarOutRuleDTO">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="employee_id" jdbcType="INTEGER" property="employeeId" />
+        <result column="car_no" jdbcType="VARCHAR" property="carNo" />
+        <result column="check_flag" jdbcType="VARCHAR" property="checkFlag" />
+        <result column="remark" jdbcType="VARCHAR" property="remark" />
+        <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="UPDATE_TIME" jdbcType="TIMESTAMP" property="updateTime" />
+        <result column="IS_DELETE" jdbcType="BIT" property="isDelete" />
+        <result column="emp_no" jdbcType="VARCHAR" property="empNo" />
+        <result column="emp_name" jdbcType="VARCHAR" property="empName" />
+        <result column="phone_no" jdbcType="VARCHAR" property="phoneNo" />
+        <result column="position_code" jdbcType="VARCHAR" property="positionCode" />
+        <result column="position_name" jdbcType="VARCHAR" property="positionName" />
+        <result column="org_name_path" jdbcType="VARCHAR" property="orgNamePath" />
+        <result column="org_code_path" jdbcType="VARCHAR" property="orgCodePath" />
+        <result column="org_code" jdbcType="VARCHAR" property="orgCode" />
+        <result column="org_name" jdbcType="VARCHAR" property="orgName" />
+        <result column="email" jdbcType="VARCHAR" property="email" />
+    </resultMap>
+
+    <select id="pageList" resultMap="BaseResultMap">
+        SELECT t.id, t.employee_id, m.emp_no, m.emp_name, m.phone_no, m.org_name_path, m.org_code_path, m.position_code, m.position_name, m.org_code,
+            m.org_name, m.email, t.car_no, t.check_flag, t.remark, t.CREATE_TIME, t.UPDATE_TIME, t.IS_DELETE
+        FROM safety.safety_person_car_out_rule t, safety.safety_employee_message m
+        WHERE 1 = 1 AND t.employee_id = m.id AND t.IS_DELETE = 0
+        <if test="checkFlag!=null and checkFlag!=''">
+            AND t.check_flag = #{checkFlag}
+        </if>
+        <if test="empNo!=null and empNo!=''">
+            AND m.emp_no = #{empNo}
+        </if>
+        <if test="empName!=null and empName!=''">
+            AND m.emp_name LIKE CONCAT(CONCAT('%', #{empName}),'%')
+        </if>
+        <if test="positionName!=null and positionName!=''">
+            AND m.position_name LIKE CONCAT(CONCAT('%', #{positionName}),'%')
+        </if>
+        ORDER BY t.UPDATE_TIME DESC
+        limit #{startRowNum},#{endRowNum}
+    </select>
+
+    <select id="pageListCount" resultType="java.lang.Long">
+        SELECT count(*)
+        FROM safety.safety_person_car_out_rule t, safety.safety_employee_message m
+        WHERE 1 = 1 AND t.employee_id = m.id AND t.IS_DELETE = 0
+        <if test="checkFlag!=null and checkFlag!=''">
+            AND t.check_flag = #{checkFlag}
+        </if>
+        <if test="empNo!=null and empNo!=''">
+            AND m.emp_no = #{empNo}
+        </if>
+        <if test="empName!=null and empName!=''">
+            AND m.emp_name LIKE CONCAT(CONCAT('%', #{empName}),'%')
+        </if>
+        <if test="positionName!=null and positionName!=''">
+            AND m.position_name LIKE CONCAT(CONCAT('%', #{positionName}),'%')
+        </if>
+    </select>
+
+</mapper>

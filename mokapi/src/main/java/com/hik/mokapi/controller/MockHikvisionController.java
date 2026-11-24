@@ -88,14 +88,14 @@ public class MockHikvisionController {
         double similarity = 50 + ThreadLocalRandom.current().nextDouble() * 50; // 50~100
 
         if (passed) {
-            log.info("[Mock海康] 人员 {} 校验通过, 相似度: {:.1f}", personId, similarity);
+            log.info("[Mock海康] 人员 {} 校验通过, 相似度: {}", personId, String.format("%.1f", similarity));
             return VerifyResponse.builder()
                     .personId(personId)
                     .passed(true)
                     .similarity(similarity)
                     .build();
         } else {
-            log.info("[Mock海康] 人员 {} 校验未通过(随机), 相似度: {:.1f}", personId, similarity);
+            log.info("[Mock海康] 人员 {} 校验未通过(随机), 相似度: {}", personId, String.format("%.1f", similarity));
             return VerifyResponse.builder()
                     .personId(personId)
                     .passed(false)

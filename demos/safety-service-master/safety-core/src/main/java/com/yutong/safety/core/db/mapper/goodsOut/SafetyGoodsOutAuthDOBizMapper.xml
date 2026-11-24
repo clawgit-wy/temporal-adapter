@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.goodsOut.SafetyGoodsOutAuthDOBizMapper">
+
+  <sql id="Base_Column_List_biz">
+    id, emp_no, emp_name, emp_eip, emp_dept, power_factory_id, power_desc, out_type,
+    goods_type, create_user, create_time, update_user, update_time, remark
+  </sql>
+
+  <sql id="base_search">
+    <if test="empStr != null and empStr !='' ">
+        and (emp_name=#{empStr} or emp_eip=#{empStr} or emp_no=#{empStr})
+    </if>
+    <if test="empDept ！= null  and empDept != '' ">
+        and emp_dept = #{empDept}
+    </if>
+    <if test="outType != null and outType != '' ">
+        and out_type = #{outType}
+    </if>
+  </sql>
+
+  <select id="selectAuthList" resultType="com.yutong.safety.core.db.entity.goodsOut.SafetyGoodsOutAuthDO"
+          parameterType="com.yutong.safety.core.db.entity.goodsOut.param.GoodsOutAuthListParam">
+    select
+      <include refid="Base_Column_List_biz"/>
+    form safety_goods_out_auth
+    where 1 = 1
+    <include refid="base_search"/>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+
+  <select id="selectAuthCount" parameterType="com.yutong.safety.core.db.entity.goodsOut.param.GoodsOutAuthListParam"
+          resultType="java.lang.Long">
+    select count(1)
+    form safety_goods_out_auth
+    where 1 = 1
+    <include refid="base_search"/>
+  </select>
+</mapper>

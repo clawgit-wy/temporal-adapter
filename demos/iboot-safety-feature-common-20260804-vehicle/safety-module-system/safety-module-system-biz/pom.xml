@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.yutong.iboot</groupId>
+        <artifactId>safety-module-system</artifactId>
+        <version>3.5.0</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>safety-module-system-biz</artifactId>
+    <dependencies>
+
+        <!-- 引入jeecg-boot-starter-cloud依赖 -->
+        <dependency>
+            <groupId>com.yutong.iboot</groupId>
+            <artifactId>iboot-starter-cloud</artifactId>
+            <version>${jeecgboot.version}</version>
+        </dependency>
+		
+		<dependency>
+            <groupId>com.yutong.iboot</groupId>
+            <artifactId>safety-base-core</artifactId>
+            <version>${jeecgboot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.yutong.iboot</groupId>
+            <artifactId>safety-module-user-biz</artifactId>
+            <version>3.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.yutong.iboot</groupId>
+            <artifactId>safety-module-risk-biz</artifactId>
+            <version>${jeecgboot.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.yutong.iboot</groupId>
+            <artifactId>safety-module-risk-biz</artifactId>
+            <version>3.5.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.yutong.iboot</groupId>
+            <artifactId>safety-module-common-biz</artifactId>
+            <version>${jeecgboot.version}</version>
+        </dependency>
+
+        <!-- feign -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <!-- sentinel限流熔断降级-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.yutong.iboot</groupId>
+            <artifactId>iboot-auth-cloud-api</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.yutong.iboot</groupId>-->
+<!--            <artifactId>iboot-base-core</artifactId>-->
+<!--            <version>3.5.0</version>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>com.yutong.iboot</groupId>
+            <artifactId>safety-module-user-api</artifactId>
+            <version>${jeecgboot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.yutong.iboot</groupId>
+            <artifactId>safety-module-user-biz</artifactId>
+            <version>${jeecgboot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.yutong.iboot</groupId>
+            <artifactId>safety-module-vehicle-api</artifactId>
+            <version>${jeecgboot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.yutong.iboot</groupId>
+            <artifactId>safety-module-vehicle-biz</artifactId>
+            <version>${jeecgboot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.yutong.iboot</groupId>
+            <artifactId>safety-module-job-biz</artifactId>
+            <version>3.5.0</version>
+        </dependency>
+        <!-- IBoot分布式锁 -->
+        <dependency>
+            <groupId>com.yutong.iboot</groupId>
+            <artifactId>iboot-starter-lock</artifactId>
+            <version>3.5.0</version>
+        </dependency>
+
+        <!-- xxjob -->
+        <dependency>
+            <groupId>org.jeecgframework.boot</groupId>
+            <artifactId>jeecg-boot-starter-job</artifactId>
+            <version>${jeecgboot.version}</version>
+        </dependency>
+    
+        <!-- safety-module-build-->
+        <dependency>
+            <groupId>com.yutong.iboot</groupId>
+            <artifactId>safety-module-build-api</artifactId>
+            <version>${jeecgboot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.yutong.iboot</groupId>
+            <artifactId>safety-module-build-biz</artifactId>
+            <version>${jeecgboot.version}</version>
+        </dependency>
+
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

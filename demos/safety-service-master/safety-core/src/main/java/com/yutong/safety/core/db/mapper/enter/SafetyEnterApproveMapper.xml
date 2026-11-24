@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.enter.SafetyEnterApproveMapper">
+    <resultMap id="EnterApproveMap" type="com.yutong.safety.core.db.entity.enter.result.SafetyEnterApproveRt">
+        <result column="fd_name" jdbcType="INTEGER" property="name" />
+        <result column="fd_card_no" jdbcType="VARCHAR" property="cardId" />
+        <result column="fd_phone" jdbcType="VARCHAR" property="phone" />
+        <result column="fd_img" jdbcType="VARCHAR" property="photographUrl" />
+        <result column="fd_filing_factory_code" jdbcType="VARCHAR" property="enterFactoryCode" />
+        <result column="fd_filing_factory" jdbcType="VARCHAR" property="enterFactory" />
+        <result column="filing_id" jdbcType="VARCHAR" property="filingId" />
+        <result column="fd_filing_begin" jdbcType="VARCHAR" property="enterStartTime" />
+        <result column="fd_filing_end" jdbcType="VARCHAR" property="enterEndTime" />
+        <result column="fd_per_type_code" jdbcType="VARCHAR" property="recordTypeCode" />
+        <result column="fd_per_type" jdbcType="VARCHAR" property="recordType" />
+        <result column="fd_car_no" jdbcType="VARCHAR" property="carNo" />
+        <result column="power_type" jdbcType="INTEGER" property="powerType" />
+        <result column="update_time" jdbcType="INTEGER" property="updateTime" />
+        <result column="butt_joint_code" jdbcType="VARCHAR" property="buttJointCode" />
+        <result column="butt_joint_name" jdbcType="VARCHAR" property="buttJointName" />
+        <result column="butt_joint_phone" jdbcType="VARCHAR" property="buttJointPhone" />
+    </resultMap>
+
+    <select id="selectApproveByPhone" resultMap="EnterApproveMap">
+        select f.id,r.fd_name,r.fd_card_no,r.fd_phone,r.fd_img,
+               a.fd_filing_factory_code,
+               a.fd_filing_factory,
+               p.filing_id,
+        date_format(a.fd_filing_begin,'%Y-%m-%d %H:%i:%s') as fd_filing_begin,
+        date_format(a.fd_filing_end,'%Y-%m-%d %H:%i:%s') as fd_filing_end,
+        date_format(a.create_time,'%Y-%m-%d %H:%i:%s') as update_time,
+        f.fd_car_no,p.fd_per_type,p.fd_per_type_code,
+        <![CDATA[
+            case when a.fd_filing_begin<=NOW() then 1 else 2 END power_type,
+        ]]>
+        au.fd_emp_name as butt_joint_name,au.fd_phone as butt_joint_phone,
+        f.fd_dock_no as butt_joint_code
+        from safety_enter_filing_per p
+        left join safety_enter_filing f on p.filing_id = f.id
+        left join safety_enter_filing_approve a on f.id = a.fd_filing_id
+        left join safety_enter_register r on p.fd_per_phone = r.fd_phone
+        left join safety_enter_auth au on f.fd_dock_no = au.fd_emp_no and au.del='0'
+        where p.fd_per_phone = #{phone}
+        and f.fd_state_code in('30','31')
+        and a.fd_filing_end > now()
+        order by a.fd_filing_begin
+    </select>
+
+    <select id="checkEnterApprove" resultMap="EnterApproveMap">
+        select f.id,r.fd_name,r.fd_card_no,r.fd_phone,r.fd_img,a.fd_filing_factory_code,a.fd_filing_factory,p.filing_id,
+        date_format(a.fd_filing_begin,'%Y-%m-%d %H:%i:%s') as fd_filing_begin,
+        date_format(a.fd_filing_end,'%Y-%m-%d %H:%i:%s') as fd_filing_end,
+        f.fd_car_no,p.fd_per_type,p.fd_per_type_code
+        from safety_enter_filing_per p
+        left join safety_enter_filing f on p.filing_id = f.id
+        left join safety_enter_filing_approve a on f.id = a.fd_filing_id
+        left join safety_enter_register r on p.fd_per_phone = r.fd_phone
+        where p.fd_per_phone = #{phone}
+        and f.fd_state_code in('30','31')
+        and now() between a.fd_filing_begin and a.fd_filing_end
+        order by a.fd_filing_begin
+    </select>
+
+    <resultMap id="EmpowerDeviceMap" type="com.yutong.safety.core.db.entity.SafetyEmpowerDeviceDO">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="factory_id" jdbcType="INTEGER" property="factoryId" />
+        <result column="factory_name" jdbcType="VARCHAR" property="factoryName" />
+        <result column="region_name" jdbcType="VARCHAR" property="regionName" />
+        <result column="empower_type" jdbcType="VARCHAR" property="empowerType" />
+        <result column="empower_no" jdbcType="VARCHAR" property="empowerNo" />
+    </resultMap>
+    <select id="checkEmpowerDevice" resultMap="EmpowerDeviceMap" parameterType="map">
+        select distinct id,factory_id,factory_name,region_name,empower_type,empower_no
+        from safety_empower_device
+        where delete_falg = 0
+        <if test="filingType!=null and filingType!=''">
+            and empower_type=#{filingType}
+        </if>
+        and factory_id in
+        <foreach collection="factoryCode" item="code" index="index" separator="," open="(" close=")">
+            #{code}
+        </foreach>
+    </select>
+
+    <update id="updateEnterFilingApprove"
+            parameterType="com.yutong.safety.core.db.entity.enter.SafetyEnterApprove">
+        update safety_enter_filing_approve
+        <set>
+            <if test="fdFilingFactoryCode!=null and fdFilingFactoryCode!=''">
+                fd_filing_factory_code=#{fdFilingFactoryCode},
+            </if>
+            <if test="fdFilingFactory!=null and fdFilingFactory!=''">
+                fd_filing_factory=#{fdFilingFactory},
+            </if>
+            <if test="fdFilingBegin!=null">
+                fd_filing_begin=#{fdFilingBegin},
+            </if>
+            <if test="fdFilingEnd!=null">
+                fd_filing_end=#{fdFilingEnd},
+            </if>
+            <if test="approveCode!=null and approveCode!=''">
+                approve_code=#{approveCode},
+            </if>
+            <if test="approveName!=null and approveName!=''">
+                approve_name=#{approveName},
+            </if>
+        </set>
+        where fd_filing_id=#{fdFilingId}
+    </update>
+
+    <insert id="insertEnterFilingApprove"
+            parameterType="com.yutong.safety.core.db.entity.enter.SafetyEnterApprove">
+        insert into safety_enter_filing_approve(
+            fd_filing_id,fd_filing_factory_code,fd_filing_factory,fd_filing_begin,fd_filing_end,approve_code,approve_name,approve_depart,create_time
+        )
+        values (
+            #{fdFilingId},#{fdFilingFactoryCode},#{fdFilingFactory},#{fdFilingBegin},#{fdFilingEnd},#{approveCode},#{approveName},#{approveDepart},now()
+        )
+    </insert>
+
+
+    <insert id="insertEnterFilingApproveBatch" parameterType="list">
+        insert into safety_enter_filing_approve(
+            fd_filing_id,fd_filing_factory_code,fd_filing_factory,fd_filing_begin,fd_filing_end,
+            approve_code,approve_name,approve_depart,create_time
+        )
+        values
+        <foreach collection="list" item="d" index="index" separator=",">
+        (
+            #{d.fdFilingId},#{d.fdFilingFactoryCode},#{d.fdFilingFactory},#{d.fdFilingBegin},
+            #{d.fdFilingEnd},#{d.approveCode},#{d.approveName},#{d.approveDepart},now()
+        )
+        </foreach>
+    </insert>
+
+
+    <delete id="deleteEnterFilingApproveAll">
+        delete from safety_enter_filing_approve where fd_filing_id=#{filingId}
+    </delete>
+
+</mapper>

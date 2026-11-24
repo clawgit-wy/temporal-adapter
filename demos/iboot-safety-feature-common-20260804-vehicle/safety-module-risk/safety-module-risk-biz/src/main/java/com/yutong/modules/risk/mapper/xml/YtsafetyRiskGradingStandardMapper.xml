@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.risk.mapper.YtsafetyRiskGradingStandardMapper">
+    <select id="selectByRiskTypeAndFormula" resultType="com.yutong.modules.risk.entity.YtsafetyRiskGradingStandard">
+        select * from ytsafety_risk_grading_standard
+        where risk_type = #{riskType}
+          and formula = #{formula}
+        and type = #{type}
+        order by level asc
+    </select>
+</mapper>

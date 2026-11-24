@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.common.mapper.SafetyBpmModelMapper">
+    <select id="queryPage" resultType="com.yutong.modules.common.vo.SafetyBpmModelVO">
+        select * from safety_bpm_model ${ew.customSqlSegment} order by create_time desc
+    </select>
+
+    <select id="queryList" resultType="com.yutong.modules.common.vo.SafetyBpmModelVO">
+        select * from (
+            select bm.id,
+            bm.model_id,
+            bm.is_show,
+            bm.model_name,
+            bm.form_id,
+            bm.form_name,
+            sp.perm_url form_url,
+            bm.template_id,
+            bm.template_type,
+            bm.model_type,
+            bm.create_time,
+            bm.creator,
+            bm.sys_id,
+            bm.form_detail,
+            bm.perm_id
+            from safety_bpm_model bm
+            inner join safety_sys_perm sp on bm.perm_id=sp.id
+        )tb
+        ${ew.customSqlSegment}
+        order by create_time desc
+    </select>
+
+    <select id="queryUserFlowPerm" resultType="long">
+        select distinct sp.id from safety_sys_user_role sur
+        inner join safety_sys_role_perm srp on sur.role_id=srp.role_id
+        inner join safety_sys_perm sp on srp.perm_id=sp.id
+        where sur.del_flag=0 and sp.delete_falg='0' and process_display=1
+        and sur.user_id=#{userId}
+    </select>
+
+    <select id="queryUserFlowPermByRole" resultType="String">
+        select distinct sp.id from safety_sys_user_role sur
+        inner join safety_sys_role_perm srp on sur.role_id=srp.role_id
+        inner join safety_sys_perm sp on srp.perm_id=sp.id
+        where sur.del_flag=0 and sp.delete_falg='0' and process_display=1
+        and sur.role_code=#{roleCode}
+    </select>
+
+
+
+</mapper>

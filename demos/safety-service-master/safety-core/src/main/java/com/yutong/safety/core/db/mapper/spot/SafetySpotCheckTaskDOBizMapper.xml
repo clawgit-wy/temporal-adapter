@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.spot.SafetySpotCheckTaskDOBizMapper">
+  <resultMap id="BaseResultMap" type="com.yutong.safety.core.db.entity.spot.SafetySpotCheckTaskDO">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="plan_id" jdbcType="INTEGER" property="planId" />
+    <result column="plan_name" jdbcType="VARCHAR" property="planName" />
+    <result column="task_begin_date" jdbcType="VARCHAR" property="taskBeginDate" />
+    <result column="task_end_date" jdbcType="VARCHAR" property="taskEndDate" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+      <result column="factory_id" jdbcType="VARCHAR" property="factoryId" />
+  </resultMap>
+
+  <!-- 批量新增周期任务 -->
+  <insert id="batchInsertTask" parameterType="com.yutong.safety.core.db.entity.spot.SafetySpotCheckTaskDO">
+    insert into `safety_spot_check_task`(`plan_id`,`plan_name`,`team_id`,`factory_id`,`task_begin_date`,`task_end_date`,`status`,`CREATE_time`,cur_order)
+    VALUES
+    <foreach collection="list" item="item" separator=",">
+      (#{item.planId}, #{item.planName},#{item.teamId},#{item.factoryId},#{item.taskBeginDate},#{item.taskEndDate},#{item.status},#{item.createTime},#{item.curOrder})
+    </foreach>
+  </insert>
+
+  <!-- 批量新增周期内点检设备 -->
+  <insert id="batchInsertRecord" parameterType="com.yutong.safety.core.db.entity.spot.SafetySpotCheckRecordDO">
+    insert into safety_spot_check_record(task_id,device_id,task_begin_date,task_end_date,plan_check_emp,plan_check_emp_no,status,create_time,update_time,update_emp_no,update_emp)
+     values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.taskId}, #{item.deviceId},#{item.taskBeginDate},#{item.taskEndDate},#{item.planCheckEmp},#{item.planCheckEmpNo},#{item.status},now(),now(),#{item.updateEmpNo},#{item.updateEmp})
+    </foreach>
+  </insert>
+
+  <!-- 批量新增周期任务的设备各检测标准项 -->
+  <insert id="batchInsertRecordRule" parameterType="com.yutong.safety.core.db.entity.spot.SafetySpotLinkRecordRuleDO">
+    insert into safety_spot_link_record_rule(record_id,rule_id,rule_name,rule_info,rule_sort,device_id,create_time,update_time,update_emp_no,update_emp)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.recordId}, #{item.ruleId},#{item.ruleName},#{item.ruleInfo},#{item.ruleSort},#{item.deviceId},now(),now(),#{item.updateEmpNo},#{item.updateEmp})
+    </foreach>
+  </insert>
+
+  <!-- 最新设备周期信息 -->
+  <select id="selectMaxTask" parameterType="com.yutong.safety.common.param.web.spot.SpotCheckTaskListParam" resultMap="BaseResultMap">
+    select t.id,t.plan_id,t.plan_name,t.team_id,t.factory_id,t.task_begin_date,t.task_end_date,t.`status`,t.remark,t.create_time,t.cur_order
+      from safety_spot_check_task t
+     where 1 = 1
+       and t.id in (select max(id) from safety_spot_check_task a group by a.plan_id,a.factory_id)
+    <if test="planId != null">
+        and t.plan_id = #{planId}
+    </if>
+    <if test="factoryId != null">
+        and t.factory_id = #{factoryId}
+    </if>
+      order by t.task_begin_date desc
+  </select>
+
+    <select id="getCurrentTask" parameterType="com.yutong.safety.common.param.web.spot.SpotCheckTaskListParam" resultMap="BaseResultMap">
+        select t.id,t.plan_id,t.plan_name,t.team_id,t.factory_id,t.task_begin_date,t.task_end_date,t.`status`,t.remark,t.create_time,t.cur_order
+        from safety_spot_check_task t
+        where 1 = 1
+          and t.task_begin_date = #{taskBeginDate}
+        <if test="planId != null">
+            and t.plan_id = #{planId}
+        </if>
+        <if test="factoryId != null">
+            and t.factory_id = #{factoryId}
+        </if>
+    </select>
+
+    <select id="selectCheckRecord" parameterType="com.yutong.safety.common.param.web.spot.SpotCheckTaskListParam"
+            resultType="com.yutong.safety.common.vo.web.SpotCheckTaskReportVO">
+        select r.task_id as id,
+        count(1)                                                                   device_num,
+        sum(r.status)                                                              check_num,
+        count(1) - sum(r.status)                                                   uncheck_num,
+        sum(IFNULL(device_status, 0))                                              exception_num,
+        round((sum(r.status) / count(1)) * 100, 2)                                 check_rate,
+        sum(IFNULL(r.is_reform, 0))                                                reform_num,
+        sum(IFNULL(r.validate_status, 0))                                          validate_num,
+        sum(IFNULL(r.delay_check_flag, 0))                                         spot_delay_num,
+        sum(IFNULL(r.delay_reform_flag, 0))                                        reform_delay_num,
+        case
+        when sum(IFNULL(device_status, 0)) = 0 then 0
+        else round(sum(IFNULL(r.is_reform, 0)) / sum(IFNULL(device_status, 0)) * 100,
+        2) end                                                      reform_rate,
+        case
+        when count(1) = 0 then 0
+        else round(sum(IFNULL(r.delay_check_flag, 0)) / count(1) * 100, 2) end spot_delay_rate,
+        case
+        when sum(IFNULL(r.is_reform, 0)) = 0 then 0
+        else round(sum(IFNULL(r.delay_reform_flag, 0)) / sum(IFNULL(r.is_reform, 0)) * 100,
+        2) end                                                      reform_delay_rate
+        from safety_spot_check_record r
+        where r.task_id in
+        <foreach collection="list" open="(" close=")" item="item" separator=",">
+            #{item}
+        </foreach>
+        group by r.task_id
+    </select>
+
+  <!-- 设备巡检结果统计 -->
+  <select id="selectTaskReport" parameterType="com.yutong.safety.common.param.web.spot.SpotCheckTaskListParam"
+          resultType="com.yutong.safety.common.vo.web.SpotCheckTaskReportVO">
+      select t.id,t.plan_id,t.plan_name,t.team_id,t.factory_id,t.task_begin_date,t.task_end_date,t.`status`
+              ,t.remark,t.cur_order,m.field_name factory_name,m1.field_name team_name,m2.id device_type_id
+              ,m2.field_name device_type,CONCAT(p.cycle,'天1次') cycle_desc
+      from safety_spot_check_task t
+      left JOIN safety_field_manage m on m.id = t.factory_id
+      left join safety_field_manage m1 on m1.id = t.team_id
+      left join safety_field_manage m2 on m2.id = m1.parent_id
+      left join safety_spot_check_plan p on p.id = t.plan_id
+    where 1 = 1
+    <if test="factoryId != null and factoryId != ''">
+        and t.factory_id = #{factoryId}
+    </if>
+    <if test="deviceTypeId != null ">
+        and m2.id = #{deviceTypeId}
+    </if>
+    <if test="deviceType != null and deviceType != '' ">
+        and m2.field_name like CONCAT('%',#{deviceType},'%')
+    </if>
+    <if test="teamId != null">
+        and t.team_id = #{teamId}
+    </if>
+    <if test="teamName != null and teamName != '' ">
+        and m1.field_name like CONCAT('%',#{teamName},'%')
+    </if>
+    <if test="cycle != null ">
+        and p.cycle = #{cycle}
+    </if>
+      <if test="taskBeginDate != null and taskBeginDate != ''">
+          <![CDATA[
+        and t.task_end_date >= #{taskBeginDate}
+        ]]>
+      </if>
+      <if test="taskEndDate != null and taskEndDate != ''">
+          <![CDATA[
+        AND T.task_begin_date <= #{taskEndDate}
+        ]]>
+      </if>
+    order by task_begin_date desc,plan_id asc
+    <if test="pageFlag != null and pageFlag">
+      <if test="limit != null">
+        <if test="offset != null">
+          limit ${offset}, ${limit}
+        </if>
+        <if test="offset == null">
+          limit ${limit}
+        </if>
+      </if>
+    </if>
+  </select>
+
+    <!-- 获取设备设施点检报表-条数 -->
+  <select id="selectTaskReportCount" parameterType="com.yutong.safety.common.param.web.spot.SpotCheckTaskListParam"
+    resultType="java.lang.Long">
+    select count(1)
+    from safety_spot_check_task t
+    left JOIN safety_field_manage m on m.id = t.factory_id
+    left join safety_field_manage m1 on m1.id = t.team_id
+    left join safety_field_manage m2 on m2.id = m1.parent_id
+    left join safety_spot_check_plan p on p.id = t.plan_id
+    where 1 = 1
+      <if test="factoryId != null and factoryId != ''">
+          and t.factory_id = #{factoryId}
+      </if>
+      <if test="deviceTypeId != null ">
+          and m2.id = #{deviceTypeId}
+      </if>
+      <if test="deviceType != null and deviceType != '' ">
+          and m2.field_name like CONCAT('%',#{deviceType},'%')
+      </if>
+      <if test="teamId != null">
+          and t.team_id = #{teamId}
+      </if>
+      <if test="teamName != null and teamName != '' ">
+          and m1.field_name like CONCAT('%',#{teamName},'%')
+      </if>
+      <if test="cycle != null ">
+          and p.cycle = #{cycle}
+      </if>
+      <if test="taskBeginDate != null and taskBeginDate != ''">
+        <![CDATA[
+        and t.task_end_date >= #{taskBeginDate}
+        ]]>
+      </if>
+      <if test="taskEndDate != null and taskEndDate != ''">
+        <![CDATA[
+        AND T.task_begin_date <= #{taskEndDate}
+        ]]>
+      </if>
+  </select>
+
+    <!-- 设备设施点检代办 -->
+  <select id="selectSpotToDo" parameterType="com.yutong.safety.common.param.app.SpotTaskListAppParam"
+          resultType="com.yutong.safety.common.vo.app.SpotCheckToDoVO">
+    SELECT type_id,max(type_name) type_name,team_id,max(team_name) team_name,
+       count(1) device_num,sum(`status`) check_num, count(1)-sum(`status`) uncheck_num,
+       task_begin_date,max(task_end_date) task_end_date,plan_id
+       ,CONCAT(round(sum(`status`)*100/count(1)),'%') check_rate
+    FROM (SELECT r.id,r.device_id,r.`status`,r.device_status,r.is_reform,r.validate_status,r.task_id,
+                t.team_id,m.field_name team_name,t.task_begin_date,t.task_end_date,m.parent_id type_id,
+                m1.field_name type_name,t.plan_id
+            FROM safety_spot_check_record r
+            LEFT JOIN safety_spot_check_task t ON r.task_id = t.id
+            LEFT JOIN safety_field_manage m ON t.team_id = m.id
+            LEFT JOIN safety_field_manage m1 ON m.parent_id = m1.id
+           WHERE 1 = 1
+             and m1.field_name is not null
+        <if test="dayDate != null and dayDate != '' ">
+          <![CDATA[
+            and t.task_begin_date <= #{dayDate}
+            and t.task_end_date >= #{dayDate}
+          ]]>
+        </if>
+        <if test="beginDate != null and beginDate != ''">
+        <![CDATA[
+            and t.task_begin_date <= #{endDate}
+        ]]>
+        </if>
+        <if test="endDate !=null and endDate != ''">
+        <![CDATA[
+            and t.task_end_date >= #{beginDate}
+        ]]>
+        </if>
+        <if test="checkEmpNo != null and checkEmpNo!='' ">
+            and r.plan_check_emp_no like concat('%',#{checkEmpNo},'%')
+        </if>
+        ) AS cur
+    group by type_id,team_id,plan_id,task_begin_date
+    order by task_begin_date desc
+  </select>
+
+    <!-- 获取当前未结束的周期任务 -->
+    <select id="getCurrentTaskList" parameterType="com.yutong.safety.common.param.web.spot.SpotCheckTaskListParam"
+        resultType="com.yutong.safety.common.vo.web.SpotCheckTaskReportVO">
+        select t.id,t.plan_id,t.plan_name,t.team_id,t.factory_id,t.task_begin_date,t.task_end_date,t.`status`
+            ,t.remark,t.cur_order,m.field_name factory_name,m1.field_name team_name,m2.id device_type_id
+            ,m2.field_name device_type,CONCAT(p.cycle,'') cycle_desc
+        from safety_spot_check_task t
+        left JOIN safety_field_manage m on m.id = t.factory_id
+        left join safety_field_manage m1 on m1.id = t.team_id
+        left join safety_field_manage m2 on m2.id = m1.parent_id
+        left join safety_spot_check_plan p on p.id = t.plan_id
+        where 1 = 1 and t.task_end_date > DATE_FORMAT(NOW(), '%Y-%m-%d')
+        <if test="taskBeginDate != null and taskBeginDate != '' ">
+        <![CDATA[
+            and t.task_begin_date <= #{taskEndDate}
+        ]]>
+        </if>
+        <if test="taskEndDate !=null and taskEndDate != ''">
+         <![CDATA[
+            and t.task_end_date >= #{taskBeginDate}
+        ]]>
+        </if>
+        <if test="planIdStr != null and planIdStr !='' ">
+            and t.plan_id in
+            <foreach item="item" index="index" collection="planIdStr.split(',')"  open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <update id="batchUpdateTask" parameterType="java.util.List">
+        <foreach collection="list" item="item" separator=";">
+            update safety_spot_check_task
+               set task_end_date = #{item.taskEndDate}
+               <if test="item.taskBeginDate != null and item.taskBeginDate!=''">
+                   , task_begin_date = #{taskBeginDate}
+               </if>
+            where id = #{item.id}
+        </foreach>
+    </update>
+
+    <select id="getTaskDevice" resultType="com.yutong.safety.core.db.entity.spot.SafetySpotCheckDeviceInfoDO">
+        SELECT *
+          FROM safety_spot_check_device_info d
+         WHERE (d.team_id,d.factory_id) in (SELECT t.team_id,t.factory_id from safety_spot_check_task t where t.id= #{taskId})
+         <if test="deleteFalg == 1">
+           and d.id in (SELECT r.device_id FROM safety_spot_check_record r where r.task_id = #{taskId})
+         </if>
+           AND d.delete_falg = #{deleteFalg}
+    </select>
+
+    <select id="getTaskDeviceUpdateList" resultType="com.yutong.safety.core.db.entity.spot.SafetySpotCheckDeviceInfoDO">
+        SELECT *
+          FROM safety_spot_check_device_info d
+         WHERE (d.team_id,d.factory_id) in (SELECT t.team_id,t.factory_id from safety_spot_check_task t where t.id= #{taskId})
+           and d.id not in (SELECT r.device_id FROM safety_spot_check_record r where r.task_id = #{taskId})
+           AND d.delete_falg = 0
+    </select>
+</mapper>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.vehicle.mapper.YTSafetyCarWhitelistMapper">
+
+    <resultMap id="BaseResultMap" type="com.yutong.modules.vehicle.entity.YTSafetyCarWhitelist">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="whitelist_type" jdbcType="TINYINT" property="whitelistType"/>
+        <result column="emp_no" jdbcType="VARCHAR" property="empNo"/>
+        <result column="emp_name" jdbcType="VARCHAR" property="empName"/>
+        <result column="org_name" jdbcType="VARCHAR" property="orgName"/>
+        <result column="car_type" jdbcType="VARCHAR" property="carType"/>
+        <result column="valid_start_time" jdbcType="TIMESTAMP" property="validStartTime"/>
+        <result column="valid_end_time" jdbcType="TIMESTAMP" property="validEndTime"/>
+        <result column="status" jdbcType="TINYINT" property="status"/>
+        <result column="create_by" jdbcType="VARCHAR" property="createBy"/>
+        <result column="create_user" jdbcType="VARCHAR" property="createUser"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_by" jdbcType="VARCHAR" property="updateBy"/>
+        <result column="update_user" jdbcType="VARCHAR" property="updateUser"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="del_flag" jdbcType="TINYINT" property="delFlag"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, whitelist_type, emp_no, emp_name, org_name, car_type,
+        valid_start_time, valid_end_time, status, create_by, create_user, create_time,
+        update_by, update_user, update_time, del_flag
+    </sql>
+
+    <select id="selectPageList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM ytsafety_car_whitelist
+        <where>
+            del_flag = 0
+            <if test="param.whitelistType != null">
+                AND whitelist_type = #{param.whitelistType}
+            </if>
+            <if test="param.empNo != null and param.empNo != ''">
+                AND emp_no LIKE CONCAT('%', #{param.empNo}, '%')
+            </if>
+            <if test="param.empName != null and param.empName != ''">
+                AND emp_name LIKE CONCAT('%', #{param.empName}, '%')
+            </if>
+            <if test="param.orgName != null and param.orgName != ''">
+                AND org_name LIKE CONCAT('%', #{param.orgName}, '%')
+            </if>
+            <if test="param.carType != null and param.carType != ''">
+                AND car_type = #{param.carType}
+            </if>
+            <if test="param.status != null">
+                AND status = #{param.status}
+            </if>
+            <if test="param.validStartTimeStart != null and param.validStartTimeStart != ''">
+                AND valid_start_time &gt;= #{param.validStartTimeBegin}
+            </if>
+            <if test="param.validStartTimeEnd != null and param.validStartTimeEnd != ''">
+                AND valid_start_time &lt;= #{param.validStartTimeEnd}
+            </if>
+            <if test="param.validEndTimeStart != null and param.validEndTimeStart != ''">
+                AND valid_end_time &gt;= #{param.validEndTimeBegin}
+            </if>
+            <if test="param.validEndTimeEnd != null and param.validEndTimeEnd != ''">
+                AND valid_end_time &lt;= #{param.validEndTimeEnd}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM ytsafety_car_whitelist
+        <where>
+            del_flag = 0
+            <if test="param.whitelistType != null">
+                AND whitelist_type = #{param.whitelistType}
+            </if>
+            <if test="param.empNo != null and param.empNo != ''">
+                AND emp_no LIKE CONCAT('%', #{param.empNo}, '%')
+            </if>
+            <if test="param.empName != null and param.empName != ''">
+                AND emp_name LIKE CONCAT('%', #{param.empName}, '%')
+            </if>
+            <if test="param.orgName != null and param.orgName != ''">
+                AND org_name LIKE CONCAT('%', #{param.orgName}, '%')
+            </if>
+            <if test="param.carType != null and param.carType != ''">
+                AND car_type = #{param.carType}
+            </if>
+            <if test="param.status != null">
+                AND status = #{param.status}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM ytsafety_car_whitelist
+        WHERE id = #{id} AND del_flag = 0
+    </select>
+
+    <select id="selectByEmpNo" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM ytsafety_car_whitelist
+        WHERE emp_no = #{empNo} AND del_flag = 0
+        LIMIT 1
+    </select>
+
+    <select id="selectByCarType" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM ytsafety_car_whitelist
+        WHERE car_type = #{carType} AND del_flag = 0
+        LIMIT 1
+    </select>
+
+</mapper>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.build.SafetyBuildInfoRecordDTOMapper">
+  <insert id="batchSave" parameterType="java.util.List">
+    <if test="list != null">
+      <foreach collection="list" item="ll" separator=";">
+        insert into safety_build_info_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+          <if test="ll.infoType != null">
+            info_TYPE,
+          </if>
+          <if test="ll.infoContent != null">
+            info_content,
+          </if>
+          <if test="ll.infoTime != null">
+            info_time,
+          </if>
+          <if test="ll.infoConfirm != null">
+            info_confirm,
+          </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+          <if test="ll.infoType != null">
+            #{ll.infoType,jdbcType=VARCHAR},
+          </if>
+          <if test="ll.infoContent != null">
+            #{ll.infoContent,jdbcType=VARCHAR},
+          </if>
+          <if test="ll.infoTime != null">
+            #{ll.infoTime,jdbcType=TIMESTAMP},
+          </if>
+          <if test="ll.infoConfirm != null">
+            #{ll.infoConfirm,jdbcType=VARCHAR},
+          </if>
+        </trim>
+      </foreach>
+    </if>
+  </insert>
+
+</mapper>

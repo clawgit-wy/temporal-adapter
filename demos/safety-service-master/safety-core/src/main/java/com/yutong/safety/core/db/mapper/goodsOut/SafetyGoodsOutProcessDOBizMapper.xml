@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.goodsOut.SafetyGoodsOutProcessDOBizMapper">
+
+  <sql id="Base_Column_List_Biz">
+    id, create_time, publish_time, creator, submit_dept, submit_name, submit_no, submit_phone,
+    system_flag, out_factory_id, out_factory_name, out_type_id, out_type_name, out_person_type,
+    examine_emp_eip, examine_emp_name, examine_emp_no, examine_phone, examine_dept, superior_emp_no,
+    superior_emp_eip, superior_emp_name, superior_dept, out_power_desc, outside_name,
+    outside_phone, delivery_unit_name, goout_emp_no, goout_emp_name, goout_phone, goout_emp_dept,
+    is_vehicle, vehicle_no, flow_id, goods_type, reason_type, is_set_accept, qa_examine_emp,
+    qa_examine_emp_no, qa_examine_emp_eip, reason_desc, receive_status, receive_confirm_img,
+    un_receive_reason, check_receive_status, check_receive_reson, scene_img, leave_data,
+    leave_data_img, leave_data_flag, release_status, release_emp_no, release_emp_eip,
+    release_emp, release_phone, release_time, release_emp_dept, release_img, exception_desc,
+    exception_remark, cur_node_handler, cur_handler_name, cur_node_id, cur_node_name,
+    status, vehicle_type, is_goods, is_spare_tire, spare_tire_num, flow_no, subject,
+    is_history_exce, node_flag, weight_data_url, weight_data_flag, remark, receive_eip_str,
+    is_time_out, weight_sheet_upload, micro_manager_no, micro_manager_phone, micro_manager_name,
+    micro_manager_eip, short_barge_car, short_barge_num, is_receive_shr, reason_shr,
+    photo_shr,goods_file_url,auth_id
+  </sql>
+
+  <update id="modifyCurDealHandler" parameterType="com.yutong.safety.core.db.entity.goodsOut.param.GoodsOutNodeUpdateParam">
+    update safety_goods_out_process
+    set
+        cur_node_id=#{curNodeId},
+        cur_node_name = #{curNodeName}
+    <if test="curDealHandler != null and curDealHandler !='' ">
+        ,cur_node_handler = #{curDealHandler}
+    </if>
+    <if test="curHandlerName != null and curHandlerName !='' ">
+        ,cur_handler_name = #{curHandlerName}
+    </if>
+    <if test="fdStatus != null and fdStatus !='' ">
+      ,status = #{fdStatus}
+    </if>
+    <if test="nodeFlag != null and nodeFlag !='' ">
+      ,node_flag = #{nodeFlag}
+    </if>
+    <if test="releaseStatus != null and releaseStatus !='' ">
+      ,release_status = #{releaseStatus}
+    </if>
+    where id = #{id}
+  </update>
+
+  <update id="batchModifyCurDeal" parameterType="java.util.List">
+    <foreach collection="list" item="item" separator=";">
+        update safety_goods_out_process
+           set cur_node_handler = #{item.fdCurrLoginNames},
+              cur_node_id=#{item.nodeIds},
+              cur_node_name = #{item.nodeNames},
+              cur_handler_name = #{item.fdCurrNames},
+              status = #{item.fdStatus}
+         where flow_id = #{item.modelId}
+    </foreach>
+  </update>
+
+  <update id="modifyFlowId" parameterType="com.yutong.safety.core.db.entity.goodsOut.param.GoodsOutNodeUpdateParam">
+    update safety_goods_out_process
+    set flow_id = #{flowId}
+    where id = #{id}
+  </update>
+
+  <insert id="batchInsertDetailGoods">
+    insert into safety_goods_out_detail_goods (process_id, goods_code, goods_name, goods_unit, goods_num, remark) values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.processId}, #{item.goodsCode}, #{item.goodsName}, #{item.goodsUnit},#{item.goodsNum}, #{item.remark})
+    </foreach>
+  </insert>
+
+  <insert id="batchInsertDetailVehicle">
+    insert into safety_goods_out_detail_vehicle (process_id, vehicle_no, vin_no, remark) values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.processId}, #{item.vehicleNo}, #{item.vinNo}, #{item.remark})
+    </foreach>
+  </insert>
+
+  <insert id="batchInsertDetailReceive">
+    insert into safety_goods_out_detail_receive
+        (process_id, target_factory_id, target_factory, receive_emp_no,receive_emp_eip,receive_emp,receive_emp_dept,receive_phone)
+    values
+    <foreach collection="list" item="item" separator=",">
+      (#{item.processId}, #{item.targetFactoryId}, #{item.targetFactory}, #{item.receiveEmpNo},
+       #{item.receiveEmpEip}, #{item.receiveEmp}, #{item.receiveEmpDept}, #{item.receivePhone})
+    </foreach>
+  </insert>
+
+  <delete id="deleteDetailGoodsByProcessId">
+    delete from safety_goods_out_detail_vehicle where process_id = #{processId}
+  </delete>
+
+  <delete id="deleteDetailVehicleByProcessId">
+    delete from safety_goods_out_detail_goods where process_id = #{processId}
+  </delete>
+
+  <delete id="deleteDetailReceiveByProcessId">
+    delete from safety_goods_out_detail_receive where process_id = #{processId}
+  </delete>
+
+  <select id="getList" parameterType="com.yutong.safety.core.db.entity.goodsOut.param.GoodsOutProcessListParam"
+    resultType="com.yutong.safety.core.db.entity.goodsOut.vo.GoodsOutProcessDTO">
+    select <include refid="Base_Column_List_Biz"/>
+    from safety_goods_out_process p
+         left join safety_goods_out_process_ext pe on p.id = pe.relation_id
+    where 1 = 1
+    <include refid="base_search"/>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="begin != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+
+  <select id="getListCount" parameterType="com.yutong.safety.core.db.entity.goodsOut.param.GoodsOutProcessListParam"
+          resultType="java.lang.Long">
+    select count(1) from safety_goods_out_process p
+    where 1 = 1
+    <include refid="base_search"/>
+  </select>
+
+  <sql id="base_search">
+    <if test="flowId != null and flowId != ''">
+      and flow_id = #{flowId}
+    </if>
+    <if test="creator != null and creator != ''">
+      and creator = #{creator}
+    </if>
+    <if test="submitPhone != null and submitPhone !='' ">
+      and (submit_phone=#{submitPhone} or goout_phone =#{submitPhone} or outside_phone = #{submitPhone})
+    </if>
+    <if test="submitEmp != null and submitEmp != ''">
+        and (submit_no=#{submitEmp} or submit_name=#{submitEmp} or submit_phone=#{submitEmp})
+    </if>
+    <if test="goOutEmp != null and goOutEmp != ''">
+        and (outside_name=#{goOutEmp} or outside_phone=#{goOutEmp} or goout_emp_no=#{goOutEmp} or goout_emp_name=#{goOutEmp} or goout_phone=#{goOutEmp})
+    </if>
+    <if test="examineEmp != null and examineEmp != ''">
+        and (examine_emp_name=#{examineEmp} or examine_emp_no=#{examineEmp} or examine_phone=#{examineEmp})
+    </if>
+    <if test="releaseEmp != null and releaseEmp !='' ">
+        and (release_emp_no=#{releaseEmp} or release_emp=#{releaseEmp} or examine_phone=#{releaseEmp})
+    </if>
+    <if test="isVehicle != null and isVehicle != '' ">
+        and is_vehicle = #{isVehicle}
+    </if>
+    <if test="vehicleNo != null and vehicleNo != ''">
+        and vehicle_no = #{vehicleNo}
+    </if>
+    <if test="status != null and status != ''">
+        and status = #{status}
+    </if>
+    <if test="outFactoryName != null and outFactoryName != ''">
+        and out_factory_name = #{outFactoryName}
+    </if>
+    <if test="outFactoryId != null and outFactoryId != ''">
+        and out_Factory_Id in
+        <foreach collection="outFactoryId.split(',')" item="item" open="(" close=")" separator=",">
+          ${item}
+        </foreach>
+    </if>
+    <if test="outTypeName != null and outTypeName !=''">
+        and out_type_name = #{outTypeName}
+    </if>
+    <if test="goodsType != null and goodsType !=''">
+      and goods_type = #{goodsType}
+    </if>
+    <if test="reasonType != null and reasonType != ''">
+      and reason_type = #{reasonType}
+    </if>
+    <if test="flowNo != null and flowNo != ''">
+      and flow_no = #{flowNo}
+    </if>
+    <if test="subject != null and subject != ''">
+      and subject like CONCAT('%',#{subject},'%')
+    </if>
+    <if test="submitDept != null and submitDept!=''">
+      and submit_dept = #{submitDept}
+    </if>
+    <if test="gooutEmpDept !=null and gooutEmpDept != ''">
+      and goout_emp_dept = #{gooutEmpDept}
+    </if>
+    <if test="examineDept != null and examineDept != ''">
+      and examine_dept = #{examineDept}
+    </if>
+    <if test="releaseStatus != null and releaseStatus != '' ">
+      and release_status = #{releaseStatus}
+    </if>
+    <if test="releaseEmpEip != null and releaseEmpEip !='' ">
+      AND find_in_set(#{releaseEmpEip},release_emp_eip)
+    </if>
+    <if test="createBegin != null and createBegin != ''">
+      and create_time >= #{createBegin}
+        <if test="createEnd != null and createEnd != '' ">
+          <![CDATA[ and create_time < #{createEnd} ]]>
+        </if>
+    </if>
+    <if test="outFactoryIds != null and outFactoryIds != '' ">
+      and (out_factory_id in
+      <foreach item="item" index="index" collection="outFactoryIds.split(',')" open="(" separator="," close=")">
+        #{item}
+      </foreach>
+      <if test="curPersonLogin != null and curPersonLogin != '' ">
+       or creator = #{curPersonLogin}
+      </if>
+      )
+    </if>
+    <if test="idList != null">
+      and id in
+      <foreach item="item" index="index" collection="idList"  open="(" separator="," close=")">
+      #{item}
+    </foreach>
+    </if>
+    <if test="curNodeId != null and curNodeId != null">
+      and cur_node_id = #{curNodeId}
+    </if>
+    <if test="curNodeHandler != null and curNodeHandler != null">
+      and cur_node_handler like concat('%',#{curNodeHandler},'%')
+    </if>
+    <if test="unNodeFlag != null and unNodeFlag !='' ">
+      and node_flag not in
+      <foreach item="item" index="index" collection="unNodeFlag.split(',')"  open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
+    <if test="unCurNodeId != null and unCurNodeId !='' ">
+      and cur_node_id not in
+      <foreach item="item" index="index" collection="unCurNodeId.split(',')"  open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
+
+    <if test="shortBargeCar != null and shortBargeCar != ''">
+      and short_barge_car = #{shortBargeCar}
+    </if>
+    <if test="shortBargeNum != null and shortBargeNum != ''">
+      and short_barge_num = #{shortBargeNum}
+    </if>
+    <if test="vehicleType != null and vehicleType != '' ">
+      and vehicle_type = #{vehicleType}
+    </if>
+  </sql>
+
+  <select id="selectByPrimaryKeyBiz" parameterType="java.lang.String"
+          resultType="com.yutong.safety.core.db.entity.goodsOut.vo.GoodsOutProcessDTO">
+    select
+    <include refid="Base_Column_List_Biz" />
+    from safety_goods_out_process p
+        left join safety_goods_out_process_ext pe on p.id = pe.relation_id
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+
+  <select id="getProcessGooutList" parameterType="com.yutong.safety.core.db.entity.goodsOut.param.GoodsProcessGooutListParam"
+    resultType="com.yutong.safety.core.db.entity.goodsOut.vo.GoodsProcessGooutVO">
+    select outside_name,outside_phone,goout_phone,goout_emp_no,
+                    goout_emp_dept,goout_emp_name,delivery_unit_name,is_vehicle,vehicle_no,max(create_time) as createTime
+      from safety_goods_out_process
+     where (submit_phone = #{submitNo} or submit_no =  #{submitNo})
+    <if test="status != null and status !=''">
+      and status = #{status}
+    </if>
+    group by outside_name,outside_phone,goout_phone,goout_emp_no,goout_emp_dept,goout_emp_name,delivery_unit_name,is_vehicle,vehicle_no order by createTime DESC
+    <if test="begin != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+
+  <select id="getProcessGooutCount" parameterType="com.yutong.safety.core.db.entity.goodsOut.param.GoodsProcessGooutListParam"
+          resultType="java.lang.Long">
+    select count(1) from (
+    select outside_name,outside_phone,goout_phone,goout_emp_no,goout_emp_dept,goout_emp_name,delivery_unit_name
+    from safety_goods_out_process
+    where (submit_phone = #{submitNo} or submit_no =  #{submitNo})
+    <if test="status != null and status !=''">
+      and status = #{status}
+    </if>
+    group by outside_name,outside_phone,goout_phone,goout_emp_no,goout_emp_dept,goout_emp_name,delivery_unit_name,is_vehicle,vehicle_no
+    ) as p_limit
+  </select>
+
+  <update id="batchUpdate" parameterType="java.util.List">
+    <if test="list != null">
+      <foreach collection="list" item="lis" separator=";">
+        update safety_goods_out_process
+        set status = #{lis.status},
+        is_time_out = #{lis.isTimeOut}
+        where id = #{lis.id}
+      </foreach>
+    </if>
+  </update>
+
+  <select id="getListByParamMap" parameterType="java.util.Map" resultType="com.yutong.safety.core.db.entity.goodsOut.SafetyGoodsOutProcessDO">
+    select
+        id,cur_node_handler,cur_handler_name,cur_node_id,cur_node_name
+    from safety_goods_out_process
+    where status = #{status}
+      <![CDATA[
+      and create_time < #{beginDate}
+      ]]>
+  </select>
+
+  <select id="getUnReceiveList" parameterType="java.util.Map" resultType="com.yutong.safety.core.db.entity.goodsOut.SafetyGoodsOutDetailReceiveDO">
+    select
+      r.process_id,r.receive_emp_no,r.receive_emp_eip,r.receive_emp
+    from safety_goods_out_process p
+    left join safety_goods_out_detail_receive r on r.process_id = p.id
+    where p.status = #{status}
+      <![CDATA[
+        and p.publish_time < now()
+      ]]>
+    and p.cur_node_id = #{curNodeId}
+    <if test="type == 'receive'">
+      and r.receive_status is null
+      or r.receive_status = 0
+    </if>
+    <if test="type == 'outFactory'">
+      and p.is_set_accept = #{isSetAccept}
+    </if>
+  </select>
+
+  <insert id="batchUpdateExt" keyColumn="relation_id">
+        insert into safety_goods_out_process_ext(relation_id,goods_file_url,auth_id)
+        values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.relationId}, #{item.goodsFileUrl}, #{item.authId})
+    </foreach>
+    ON DUPLICATE KEY UPDATE
+    goods_file_url = values(goods_file_url), auth_id = values(auth_id)
+  </insert>
+
+  <delete id="deleteOutPower" parameterType="java.lang.String">
+    delete from safety_goods_out_auth
+    where emp_no in
+    (
+        select EMPLOYEE_CODE from safety_depart_change_list
+                             where UPDATE_TIME >= #{beginTime}
+                               <![CDATA[
+                               and UPDATE_TIME <= #{endTime}
+                               ]]>
+      )
+  </delete>
+</mapper>

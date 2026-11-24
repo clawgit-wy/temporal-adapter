@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.common.mapper.YtsafetyProcessNodeConfigMapper">
+
+    <!-- 原 ytsafety_sys_responsible + ytsafety_sys_user_factory + safety_sys_user_role 多表关联
+         改为安全责任人映射表 ytsafety_sys_responsible_mapping（该表随责任数据增删改同步维护，仅含有效数据） -->
+    <select id="queryResponsibleByFactory" resultType="com.yutong.modules.common.vo.SysResponsibleVO">
+        SELECT DISTINCT
+            m.user_name AS userName,
+            m.emp_name AS empName,
+            m.emp_no AS empNo
+        FROM ytsafety_sys_responsible_mapping m
+        WHERE m.factory_id = #{factoryId}
+          AND m.role_code = #{roleCode}
+    </select>
+
+    <!-- 原 ytsafety_sys_user_depart + ytsafety_sys_responsible + safety_sys_user_role 多表关联
+         改为安全责任人映射表 ytsafety_sys_responsible_mapping，按 depart_code + role_code 直接匹配 -->
+    <select id="batchQueryResponsibleByOrgCodes" resultType="com.yutong.modules.common.vo.SysResponsibleVO">
+        SELECT DISTINCT
+            m.user_name AS userName,
+            m.emp_name AS empName,
+            m.emp_no AS empNo
+        FROM (
+            SELECT
+                (SELECT m2.depart_code
+                 FROM safety_group_info gi2
+                 INNER JOIN ytsafety_sys_responsible_mapping m2
+                     ON FIND_IN_SET(m2.depart_code, gi2.org_code_path) > 0
+                     AND m2.role_code = #{roleCode}
+                 WHERE gi2.code = gi.code AND gi2.status = 'Y'
+                 ORDER BY FIND_IN_SET(m2.depart_code, gi2.org_code_path) DESC
+                 LIMIT 1) AS depart_code
+            FROM safety_group_info gi
+            WHERE gi.code IN
+            <foreach collection="orgCodes" item="orgCode" open="(" separator="," close=")">
+                #{orgCode}
+            </foreach>
+              AND gi.status = 'Y'
+        ) od
+        INNER JOIN ytsafety_sys_responsible_mapping m
+            ON m.depart_code = od.depart_code
+            AND m.role_code = #{roleCode}
+    </select>
+
+    <!-- 同 batchQueryResponsibleByOrgCodes，额外按厂区过滤；厂区条件直接使用映射表 factory_id -->
+    <select id="batchQueryResponsibleByFactoryAndDeparts" resultType="com.yutong.modules.common.vo.SysResponsibleVO">
+        SELECT DISTINCT
+            m.user_name AS userName,
+            m.emp_name AS empName,
+            m.emp_no AS empNo
+        FROM (
+            SELECT
+                (SELECT m2.depart_code
+                 FROM safety_group_info gi2
+                 INNER JOIN ytsafety_sys_responsible_mapping m2
+                     ON FIND_IN_SET(m2.depart_code, gi2.org_code_path) > 0
+                     AND m2.role_code = #{roleCode}
+                     AND m2.factory_id = #{factoryId}
+                 WHERE gi2.code = gi.code AND gi2.status = 'Y'
+                 ORDER BY FIND_IN_SET(m2.depart_code, gi2.org_code_path) DESC
+                 LIMIT 1) AS depart_code
+            FROM safety_group_info gi
+            WHERE gi.code IN
+            <foreach collection="orgCodes" item="orgCode" open="(" separator="," close=")">
+                #{orgCode}
+            </foreach>
+              AND gi.status = 'Y'
+        ) od
+        INNER JOIN ytsafety_sys_responsible_mapping m
+            ON m.depart_code = od.depart_code
+            AND m.role_code = #{roleCode}
+            AND m.factory_id = #{factoryId}
+    </select>
+</mapper>

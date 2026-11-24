@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.SafetyBlackManageDOBizMapper">
+    <insert id="batchInsert">
+        insert into `safety_black_message` (`company_name`, `emp_name`, `card_no`, `phone_no`, `id_card_no`, `emp_type`, `car_no`, `operator`, `create_time`, `update_time`, `remark`, `delete_falg`, `source`, `state`, `position_type`, `position_code`, `id_photo`, `life_photo`) values
+        <foreach collection="blackList" item="item" separator=",">
+            (#{item.companyName}, #{item.empName}, #{item.cardNo}, #{item.phoneNo}, #{item.idCardNo}, #{item.empType}, #{item.carNo}, #{item.operator}, now(), now(), #{item.remark}, '0', #{item.source}, #{item.state}, #{item.positionType}, #{item.positionCode}, #{item.idPhoto}, #{item.lifePhoto})
+        </foreach>
+    </insert>
+
+    <update id="batchUpdate" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" separator=";">
+            UPDATE safety_black_message
+            SET
+                company_name = #{item.companyName,jdbcType=VARCHAR},
+                emp_name = #{item.empName,jdbcType=VARCHAR},
+                card_no = #{item.cardNo,jdbcType=VARCHAR},
+                phone_no = #{item.phoneNo,jdbcType=VARCHAR},
+                id_card_no = #{item.idCardNo,jdbcType=VARCHAR},
+                emp_type = #{item.empType,jdbcType=VARCHAR},
+                car_no = #{item.carNo,jdbcType=VARCHAR},
+                operator = #{item.operator,jdbcType=VARCHAR},
+                update_time = now(),
+                remark = #{item.remark,jdbcType=VARCHAR},
+                delete_falg = '0',
+                source = #{item.source,jdbcType=VARCHAR},
+                state = #{item.state,jdbcType=INTEGER},
+                position_type = #{item.positionType,jdbcType=VARCHAR},
+                position_code = #{item.positionCode,jdbcType=VARCHAR},
+                id_photo = #{item.idPhoto,jdbcType=VARCHAR},
+                life_photo = #{item.lifePhoto,jdbcType=VARCHAR}
+            WHERE id = #{item.id,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+
+
+    <update id="batchUpdateForEhr" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" separator=";">
+            UPDATE safety_black_message
+            SET
+            emp_name = #{item.empName,jdbcType=VARCHAR},
+            card_no = #{item.cardNo,jdbcType=VARCHAR},
+            phone_no = #{item.phoneNo,jdbcType=VARCHAR},
+            id_card_no = #{item.idCardNo,jdbcType=VARCHAR},
+            operator = #{item.operator,jdbcType=VARCHAR},
+            update_time = now(),
+            remark = #{item.remark,jdbcType=VARCHAR},
+            delete_falg = '0',
+            source = #{item.source,jdbcType=VARCHAR},
+            state = #{item.state,jdbcType=INTEGER}
+            WHERE id = #{item.id,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+
+    <update id="batchUpdatePhoto" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" separator=";">
+            UPDATE safety_black_message
+            SET
+            id_photo = #{item.idPhoto,jdbcType=VARCHAR},
+            life_photo = #{item.lifePhoto,jdbcType=VARCHAR}
+            WHERE id = #{item.id,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+
+    <select id="selectListByIdCard" parameterType="java.util.List" resultType="com.yutong.safety.core.db.entity.SafetyBlackMessageDO">
+        SELECT
+            smb1.id,
+            smb1.company_name,
+            smb1.emp_name,
+            smb1.card_no,
+            smb1.phone_no,
+            smb1.id_card_no,
+            smb1.emp_type,
+            smb1.car_no,
+            smb1.operator,
+            smb1.create_time,
+            smb1.update_time,
+            smb1.remark,
+            smb1.delete_falg,
+            smb1.source,
+            smb1.state,
+            smb1.position_type,
+            smb1.position_code,
+            smb1.id_photo,
+            smb1.life_photo
+        FROM
+            safety_black_message smb1
+            RIGHT JOIN (
+                SELECT
+                    id_card_no,
+                    MAX(update_time) AS max_update_time
+                FROM
+                    safety_black_message
+                    where id_card_no in
+                        <foreach collection="list" close=")" open="(" separator="," item="item">
+                            #{item}
+                        </foreach>
+                GROUP BY
+                    id_card_no
+            ) smb2
+            ON smb1.id_card_no = smb2.id_card_no
+            AND smb1.update_time = smb2.max_update_time
+            order by smb1.id DESC
+    </select>
+
+    <select id="selectBlackEmpInfo" parameterType="java.util.List" resultType="com.yutong.safety.core.dto.BlackMessageDto">
+        select a.id_card_no as idCardNo, a.position_type as positionType, b.org_name_path as orgNamePath, b.org_code_path as orgCodePath
+        from safety_black_message a
+                 left join safety_employee_message b on a.card_no = b.emp_no
+        where a.delete_falg = 0
+          and a.source != 'EHR导入'
+          and a.id_card_no in
+            <foreach collection="list" close=")" open="(" separator="," item="item">
+                #{item}
+            </foreach>
+    </select>
+
+    <select id="querySelect" resultType="java.lang.String">
+        select position_type from safety.safety_black_message where delete_falg = 0 group by position_type
+    </select>
+
+    <select id="selectMaxId" resultType="java.lang.Integer">
+        SELECT max(id) as current_max_id FROM safety_black_message
+    </select>
+</mapper>

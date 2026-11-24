@@ -3,9 +3,9 @@ package com.hik.mokapi.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Webhook回调接收Controller
@@ -16,8 +16,8 @@ import java.util.Map;
 @RequestMapping("/api/webhook")
 public class WebhookController {
 
-    /** 存储接收到的Webhook回调记录（内存存储，用于验证） */
-    private final List<Map<String, Object>> receivedCallbacks = new ArrayList<>();
+    /** 存储接收到的Webhook回调记录（线程安全，用于验证） */
+    private final List<Map<String, Object>> receivedCallbacks = new CopyOnWriteArrayList<>();
 
     /** 控制开关：设为true时模拟业务系统宕机（返回500），用于验证Webhook重试 */
     private volatile boolean simulateDown = false;

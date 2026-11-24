@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.user.mapper.SafetyCommonMapper">
+    <select id="queryEmployFuzzySearch" resultType="com.yutong.modules.user.vo.SafetyEmployeeMessageVO">
+        SELECT
+        sem.emp_no,
+        sem.emp_name,
+        sem.emp_login as user_name,
+        sem.phone_no,
+        sem.email,
+        sem.org_name_path org_name,
+        sem.org_code,
+        sem.position_name,
+        (case when jrm.is_security>=1 then 1 else 0 end) as user_type
+        FROM
+        safety_employee_message sem
+        left join (select job_code,count(1) is_security from ytsafety_sys_job_role_mapping where del_flag=0 group by job_code) jrm on jrm.job_code=sem.position_code
+        where sem.status='NORMAL' and (sem.emp_no like CONCAT('%',#{userInfo},'%') or sem.emp_name like CONCAT('%',#{userInfo},'%'))
+        limit 100
+    </select>
+
+    <select id="queryGroupInfoSafetyOfficer" resultType="com.yutong.modules.user.vo.SafetyOfficerVO">
+        SELECT DISTINCT
+        sr.emp_no, sr.emp_name,  sr.user_name
+        FROM
+        safety_group_info gi
+        LEFT JOIN
+        ytsafety_sys_user_depart ud ON ud.depart_code = gi.code
+        LEFT JOIN
+        ytsafety_sys_responsible sr ON sr.user_id = ud.user_id
+        LEFT JOIN
+        safety_sys_user_role ur ON ur.user_id = sr.user_id
+        AND ur.del_flag = 0
+        WHERE sr.status=0 and sr.del_flag=0 and
+        gi.code = #{code} AND ur.role_code = #{safetyOfficer}
+
+
+    </select>
+
+    <select id="queryEmployByOrgCode" resultType="com.yutong.modules.user.vo.SafetyEmployeeMessageVO">
+        SELECT
+        sem.emp_no,
+        sem.emp_name,
+        sem.emp_login as user_name,
+        sem.phone_no,
+        sem.email,
+        sem.org_name_path org_name,
+        sem.org_code,
+        sem.position_name,
+        (case when jrm.is_security>=1 then 1 else 0 end) as user_type
+        FROM
+        safety_employee_message sem
+        left join (select job_code,count(1) is_security from ytsafety_sys_job_role_mapping where del_flag=0 group by job_code) jrm on jrm.job_code=sem.position_code
+        where sem.status='NORMAL' and sem.org_code=#{orgCode}
+    </select>
+
+    <select id="queryResponsibleByOrgCode" resultType="com.yutong.modules.user.vo.YtsafetySysResponsibleVO">
+        select distinct
+        sr.user_name AS userName,
+        sr.emp_name AS empName,
+        sr.emp_no AS empNo,
+        em.phone_no AS phoneNo,
+        em.email AS email,
+        em.position_name,
+        em.org_name AS orgName
+        from ytsafety_sys_responsible sr
+        inner join safety_employee_message em on em.emp_no = sr.emp_no
+        where sr.status=0 and sr.del_flag=0 and sr.user_id in (select user_id from ytsafety_sys_user_depart where depart_code=#{departCode} )
+        and sr.user_id in (select user_id from safety_sys_user_role where role_code in
+        <foreach collection="roleCodeList" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        )
+    </select>
+
+    <select id="queryResponsibleByFactory" resultType="com.yutong.modules.user.vo.YtsafetySysResponsibleVO">
+        select distinct
+        sr.user_name AS userName,
+        sr.emp_name AS empName,
+        sr.emp_no AS empNo,
+        em.phone_no AS phoneNo,
+        em.email AS email,
+        ud.depart_name AS departName
+        from ytsafety_sys_responsible sr
+        inner join safety_sys_user su on sr.user_id = su.id
+        inner join ytsafety_sys_user_factory suf on suf.user_id = su.id and suf.factory_id = #{factoryId}
+        inner join safety_sys_user_role surr on surr.user_id = su.id
+        inner join safety_employee_message em on em.emp_no = sr.emp_no
+        left join ytsafety_sys_user_depart ud on ud.user_id = su.id
+        where sr.status=0 and sr.del_flag=0 and surr.role_code in
+        <foreach collection="roles" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="queryResponsibleByFactoryAndDepart" resultType="com.yutong.modules.user.vo.YtsafetySysResponsibleVO">
+        select distinct
+        sr.user_name AS userName,
+        sr.emp_name AS empName,
+        sr.emp_no AS empNo,
+        em.phone_no AS phoneNo,
+        em.email AS email,
+        ud.depart_name AS departName
+        from ytsafety_sys_responsible sr
+        inner join safety_sys_user su on sr.user_id = su.id
+        inner join ytsafety_sys_user_factory suf on suf.user_id = su.id and suf.factory_id = #{factoryId}
+        inner join safety_sys_user_role surr on surr.user_id = su.id
+        inner join safety_employee_message em on em.emp_no = sr.emp_no
+        left join ytsafety_sys_user_depart ud on ud.user_id = su.id and ud.depart_code=#{departCode}
+        where sr.status=0 and sr.del_flag=0 and surr.role_code in
+        <foreach collection="roles" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+
+
+
+    <select id="checkIsResponsible" resultType="java.lang.Boolean">
+        SELECT COUNT(1) &gt; 0
+        FROM ytsafety_sys_responsible sr
+        INNER JOIN safety_sys_user_role sur ON sr.user_id = sur.user_id
+        WHERE sr.status=0 and sr.del_flag = 0 AND sr.emp_no = #{empNo}
+        AND sur.role_code IN
+        <foreach collection="roleCodeList" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND sur.del_flag = 0
+    </select>
+
+    <select id="queryRiskRegion" resultType="com.yutong.modules.user.vo.SafetyFieldManageVO">
+        select fm.id, fm.field_code, fm.field_name, fmf.file_url
+        from safety_field_manage fm
+        LEFT JOIN (
+            SELECT id, SUBSTRING_INDEX(GROUP_CONCAT(file_url ORDER BY update_time DESC SEPARATOR '||'), '||', 1) AS file_url
+            FROM ytsafety_field_manage_file
+            GROUP BY id
+        ) fmf ON fm.id = fmf.id
+        where fm.field_type = 'risk_region' and fm.delete_falg = 0 and fm.parent_id IN
+        <foreach collection="parentIds" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="queryAllRiskRegion" resultType="com.yutong.modules.user.vo.SafetyFieldManageVO">
+        select fm.id, fm.field_code, fm.field_name, fmf.file_url
+        from safety_field_manage fm
+        LEFT JOIN (
+            SELECT id, SUBSTRING_INDEX(GROUP_CONCAT(file_url ORDER BY update_time ASC SEPARATOR '||'), '||', 1) AS file_url
+            FROM ytsafety_field_manage_file
+            GROUP BY id
+        ) fmf ON fm.id = fmf.id
+        where fm.field_type = 'risk_region' and fm.delete_falg = 0
+    </select>
+    <select id="getIsSuperAdmin" resultType="com.yutong.modules.user.entity.SafetySysUser">
+        select * from safety_sys_user_role us
+        left join safety_sys_user u on u.id = us.user_id
+        where u.emp_no = #{empNo}
+        <if test="roleList != null and roleList.size() > 0">
+            and us.role_code in
+            <foreach collection="roleList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+    <select id="isSecurityPersonnel" resultType="com.yutong.modules.user.entity.SafetySysUser">
+        select * from ytsafety_sys_responsible where status=0 and user_type = 0 and del_flag = 0 and emp_no = #{empNo}
+    </select>
+    <select id="getAproveUser" resultType="com.yutong.modules.user.entity.SafetySysUser">
+
+        SELECT
+        *
+        FROM
+        ytsafety_sys_responsible
+        WHERE status=0 and
+        user_id IN (SELECT
+        user_id
+        FROM
+        ytsafety_sys_user_depart
+        WHERE
+        depart_code = #{code}) and del_flag = 0
+        AND user_id IN (SELECT
+        user_id
+        FROM
+        safety_sys_user_role
+        WHERE
+        role_code = #{roleCode})
+    </select>
+    <select id="selectFactoryRole" resultType="com.yutong.modules.user.entity.SafetySysUser">
+        SELECT DISTINCT u.*
+        FROM safety_sys_user_role ur
+        INNER JOIN safety_sys_user u
+        ON u.id = ur.user_id
+        AND u.delete_falg = 0
+        INNER JOIN ytsafety_sys_user_factory uf
+        ON uf.user_id = ur.user_id
+        WHERE ur.role_code IN
+        <foreach collection="roles" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND uf.factory_code = #{factoryCode};
+    </select>
+
+    <select id="isSafetyOfficer" resultType="com.yutong.modules.user.entity.SafetySysUser">
+        select u.* from  safety_sys_user u
+        left join safety_sys_user_role ur on ur.user_id = u.id and u.delete_falg = 0
+        where ur.role_code =  #{safetyOfficer} and u.id = #{userId}
+    </select>
+
+    <select id="queryLocationInfo" resultType="com.yutong.modules.user.vo.SafetyLocationInfoVO">
+        select t.id, t.location_name, t.location_code,
+               t.org_name as orgName, t.org_code as orgCode, t.org_id as orgId,
+               t.factory_id as factoryId, t.factory_code as factoryCode, t.factory_name as factoryName,
+               t.area_id as areaId, t.area_name as areaName,
+               sf.field_code as areaCode
+        from ytsafety_location_info t
+        left join safety_field_manage sf on sf.id = t.area_id and sf.delete_falg = 0
+        where t.del_flag = 0 and t.status=0
+        <if test="factoryId!=null and factoryId!=''">
+            and t.factory_id = #{factoryId}
+        </if>
+        <if test="areaId!=null and areaId!=''">
+            and t.area_id = #{areaId}
+        </if>
+        <if test="orgId!=null and orgId!=''">
+            and t.org_id = #{orgId}
+        </if>
+        <if test="orgCode!=null and orgCode!=''">
+            and t.org_code = #{orgCode}
+        </if>
+    </select>
+
+</mapper>

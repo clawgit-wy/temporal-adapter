@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.enter.SafetyEnterAuthMapper">
+    <resultMap id="EnterAuthMap" type="com.yutong.safety.core.db.entity.enter.result.SafetyEnterAuthRt">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="fd_filing_type_code" jdbcType="VARCHAR" property="fdFilingTypeCode" />
+        <result column="fd_filing_type" jdbcType="VARCHAR" property="fdFilingType" />
+        <result column="fd_emp_no" jdbcType="VARCHAR" property="fdEmpNo" />
+        <result column="fd_emp_name" jdbcType="VARCHAR" property="fdEmpName" />
+        <result column="fd_emp_department" jdbcType="VARCHAR" property="fdEmpDepartment" />
+        <result column="fd_phone" jdbcType="VARCHAR" property="fdPhone" />
+        <result column="fd_auth_code" jdbcType="VARCHAR" property="fdAuthCode" />
+        <result column="fd_auth" jdbcType="VARCHAR" property="fdAuth" />
+        <result column="fd_factory_code" jdbcType="VARCHAR" property="fdFactoryCode" />
+        <result column="fd_factory" jdbcType="VARCHAR" property="fdFactory" />
+        <result column="fd_filing_user_type_code" jdbcType="VARCHAR" property="fdFilingUserTypeCode" />
+        <result column="fd_filing_user_type" jdbcType="VARCHAR" property="fdFilingUserType" />
+        <result column="fd_limit" jdbcType="INTEGER" property="fdLimit" />
+        <result column="fd_limit_day" jdbcType="INTEGER" property="fdLimitDay" />
+        <result column="fd_long_term" jdbcType="VARCHAR" property="fdLongTerm" />
+        <result column="fd_black" jdbcType="VARCHAR" property="fdBlack" />
+        <result column="fd_approval" jdbcType="VARCHAR" property="fdApproval" />
+        <result column="fd_remark" jdbcType="VARCHAR" property="fdRemark" />
+        <result column="update_time" jdbcType="VARCHAR" property="updateTime" />
+        <result column="update_user" jdbcType="VARCHAR" property="updateUser" />
+        <result column="fd_config_type" jdbcType="VARCHAR" property="fdConfigType"/>
+        <result column="fd_power_org_code" jdbcType="VARCHAR" property="fdPowerOrgCode"/>
+        <result column="fd_org_code" jdbcType="VARCHAR" property="fdOrgCode"/>
+        <result column="fd_notification" jdbcType="VARCHAR" property="fdNotification"/>
+    </resultMap>
+    <sql id="EnterAuthSh">
+        del='0'
+        <if test="fdEmpName!=null and fdEmpName!=''">
+            AND t.fd_emp_name = #{fdEmpName}
+        </if>
+        <if test="fdEmpNo!=null and fdEmpNo!=''">
+            AND t.fd_emp_no = #{fdEmpNo}
+        </if>
+        <if test="fdPhone != null and fdPhone != ''">
+            AND t.fd_phone = #{fdPhone}
+        </if>
+        <if test="fdEmpDepartment!=null and fdEmpDepartment!=''">
+            AND t.fd_emp_department = #{fdEmpDepartment}
+        </if>
+        <if test="fdFilingType!=null and fdFilingType!=''">
+            AND t.fd_filing_type_code like CONCAT(CONCAT('%', #{fdFilingType}),'%')
+        </if>
+        <if test="fdConfigType != null">
+            AND t.fd_config_type = #{fdConfigType}
+        </if>
+        <if test="empNoList != null">
+            and t.fd_emp_no in (
+            <foreach collection="empNoList" item="item" separator=",">
+                #{item}
+            </foreach>
+            <![CDATA[ ) ]]>
+        </if>
+        <if test="empNameList != null">
+            and t.fd_emp_name in (
+            <foreach collection="empNameList" item="item" separator=",">
+                #{item}
+            </foreach>
+            <![CDATA[ ) ]]>
+        </if>
+        <if test="phoneList != null">
+            and t.fd_phone in (
+            <foreach collection="phoneList" item="item" separator=",">
+                #{item}
+            </foreach>
+            <![CDATA[ ) ]]>
+        </if>
+        <if test="filingUserTypeList != null">
+            <![CDATA[ and ( ]]>
+            <foreach collection="filingUserTypeList" item="item" separator=" or ">
+                find_in_set(#{item},t.fd_filing_user_type_code) > 0
+            </foreach>
+            <![CDATA[ ) ]]>
+        </if>
+    </sql>
+    <select id="selectEnterAuthById" resultMap="EnterAuthMap">
+        select id,fd_filing_type_code,fd_filing_type,fd_emp_no,fd_emp_name,fd_emp_department,fd_phone,
+        fd_auth,fd_auth_code,fd_factory_code,fd_factory,fd_filing_user_type_code,fd_filing_user_type,
+        fd_limit,fd_limit_day,fd_long_term,fd_black,fd_approval,fd_remark,
+        date_format(update_time,'%Y-%m-%d %H:%i:%s') update_time,update_user,fd_config_type,fd_notification
+        from safety_enter_auth t
+        where t.id=#{id}
+    </select>
+    <select id="selectEnterAuthByEmpNo" resultMap="EnterAuthMap">
+        select id,fd_filing_type_code,fd_filing_type,fd_auth,fd_auth_code,
+        fd_factory_code,fd_factory,fd_filing_user_type_code,fd_filing_user_type,
+        fd_limit,fd_limit_day,fd_long_term,fd_black,fd_approval,
+        fd_emp_no,fd_emp_name,fd_emp_department,fd_phone,fd_config_type,fd_notification
+        from safety_enter_auth t
+        where fd_emp_no=#{empNo} and del='0'
+          and fd_config_type = '1'
+        order by update_time desc
+    </select>
+    <select id="selectEnterAuthList" resultMap="EnterAuthMap"
+            parameterType="com.yutong.safety.core.db.entity.enter.search.SafetyEnterAuthSh">
+        select id,fd_filing_type_code,fd_filing_type,fd_emp_no,fd_emp_name,fd_emp_department,fd_phone,
+        fd_auth,fd_auth_code,fd_factory_code,fd_factory,fd_filing_user_type_code,fd_filing_user_type,
+        fd_limit,fd_limit_day,fd_long_term,fd_black,fd_approval,fd_remark,
+        date_format(update_time,'%Y-%m-%d %H:%i:%s') update_time,update_user,fd_config_type,
+        t1.group_code as fd_power_org_code,fd_notification
+        from safety_enter_auth t
+        left join (select auth_id,GROUP_CONCAT(group_code) group_code
+                     from safety_enter_link_auth_group
+                    GROUP BY auth_id) as t1 on t.id = t1.auth_id
+        where <include refid="EnterAuthSh"/>
+        order by t.update_time desc
+        <if test="export == null">
+            <if test="limit != null">
+                <if test="offset != null">
+                    limit #{offset}, #{limit}
+                </if>
+                <if test="offset == null">
+                    limit #{limit}
+                </if>
+            </if>
+        </if>
+        <if test="export != null">
+            limit 5000
+        </if>
+    </select>
+    <select id="selectEnterAuthCount" resultType="integer"
+            parameterType="com.yutong.safety.core.db.entity.enter.search.SafetyEnterAuthSh">
+        select count(*)
+        from safety_enter_auth t
+        left join (select auth_id,GROUP_CONCAT(group_code) group_code
+                     from safety_enter_link_auth_group
+                    GROUP BY auth_id) as t1 on t.id = t1.auth_id
+        where <include refid="EnterAuthSh"/>
+    </select>
+
+    <insert id="insertEnterAuth" parameterType="com.yutong.safety.core.db.entity.enter.SafetyEnterAuth">
+        insert into safety_enter_auth(
+        fd_filing_type_code,fd_filing_type,fd_emp_no,fd_emp_name,fd_emp_department,fd_phone,
+        fd_auth,fd_auth_code,fd_factory_code,fd_factory,fd_filing_user_type_code,fd_filing_user_type,
+        fd_limit,fd_limit_day,fd_long_term,fd_black,fd_approval,
+        fd_remark,create_time,create_user,update_time,update_user,
+        fd_config_type,fd_power_org_code,fd_notification
+        )
+        values (
+        #{fdFilingTypeCode},#{fdFilingType},#{fdEmpNo},#{fdEmpName},#{fdEmpDepartment},#{fdPhone},
+        #{fdAuth},#{fdAuthCode},#{fdFactoryCode},#{fdFactory},#{fdFilingUserTypeCode},#{fdFilingUserType},
+        #{fdLimit},#{fdLimitDay},#{fdLongTerm},#{fdBlack},#{fdApproval},
+        #{fdRemark},#{createTime},#{createUser},#{updateTime},#{updateUser},
+        #{fdConfigType},#{fdPowerOrgCode},#{fdNotification}
+        )
+    </insert>
+
+    <update id="updateEnterAuth" parameterType="com.yutong.safety.core.db.entity.enter.SafetyEnterAuth">
+        update safety_enter_auth
+        <set>
+            <if test="fdFilingTypeCode!=null and fdFilingTypeCode!=''">
+                fd_filing_type_code=#{fdFilingTypeCode},
+            </if>
+            <if test="fdFilingType!=null and fdFilingType!=''">
+                fd_filing_type=#{fdFilingType},
+            </if>
+            <if test="fdEmpNo!=null and fdEmpNo!=''">
+                fd_emp_no=#{fdEmpNo},
+            </if>
+            <if test="fdEmpName!=null and fdEmpName!=''">
+                fd_emp_name=#{fdEmpName},
+            </if>
+            <if test="fdEmpDepartment!=null and fdEmpDepartment!=''">
+                fd_emp_department=#{fdEmpDepartment},
+            </if>
+            <if test="fdPhone!=null and fdPhone!=''">
+                fd_phone=#{fdPhone},
+            </if>
+            <if test="fdAuthCode!=null and fdAuthCode!=''">
+                fd_auth_code=#{fdAuthCode},
+            </if>
+            <if test="fdAuth!=null and fdAuth!=''">
+                fd_auth=#{fdAuth},
+            </if>
+            <if test="fdFactoryCode!=null and fdFactoryCode!=''">
+                fd_factory_code=#{fdFactoryCode},
+            </if>
+            <if test="fdFactory!=null and fdFactory!=''">
+                fd_factory=#{fdFactory},
+            </if>
+            <if test="fdFilingUserTypeCode!=null">
+                fd_filing_user_type_code=#{fdFilingUserTypeCode},
+            </if>
+            <if test="fdFilingUserType!=null">
+                fd_filing_user_type=#{fdFilingUserType},
+            </if>
+            <if test="fdLimit!=null">
+                fd_limit=#{fdLimit},
+            </if>
+            <if test="fdLimitDay!=null">
+                fd_limit_day=#{fdLimitDay},
+            </if>
+            <if test="fdLongTerm!=null and fdLongTerm!=''">
+                fd_long_term=#{fdLongTerm},
+            </if>
+            <if test="fdBlack!=null and fdBlack!=''">
+                fd_black=#{fdBlack},
+            </if>
+            <if test="fdApproval!=null and fdApproval!=''">
+                fd_approval=#{fdApproval},
+            </if>
+            <if test="fdRemark!=null and fdRemark!=''">
+                fd_remark=#{fdRemark},
+            </if>
+            <if test="updateTime!=null">
+                update_time=#{updateTime},
+            </if>
+            <if test="updateUser!=null and updateUser!=''">
+                update_user=#{updateUser},
+            </if>
+            <if test="fdPowerOrgCode != null and fdPowerOrgCode !='' ">
+                fd_power_org_code = #{fdPowerOrgCode},
+            </if>
+            <if test="fdNotification != null and fdNotification !='' ">
+                fd_notification = #{fdNotification},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <update id="deleteEnterAuth">
+        update safety_enter_auth set del='1' where id=#{id}
+    </update>
+
+    <select id="selectAuthFactory" resultMap="EnterAuthMap">
+        select fd_factory,fd_factory_code from safety_enter_auth where fd_emp_no=#{empNo} and del='0'
+    </select>
+
+    <select id="selectEmpInfoByEmpNo" resultMap="EnterAuthMap"
+            parameterType="com.yutong.safety.core.db.entity.enter.search.SafetyEnterAuthSh">
+        select m1.emp_no as fd_emp_no,m1.emp_name as fd_emp_name,m1.phone_no as fd_phone,
+                m1.org_code as fd_org_code,
+                m1.org_name as fd_emp_department,
+                m2.fd_factory_code,m2.fd_factory,m2.fd_filing_type_code,m2.fd_auth_code,m2.fd_filing_user_type_code,m2.fd_limit,
+                m2.fd_limit_day,m2.fd_black,m2.fd_approval,m2.fd_notification
+        from safety_employee_message m1
+        left join safety_enter_auth m2 on m1.emp_no = m2.fd_emp_no and m2.del = 0
+        where m1.status = 'NORMAL'
+        <if test="fdEmpName!=null and fdEmpName!=''">
+            AND m1.emp_name = #{fdEmpName}
+        </if>
+        <if test="fdEmpNo!=null and fdEmpNo!=''">
+            AND m1.emp_no = #{fdEmpNo}
+        </if>
+        <if test="fdPhone != null and fdPhone != ''">
+            AND m1.phone_no = #{fdPhone}
+        </if>
+        limit 1
+    </select>
+
+    <sql id="authField">
+        id,fd_filing_type_code,fd_filing_type,fd_emp_no,fd_emp_name,fd_emp_department,fd_phone,
+        fd_auth,fd_auth_code,fd_factory_code,fd_factory,fd_filing_user_type_code,fd_filing_user_type,
+        fd_limit,fd_limit_day,fd_long_term,fd_black,fd_approval,fd_remark,
+        date_format(update_time,'%Y-%m-%d %H:%i:%s') update_time,update_user,fd_config_type,fd_notification
+    </sql>
+
+    <select id="selectEnterAuthByOrgCode" resultMap="EnterAuthMap">
+        SELECT
+        <include refid="authField"/>
+          FROM (SELECT
+        <include refid="authField"/>
+                  FROM safety_enter_auth a1,safety_enter_link_auth_group p1
+                 WHERE a1.id = p1.auth_id
+                   and a1.del = 0
+                   and a1.fd_config_type = '2'
+                   and p1.group_code = #{orgCode}
+                 UNION ALL
+                SELECT
+        <include refid="authField"/>
+                  FROM safety_enter_auth a2,safety_enter_link_auth_group p2
+                 WHERE a2.id = p2.auth_id
+                   and a2.del = 0
+                   and a2.fd_config_type = '2'
+                   and instr(#{orgCode},p2.group_code)>0
+            )  AS TMP
+         ORDER BY update_time DESC
+         LIMIT 1
+    </select>
+
+    <select id="selectFilingFactory" resultType="map">
+        select fd_filing_factory_code factoryCode,fd_filing_factory as factoryName
+        from safety_enter_filing
+        where id=#{filingId}
+    </select>
+
+    <delete id="deleteLinkAuthGroup">
+        delete from safety_enter_link_auth_group where auth_id = ${authId}
+    </delete>
+
+    <insert id="insertBatchAuthGroup">
+        insert into safety_enter_link_auth_group (auth_id,group_code) values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.authId}, #{item.groupCode})
+        </foreach>
+    </insert>
+
+    <select id="selectEnterAuthByEmpNameAndPhone" resultMap="EnterAuthMap">
+        select id,fd_filing_type_code,fd_filing_type,fd_auth,fd_auth_code,
+        fd_factory_code,fd_factory,fd_filing_user_type_code,fd_filing_user_type,
+        fd_limit,fd_limit_day,fd_long_term,fd_black,fd_approval,
+        fd_emp_no,fd_emp_name,fd_emp_department,fd_phone,fd_config_type,fd_notification
+        from safety_enter_auth t
+        where fd_emp_name = #{empName}
+          and fd_phone = #{phone}
+          and del = '0'
+          and fd_config_type = '1'
+        order by update_time desc
+        LIMIT 1
+    </select>
+</mapper>

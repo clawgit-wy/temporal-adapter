@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.risk.mapper.YtsafetyRiskDataProcessDetailsMapper">
+
+    <delete id="deleteByProcessId">
+        DELETE FROM ytsafety_risk_data_process_details WHERE process_id = #{processId}
+    </delete>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO ytsafety_risk_data_process_details (
+            id, process_id, change_id, risk_code,
+            risk_category_id, risk_category_code, risk_category_name,
+            factory_id, factory_name, area_id, area_code, area_name,
+            org_id, org_code, org_name, location_id, location_name,
+            risk_type_id, risk_type_name,
+            job_step_id, job_step_code, job_step_name,
+            safety_role_code, manager_role_code,
+            check_object, risk_factor_id, risk_factor_name,
+            risk_identify_id, risk_identify_name,
+            expose_freq_id, expose_freq_name,
+            possibility_id, possibility_name,
+            severity_id, severity_name,
+            risk_value, risk_warn_color, risk_level,
+            risk_description, prevent_measure,
+            create_name, create_user, create_time,
+            update_name, update_user, update_time,
+            del_flag, version
+        ) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.id}, #{item.processId}, #{item.changeId}, #{item.riskCode},
+                #{item.riskCategoryId}, #{item.riskCategoryCode}, #{item.riskCategoryName},
+                #{item.factoryId}, #{item.factoryName}, #{item.areaId}, #{item.areaCode}, #{item.areaName},
+                #{item.orgId}, #{item.orgCode}, #{item.orgName}, #{item.locationId}, #{item.locationName},
+                #{item.riskTypeId}, #{item.riskTypeName},
+                #{item.jobStepId}, #{item.jobStepCode}, #{item.jobStepName},
+                #{item.safetyRoleCode}, #{item.managerRoleCode},
+                #{item.checkObject}, #{item.riskFactorId}, #{item.riskFactorName},
+                #{item.riskIdentifyId}, #{item.riskIdentifyName},
+                #{item.exposeFreqId}, #{item.exposeFreqName},
+                #{item.possibilityId}, #{item.possibilityName},
+                #{item.severityId}, #{item.severityName},
+                #{item.riskValue}, #{item.riskWarnColor}, #{item.riskLevel},
+                #{item.riskDescription}, #{item.preventMeasure},
+                #{item.createName}, #{item.createUser}, #{item.createTime},
+                #{item.updateName}, #{item.updateUser}, #{item.updateTime},
+                #{item.delFlag}, #{item.version}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 安全员/安全主管名称不在 SQL 中关联，由 Service 层通过 SafetyResponsibleNameResolver 批量回填（当前组织无责任人时向上级组织递归） -->
+    <select id="queryList" resultType="com.yutong.modules.risk.vo.YtsafetyRiskDataDetailsVO">
+        SELECT
+            t.*
+        FROM ytsafety_risk_data_process_details t
+        WHERE t.process_id = #{processId} AND t.del_flag = 0
+    </select>
+
+    <!--
+        索引建议（请在数据库执行以下 DDL）：
+
+        CREATE INDEX idx_process_del ON ytsafety_risk_data_process_details(process_id, del_flag);
+    -->
+
+</mapper>

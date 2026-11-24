@@ -1,0 +1,556 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.risk.mapper.YTSafetyHazardReportMapper">
+
+    <select id="historyList" resultType="com.yutong.modules.risk.vo.YTSafetyHazardReportListVO">
+        SELECT
+            r.id AS id,
+            r.hazard_code AS hazardCode,
+            r.flow_code AS flowCode,
+            r.problem_source AS problemSource,
+            r.check_name AS checkName,
+            r.plant_id AS plantId,
+            r.area_id AS areaId,
+            r.location_id AS locationId,
+            r.problem_level AS problemLevel,
+            r.status AS status,
+            r.check_time AS checkTime,
+            r.hazard_category AS hazardCategory,
+            r.create_time AS createTime,
+            fm.field_name AS plantName,
+            fm1.field_name AS areaName,
+            sdi.item_name AS problemCategoryName,
+            li.location_name AS locationName,
+            hd.problem_description AS problemDescription
+        FROM ytsafety_hazard_report r
+        LEFT JOIN safety_field_manage fm ON r.plant_id = fm.id AND fm.delete_falg = 0
+        LEFT JOIN safety_field_manage fm1 ON r.area_id = fm1.id AND fm1.delete_falg = 0
+        LEFT JOIN safety_dict_item sdi ON r.problem_category = sdi.id
+        LEFT JOIN ytsafety_location_info li ON r.location_id = li.id
+        LEFT JOIN (
+            SELECT process_id, ANY_VALUE(problem_description) AS problem_description FROM ytsafety_hazard_description GROUP BY process_id
+        ) hd ON r.id = hd.process_id
+        WHERE r.del_flag = 0 and r.draft_status = 0 and r.create_user = #{empNo}
+        <if test="screeningCondition != null and screeningCondition != ''">
+            AND (
+                r.check_name LIKE CONCAT('%', #{screeningCondition}, '%')
+                OR (r.problem_source = 'COMPANY_INSPECTION' AND '公司级检查' LIKE CONCAT('%', #{screeningCondition}, '%'))
+                OR (r.problem_source = 'DEPARTMENT_SELF_CHECK' AND '部门自查' LIKE CONCAT('%', #{screeningCondition}, '%'))
+                OR (r.problem_source = 'EMPLOYEE_SNAPSHOT' AND '员工随手拍' LIKE CONCAT('%', #{screeningCondition}, '%'))
+                OR (r.problem_source = 'PATROL_EXCEPTION' AND '巡查异常' LIKE CONCAT('%', #{screeningCondition}, '%'))
+                OR (r.problem_level = 1 AND '低' LIKE CONCAT('%', #{screeningCondition}, '%'))
+                OR (r.problem_level = 2 AND '一般' LIKE CONCAT('%', #{screeningCondition}, '%'))
+                OR (r.problem_level = 3 AND '较大' LIKE CONCAT('%', #{screeningCondition}, '%'))
+                OR (r.problem_level = 4 AND '重大' LIKE CONCAT('%', #{screeningCondition}, '%'))
+                OR (r.status = 0 AND '草稿' LIKE CONCAT('%', #{screeningCondition}, '%'))
+                OR (r.status = 1 AND '审批中' LIKE CONCAT('%', #{screeningCondition}, '%'))
+                OR (r.status = 2 AND '整改中' LIKE CONCAT('%', #{screeningCondition}, '%'))
+                OR (r.status = 3 AND '验证中' LIKE CONCAT('%', #{screeningCondition}, '%'))
+                OR (r.status = 4 AND '部分完成' LIKE CONCAT('%', #{screeningCondition}, '%'))
+                OR (r.status = 5 AND '已完成' LIKE CONCAT('%', #{screeningCondition}, '%'))
+                OR (r.status = 6 AND '预期未完成' LIKE CONCAT('%', #{screeningCondition}, '%'))
+                OR (r.status = 7 AND '逾期完成' LIKE CONCAT('%', #{screeningCondition}, '%'))
+                OR (r.status = 8 AND '延期审批中' LIKE CONCAT('%', #{screeningCondition}, '%'))
+                OR (r.status = 30 AND '废弃' LIKE CONCAT('%', #{screeningCondition}, '%'))
+                OR fm.field_name LIKE CONCAT('%', #{screeningCondition}, '%')
+                OR li.location_name LIKE CONCAT('%', #{screeningCondition}, '%')
+                OR hd.problem_description LIKE CONCAT('%', #{screeningCondition}, '%')
+            )
+        </if>
+        ORDER BY r.create_time DESC
+    </select>
+    <select id="getFactoryHazardList" resultType="com.yutong.modules.risk.vo.YTSafetyHazardReportListVO">
+        SELECT
+        r.id AS id,
+        r.hazard_code AS hazardCode,
+        r.flow_code AS flowCode,
+        r.problem_source AS problemSource,
+        r.check_name AS checkName,
+        r.plant_id AS plantId,
+        r.area_id AS areaId,
+        r.location_id AS locationId,
+        r.problem_level AS problemLevel,
+        r.status AS status,
+        r.check_time AS checkTime,
+        r.hazard_category AS hazardCategory,
+        r.create_time AS createTime,
+        fm.field_name AS plantName,
+        fm1.field_name AS areaName,
+        sdi.item_name AS problemCategoryName,
+        li.location_name AS locationName,
+        hd.problem_description AS problemDescription
+        FROM ytsafety_hazard_report r
+        LEFT JOIN safety_field_manage fm ON r.plant_id = fm.id AND fm.delete_falg = 0
+        LEFT JOIN safety_field_manage fm1 ON r.area_id = fm1.id AND fm1.delete_falg = 0
+        LEFT JOIN safety_dict_item sdi ON r.problem_category = sdi.id
+        LEFT JOIN ytsafety_location_info li ON r.location_id = li.id
+        LEFT JOIN (
+            SELECT process_id, ANY_VALUE(problem_description) AS problem_description FROM ytsafety_hazard_description GROUP BY process_id
+        ) hd ON r.id = hd.process_id
+        WHERE r.del_flag = 0 AND r.draft_status = 0
+        <if test="screeningCondition != null and screeningCondition != ''">
+            AND (
+            r.check_name LIKE CONCAT('%', #{screeningCondition}, '%')
+            OR (r.problem_source = 'COMPANY_INSPECTION' AND '公司级检查' LIKE CONCAT('%', #{screeningCondition}, '%'))
+            OR (r.problem_source = 'DEPARTMENT_SELF_CHECK' AND '部门自查' LIKE CONCAT('%', #{screeningCondition}, '%'))
+            OR (r.problem_source = 'EMPLOYEE_SNAPSHOT' AND '员工随手拍' LIKE CONCAT('%', #{screeningCondition}, '%'))
+            OR (r.problem_source = 'PATROL_EXCEPTION' AND '巡查异常' LIKE CONCAT('%', #{screeningCondition}, '%'))
+            OR (r.problem_level = 1 AND '低' LIKE CONCAT('%', #{screeningCondition}, '%'))
+            OR (r.problem_level = 2 AND '一般' LIKE CONCAT('%', #{screeningCondition}, '%'))
+            OR (r.problem_level = 3 AND '较大' LIKE CONCAT('%', #{screeningCondition}, '%'))
+            OR (r.problem_level = 4 AND '重大' LIKE CONCAT('%', #{screeningCondition}, '%'))
+            OR (r.status = 0 AND '草稿' LIKE CONCAT('%', #{screeningCondition}, '%'))
+            OR (r.status = 1 AND '审批中' LIKE CONCAT('%', #{screeningCondition}, '%'))
+            OR (r.status = 2 AND '整改中' LIKE CONCAT('%', #{screeningCondition}, '%'))
+            OR (r.status = 3 AND '验证中' LIKE CONCAT('%', #{screeningCondition}, '%'))
+            OR (r.status = 4 AND '部分完成' LIKE CONCAT('%', #{screeningCondition}, '%'))
+            OR (r.status = 5 AND '已完成' LIKE CONCAT('%', #{screeningCondition}, '%'))
+            OR (r.status = 6 AND '预期未完成' LIKE CONCAT('%', #{screeningCondition}, '%'))
+            OR (r.status = 7 AND '逾期完成' LIKE CONCAT('%', #{screeningCondition}, '%'))
+            OR (r.status = 8 AND '延期审批中' LIKE CONCAT('%', #{screeningCondition}, '%'))
+            OR (r.status = 30 AND '废弃' LIKE CONCAT('%', #{screeningCondition}, '%'))
+            OR fm.field_name LIKE CONCAT('%', #{screeningCondition}, '%')
+            OR li.location_name LIKE CONCAT('%', #{screeningCondition}, '%')
+            OR hd.problem_description LIKE CONCAT('%', #{screeningCondition}, '%')
+            )
+        </if>
+        <if test="factoryList != null and factoryList.size() > 0">
+            AND r.plant_id IN
+            <foreach collection="factoryList" item="factoryId" open="(" separator="," close=")">
+                #{factoryId}
+            </foreach>
+        </if>
+        ORDER BY r.create_time DESC
+    </select>
+    <select id="getDraftList" resultType="com.yutong.modules.risk.vo.YTSafetyHazardReportListVO">
+        SELECT
+        r.id AS id,
+        r.hazard_code AS hazardCode,
+        r.flow_code AS flowCode,
+        r.problem_source AS problemSource,
+        r.check_name AS checkName,
+        r.plant_id AS plantId,
+        r.area_id AS areaId,
+        r.location_id AS locationId,
+        r.problem_level AS problemLevel,
+        r.status AS status,
+        r.check_time AS checkTime,
+        r.hazard_category AS hazardCategory,
+        r.create_time AS createTime,
+        fm.field_name AS plantName,
+        fm1.field_name AS areaName,
+        sdi.item_name AS problemCategoryName,
+        li.location_name AS locationName,
+        hd.problem_description AS problemDescription
+        FROM ytsafety_hazard_report r
+        LEFT JOIN safety_field_manage fm ON r.plant_id = fm.id AND fm.delete_falg = 0
+        LEFT JOIN safety_field_manage fm1 ON r.area_id = fm1.id AND fm1.delete_falg = 0
+        LEFT JOIN safety_dict_item sdi ON r.problem_category = sdi.id
+        LEFT JOIN ytsafety_location_info li ON r.location_id = li.id
+        LEFT JOIN (
+        SELECT process_id, ANY_VALUE(problem_description) AS problem_description FROM ytsafety_hazard_description GROUP BY process_id
+        ) hd ON r.id = hd.process_id
+        WHERE r.del_flag = 0 and r.draft_status = 1 and r.create_user = #{empNo}
+        ORDER BY r.create_time DESC
+    </select>
+
+    <resultMap id="hazardLedgerResultMap" type="com.yutong.modules.risk.vo.YTSafetyHazardLedgerVO">
+        <id column="id" property="id"/>
+        <result column="hazardCode" property="hazardCode"/>
+        <result column="hazardCategory" property="hazardCategory"/>
+        <result column="hazardCategoryText" property="hazardCategoryText"/>
+        <result column="problemSource" property="problemSource"/>
+        <result column="problemSourceText" property="problemSourceText"/>
+        <result column="problemCategory" property="problemCategory"/>
+        <result column="problemCategoryText" property="problemCategoryText"/>
+        <result column="problemLevel" property="problemLevel"/>
+        <result column="problemLevelText" property="problemLevelText"/>
+        <result column="isImmediateHandle" property="isImmediateHandle"/>
+        <result column="isImmediateHandleText" property="isImmediateHandleText"/>
+        <result column="applyName" property="applyName"/>
+        <result column="rectifyPersonEmpNo" property="rectifyPersonEmpNo"/>
+        <result column="rectifyPersonName" property="rectifyPersonName"/>
+        <result column="checkTime" property="checkTime"/>
+        <result column="plantId" property="plantId"/>
+        <result column="plantName" property="plantName"/>
+        <result column="areaId" property="areaId"/>
+        <result column="areaName" property="areaName"/>
+        <result column="orgId" property="orgId"/>
+        <result column="orgName" property="orgName"/>
+        <result column="locationId" property="locationId"/>
+        <result column="locationName" property="locationName"/>
+        <result column="rectifyDeadline" property="rectifyDeadline"/>
+        <result column="rectifyDelayTime" property="rectifyDelayTime"/>
+        <result column="ccPersonEmpNo" property="ccPersonEmpNo"/>
+        <result column="rectifyCompleteTime" property="rectifyCompleteTime"/>
+        <result column="status" property="status"/>
+        <result column="statusText" property="statusText"/>
+        <result column="createTime" property="createTime"/>
+        <collection property="descriptionList" ofType="com.yutong.modules.risk.vo.YTSafetyHazardDescriptionVO"
+                    select="com.yutong.modules.risk.mapper.YTSafetyHazardDescriptionMapper.listBYHazardReportId"
+                    column="id"/>
+        <collection property="resultList" ofType="com.yutong.modules.risk.vo.YTSafetyHazardResultVO"
+                    select="com.yutong.modules.risk.mapper.YTSafetyHazardResultMapper.listBYHazardReportId"
+                    column="id"/>
+    </resultMap>
+
+    <select id="getHazardLedgerList" resultMap="hazardLedgerResultMap">
+        SELECT
+        r.id AS id,
+        r.hazard_code AS hazardCode,
+        r.hazard_category AS hazardCategory,
+        CASE r.hazard_category
+        WHEN 1 THEN '消防'
+        WHEN 2 THEN '治安'
+        ELSE ''
+        END AS hazardCategoryText,
+        r.problem_source AS problemSource,
+        CASE r.problem_source
+        WHEN 'COMPANY_INSPECTION' THEN '公司级检查'
+        WHEN 'DEPARTMENT_SELF_CHECK' THEN '部门自查'
+        WHEN 'EMPLOYEE_SNAPSHOT' THEN '员工随手拍'
+        WHEN 'PATROL_EXCEPTION' THEN '巡查异常'
+        ELSE ''
+        END AS problemSourceText,
+        r.problem_category AS problemCategory,
+        di.item_name AS problemCategoryText,
+        r.problem_level AS problemLevel,
+        CASE r.problem_level
+        WHEN 2 THEN '一般'
+        WHEN 3 THEN '较大'
+        WHEN 4 THEN '重大'
+        END AS problemLevelText,
+        r.is_immediate_handle AS isImmediateHandle,
+        CASE r.is_immediate_handle
+        WHEN 1 THEN '是'
+        ELSE '否'
+        END AS isImmediateHandleText,
+        r.apply_name AS applyName,
+        r.rectify_person_emp_no AS rectifyPersonEmpNo,
+        emp_rectify.emp_name AS rectifyPersonName,
+        r.check_time AS checkTime,
+        r.plant_id AS plantId,
+        fm.field_name AS plantName,
+        r.area_id AS areaId,
+        sfm.field_name AS areaName,
+        r.org_id AS orgId,
+        r.org_path_name AS orgName,
+        r.location_id AS locationId,
+        li.location_name AS locationName,
+        r.rectify_deadline AS rectifyDeadline,
+        r.rectify_delay_time AS rectifyDelayTime,
+        r.cc_person_emp_no AS ccPersonEmpNo,
+        r.rectify_complete_time AS rectifyCompleteTime,
+        r.status AS status,
+        CASE r.status
+        WHEN 0 THEN '草稿'
+        WHEN 1 THEN '审批中'
+        WHEN 2 THEN '整改中'
+        WHEN 3 THEN '验证中'
+        WHEN 4 THEN '部分完成'
+        WHEN 5 THEN '已完成'
+        WHEN 6 THEN '预期未完成'
+        WHEN 7 THEN '逾期完成'
+        WHEN 8 THEN '延期审批中'
+        WHEN 9 THEN '起草'
+        WHEN 30 THEN '废弃'
+        ELSE ''
+        END AS statusText,
+        r.create_time AS createTime,
+        IFNULL(desc_agg.problem_photos, '') AS problemPhotos,
+        IFNULL(desc_agg.problem_description, '') AS problemDescription,
+        IFNULL(result_agg.rectify_result, '') AS rectifyResult,
+        IFNULL(result_agg.complete_photos, '') AS completePhotos
+        FROM ytsafety_hazard_report r
+        LEFT JOIN safety_field_manage fm ON r.plant_id = fm.id AND fm.delete_falg = 0
+        LEFT JOIN safety_field_manage sfm ON r.area_id = sfm.id AND sfm.delete_falg = 0
+        LEFT JOIN ytsafety_location_info li ON r.location_id = li.id
+        LEFT JOIN safety_dict_item di ON r.problem_category = di.id
+        LEFT JOIN safety_employee_message emp_rectify ON r.rectify_person_emp_no = emp_rectify.emp_no
+        LEFT JOIN (
+        SELECT
+        process_id,
+        GROUP_CONCAT(problem_description ORDER BY id SEPARATOR '; ') AS problem_description,
+        GROUP_CONCAT(attachment_ids ORDER BY id SEPARATOR ',') AS problem_photos
+        FROM ytsafety_hazard_description
+        GROUP BY process_id
+        ) desc_agg ON r.id = desc_agg.process_id
+        LEFT JOIN (
+        SELECT
+        process_id,
+        GROUP_CONCAT(handle_measure ORDER BY id SEPARATOR '; ') AS rectify_result,
+        GROUP_CONCAT(attachment_ids ORDER BY id SEPARATOR ',') AS complete_photos
+        FROM ytsafety_hazard_result
+        GROUP BY process_id
+        ) result_agg ON r.id = result_agg.process_id
+        WHERE r.del_flag = 0
+        <if test="query.applyNo != null and query.applyNo != ''">
+            AND (r.status != 0 OR r.apply_no = #{query.applyNo})
+        </if>
+        <if test="query.hazardCode != null and query.hazardCode != ''">
+            AND r.hazard_code = #{query.hazardCode}
+        </if>
+        <if test="query.hazardCategory != null">
+            AND r.hazard_category = #{query.hazardCategory}
+        </if>
+        <if test="query.problemSource != null and query.problemSource != ''">
+            AND r.problem_source = #{query.problemSource}
+        </if>
+        <if test="query.problemLevel != null">
+            AND r.problem_level = #{query.problemLevel}
+        </if>
+        <if test="query.plantId != null">
+            AND r.plant_id = #{query.plantId}
+        </if>
+        <if test="query.areaId != null">
+            AND r.area_id = #{query.areaId}
+        </if>
+        <if test="query.locationId != null">
+            AND r.location_id = #{query.locationId}
+        </if>
+        <if test="query.locationName != null">
+            AND li.location_name = #{query.locationName}
+        </if>
+        <if test="query.orgId != null">
+            AND r.org_id = #{query.orgId}
+        </if>
+        <if test="query.rectifyPersonEmpNo != null and query.rectifyPersonEmpNo != ''">
+            AND r.rectify_person_emp_no = #{query.rectifyPersonEmpNo}
+        </if>
+        <if test="query.problemCategory != null and query.problemCategory != ''">
+            AND r.problem_category LIKE CONCAT('%', #{query.problemCategory}, '%')
+        </if>
+        <if test="query.problemDescription != null and query.problemDescription != ''">
+            AND desc_agg.problem_description LIKE CONCAT('%', #{query.problemDescription}, '%')
+        </if>
+        <if test="query.isImmediateHandle != null">
+            AND r.is_immediate_handle = #{query.isImmediateHandle}
+        </if>
+        <if test="query.status != null">
+            <choose>
+                <when test="query.status != 0 and query.status != 5 and query.status != 6 and query.status != 7 and query.status != 9 and query.status != 30">
+                    AND r.status = #{query.status} AND (r.rectify_delay_time IS NULL OR r.rectify_delay_time > NOW())
+                </when>
+                <when test="query.status == 6">
+                    AND (r.status = 6 OR (r.status != 0 AND r.status != 5 AND r.status != 7 AND r.status != 9 AND r.status != 30 AND r.rectify_delay_time &lt; NOW()))
+                </when>
+                <otherwise>
+                    AND r.status = #{query.status}
+                </otherwise>
+            </choose>
+        </if>
+        <if test="query.checkTimeBegin != null and query.checkTimeEnd != null">
+            AND DATE(r.check_time) BETWEEN #{query.checkTimeBegin} AND #{query.checkTimeEnd}
+        </if>
+        ORDER BY r.create_time DESC
+    </select>
+
+    <select id="exportHazardLedger" resultMap="hazardLedgerResultMap">
+        SELECT
+        r.id AS id,
+        r.hazard_code AS hazardCode,
+        r.hazard_category AS hazardCategory,
+        CASE r.hazard_category
+        WHEN 1 THEN '消防'
+        WHEN 2 THEN '治安'
+        ELSE ''
+        END AS hazardCategoryText,
+        r.problem_source AS problemSource,
+        CASE r.problem_source
+        WHEN 'COMPANY_INSPECTION' THEN '公司级检查'
+        WHEN 'DEPARTMENT_SELF_CHECK' THEN '部门自查'
+        WHEN 'EMPLOYEE_SNAPSHOT' THEN '员工随手拍'
+        WHEN 'PATROL_EXCEPTION' THEN '巡查异常'
+        ELSE ''
+        END AS problemSourceText,
+        r.problem_category AS problemCategory,
+        di.item_name AS problemCategoryText,
+        r.problem_level AS problemLevel,
+        CASE r.problem_level
+        WHEN 2 THEN '一般'
+        WHEN 3 THEN '较大'
+        WHEN 4 THEN '重大'
+        END AS problemLevelText,
+        r.is_immediate_handle AS isImmediateHandle,
+        CASE r.is_immediate_handle
+        WHEN 1 THEN '是'
+        ELSE '否'
+        END AS isImmediateHandleText,
+        r.apply_name AS applyName,
+        r.rectify_person_emp_no AS rectifyPersonEmpNo,
+        emp_rectify.emp_name AS rectifyPersonName,
+        r.check_time AS checkTime,
+        r.plant_id AS plantId,
+        fm.field_name AS plantName,
+        r.area_id AS areaId,
+        sfm.field_name AS areaName,
+        r.org_id AS orgId,
+        r.org_path_name AS orgName,
+        r.location_id AS locationId,
+        li.location_name AS locationName,
+        r.rectify_deadline AS rectifyDeadline,
+        r.rectify_delay_time AS rectifyDelayTime,
+        r.cc_person_emp_no AS ccPersonEmpNo,
+        r.rectify_complete_time AS rectifyCompleteTime,
+        r.status AS status,
+        CASE r.status
+        WHEN 0 THEN '草稿'
+        WHEN 1 THEN '审批中'
+        WHEN 2 THEN '整改中'
+        WHEN 3 THEN '验证中'
+        WHEN 4 THEN '部分完成'
+        WHEN 5 THEN '已完成'
+        WHEN 6 THEN '预期未完成'
+        WHEN 7 THEN '逾期完成'
+        WHEN 8 THEN '延期审批中'
+        WHEN 9 THEN '起草'
+        WHEN 30 THEN '废弃'
+        ELSE ''
+        END AS statusText,
+        r.create_time AS createTime,
+        IFNULL(desc_agg.problem_photos, '') AS problemPhotos,
+        IFNULL(desc_agg.problem_description, '') AS problemDescription,
+        IFNULL(result_agg.rectify_result, '') AS rectifyResult,
+        IFNULL(result_agg.complete_photos, '') AS completePhotos
+        FROM ytsafety_hazard_report r
+        LEFT JOIN safety_field_manage fm ON r.plant_id = fm.id AND fm.delete_falg = 0
+        LEFT JOIN safety_field_manage sfm ON r.area_id = sfm.id AND sfm.delete_falg = 0
+        LEFT JOIN ytsafety_location_info li ON r.location_id = li.id
+        LEFT JOIN safety_dict_item di ON r.problem_category = di.id
+        LEFT JOIN safety_employee_message emp_rectify ON r.rectify_person_emp_no = emp_rectify.emp_no
+        LEFT JOIN (
+        SELECT
+        process_id,
+        GROUP_CONCAT(problem_description ORDER BY id SEPARATOR '; ') AS problem_description,
+        GROUP_CONCAT(attachment_ids ORDER BY id SEPARATOR ',') AS problem_photos
+        FROM ytsafety_hazard_description
+        GROUP BY process_id
+        ) desc_agg ON r.id = desc_agg.process_id
+        LEFT JOIN (
+        SELECT
+        process_id,
+        GROUP_CONCAT(handle_measure ORDER BY id SEPARATOR '; ') AS rectify_result,
+        GROUP_CONCAT(attachment_ids ORDER BY id SEPARATOR ',') AS complete_photos
+        FROM ytsafety_hazard_result
+        GROUP BY process_id
+        ) result_agg ON r.id = result_agg.process_id
+        WHERE r.del_flag = 0
+        <if test="query.applyNo != null and query.applyNo != ''">
+            AND (r.status != 0 OR r.apply_no = #{query.applyNo})
+        </if>
+        <if test="query.ids != null and query.ids.size() > 0">
+            AND r.id IN
+            <foreach collection="query.ids" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        <if test="query.hazardCode != null and query.hazardCode != ''">
+            AND r.hazard_code = #{query.hazardCode}
+        </if>
+        <if test="query.hazardCategory != null">
+            AND r.hazard_category = #{query.hazardCategory}
+        </if>
+        <if test="query.problemSource != null and query.problemSource != ''">
+            AND r.problem_source = #{query.problemSource}
+        </if>
+        <if test="query.problemLevel != null">
+            AND r.problem_level = #{query.problemLevel}
+        </if>
+        <if test="query.plantId != null">
+            AND r.plant_id = #{query.plantId}
+        </if>
+        <if test="query.areaId != null">
+            AND r.area_id = #{query.areaId}
+        </if>
+        <if test="query.locationId != null">
+            AND r.location_id = #{query.locationId}
+        </if>
+        <if test="query.locationName != null">
+            AND li.location_name = #{query.locationName}
+        </if>
+        <if test="query.orgId != null">
+            AND r.org_id = #{query.orgId}
+        </if>
+        <if test="query.rectifyPersonEmpNo != null and query.rectifyPersonEmpNo != ''">
+            AND r.rectify_person_emp_no = #{query.rectifyPersonEmpNo}
+        </if>
+        <if test="query.problemCategory != null and query.problemCategory != ''">
+            AND r.problem_category LIKE CONCAT('%', #{query.problemCategory}, '%')
+        </if>
+        <if test="query.problemDescription != null and query.problemDescription != ''">
+            AND desc_agg.problem_description LIKE CONCAT('%', #{query.problemDescription}, '%')
+        </if>
+        <if test="query.isImmediateHandle != null">
+            AND r.is_immediate_handle = #{query.isImmediateHandle}
+        </if>
+        <if test="query.status != null">
+            <choose>
+                <when test="query.status != 0 and query.status != 5 and query.status != 6 and query.status != 7 and query.status != 9 and query.status != 30">
+                    AND r.status = #{query.status} AND (r.rectify_delay_time IS NULL OR r.rectify_delay_time > NOW())
+                </when>
+                <when test="query.status == 6">
+                    AND (r.status = 6 OR (r.status != 0 AND r.status != 5 AND r.status != 7 AND r.status != 9 AND r.status != 30 AND r.rectify_delay_time &lt; NOW()))
+                </when>
+                <otherwise>
+                    AND r.status = #{query.status}
+                </otherwise>
+            </choose>
+        </if>
+        <if test="query.checkTimeBegin != null and query.checkTimeEnd != null">
+            AND DATE(r.check_time) BETWEEN #{query.checkTimeBegin} AND #{query.checkTimeEnd}
+        </if>
+        ORDER BY r.create_time DESC
+    </select>
+
+    <select id="getByIdDetail" resultType="com.yutong.modules.risk.vo.YTSafetyHazardReportVO">
+        SELECT
+            r.id,
+            r.hazard_code,
+            r.model_flag,
+            r.flow_code,
+            r.flow_subject,
+            r.apply_no,
+            r.apply_name,
+            r.apply_depart_code,
+            r.apply_depart_name,
+            r.super_approval,
+            r.super_approval_name,
+            r.review_person_emp_no,
+            r.task_account_id,
+            r.hazard_category,
+            r.problem_source,
+            r.check_name,
+            r.check_time,
+            r.plant_id,
+            r.area_id,
+            r.org_id,
+            r.location_id,
+            r.problem_category,
+            r.problem_level,
+            r.is_immediate_handle,
+            r.rectify_person_emp_no,
+            r.rectify_deadline,
+            r.rectify_delay_time,
+            r.rectify_complete_time,
+            r.cc_person_emp_no,
+            r.draft_status,
+            r.status,
+            r.create_name,
+            r.create_user,
+            r.create_time,
+            r.update_name,
+            r.update_user,
+            r.update_time,
+            r.del_flag,
+            r.version,
+            r.org_path_name AS responsibleOrgNamePath,
+            rg.code AS orgCode,
+            em1.emp_name AS rectifyPersonName,
+            em2.emp_name AS ccPersonName
+        FROM ytsafety_hazard_report r
+        LEFT JOIN safety_group_info rg ON r.org_id = rg.id
+        LEFT JOIN safety_employee_message em1 ON em1.emp_no = r.rectify_person_emp_no
+        LEFT JOIN safety_employee_message em2 ON em2.emp_no = r.cc_person_emp_no
+        WHERE r.id = #{id} AND r.del_flag = 0
+    </select>
+</mapper>

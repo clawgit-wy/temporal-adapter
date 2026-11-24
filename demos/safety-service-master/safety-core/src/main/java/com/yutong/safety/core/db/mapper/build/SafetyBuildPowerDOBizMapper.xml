@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.build.SafetyBuildPowerDOBizMapper">
+    <sql id="queryCondition">
+        where
+            p.IS_DELETE = '0'
+            <if test="employeeName != null and employeeName != ''">
+                and p.EMPLOYEE_NAME like concat('%',#{employeeName},'%')
+            </if>
+            <if test="employeeCode != null and employeeCode != ''">
+                and p.EMPLOYEE_CODE = #{employeeCode}
+            </if>
+            <if test="dutyDeptCode != null and dutyDeptCode != ''">
+                and p.DUTY_DEPT_CODE like concat('%',#{dutyDeptCode})
+            </if>
+            <if test="dutyDeptName != null and dutyDeptName != ''">
+                and p.DUTY_DEPT_NAME like concat('%',#{dutyDeptName},'%')
+            </if>
+            <if test="deviceCode != null and deviceCode != ''">
+                and p.DEVICE_CODE = #{deviceCode}
+            </if>
+    </sql>
+
+    <select id="selectPageList" parameterType="com.yutong.safety.core.dto.build.SafetyBuildPowerDTO"
+            resultType="com.yutong.safety.core.dto.build.SafetyBuildPowerDTO">
+        select
+            s.*,
+            <![CDATA[
+                CONCAT(#{bpmUrlPre},'&formInstanceId=',s.PROCESS_ID,'&processId=',s.BPM_FLOW_ID) bpm_url
+            ]]>
+        from (
+            select p.EMPLOYEE_CODE,
+                max(p.EMPLOYEE_NAME) EMPLOYEE_NAME,
+                max(e.position_name) position_name,
+                p.DUTY_DEPT_NAME,
+                p.DUTY_DEPT_CODE,
+                max(p.EMPOSER_NUM) EMPOSER_NUM,
+                group_concat(p.DEVICE_NAME order by p.DEVICE_NAME separator ',') as device_name,
+                max(p.BUILD_NUM) BUILD_NUM,
+                max(p.CREATE_TIME) CREATE_TIME,
+                max(p.PROCESS_CODE) PROCESS_CODE,
+                max(m.BPM_FLOW_ID) BPM_FLOW_ID,
+                max(p.PROCESS_ID) PROCESS_ID
+            from safety_build_power p
+            left join safety_build_manage_process m on p.PROCESS_ID = m.id
+            left join safety_employee_message e on p.EMPLOYEE_CODE = e.emp_no and e.status = 'NORMAL'
+            <include refid="queryCondition"/>
+            GROUP BY p.EMPLOYEE_CODE,
+                p.DUTY_DEPT_NAME,
+                p.DUTY_DEPT_CODE
+        )s
+        order by s.CREATE_TIME desc
+        <if test="limit != null">
+            <if test="offset != null">
+                limit ${offset}, ${limit}
+            </if>
+            <if test="offset == null">
+                limit ${limit}
+            </if>
+        </if>
+    </select>
+
+    <select id="selectPageListExport" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildPowerDO"
+            resultType="com.yutong.safety.core.dto.build.SafetyBuildPowerDTO">
+        select * from (
+            select p.EMPLOYEE_CODE,
+                max(p.EMPLOYEE_NAME) EMPLOYEE_NAME,
+                max(e.position_name) position_name,
+                p.DUTY_DEPT_NAME,
+                p.DUTY_DEPT_CODE,
+                max(p.EMPOSER_NUM) EMPOSER_NUM,
+                group_concat(p.DEVICE_NAME order by p.DEVICE_NAME separator ',') as device_name,
+                max(p.BUILD_NUM) BUILD_NUM,
+                max(p.CREATE_TIME) CREATE_TIME,
+                max(p.PROCESS_CODE) PROCESS_CODE
+            from safety_build_power p
+            left join safety_employee_message e on p.EMPLOYEE_CODE = e.emp_no and e.status = 'NORMAL'
+            <include refid="queryCondition"/>
+            GROUP BY p.EMPLOYEE_CODE,
+                p.DUTY_DEPT_NAME,
+                p.DUTY_DEPT_CODE
+        )s
+        order by s.CREATE_TIME desc
+        limit 5000
+    </select>
+
+    <select id="selectCountPageList" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildPowerDO"
+            resultType="java.lang.Integer">
+        select count(1) from (
+            select p.EMPLOYEE_CODE,
+                max(p.EMPLOYEE_NAME) EMPLOYEE_NAME,
+                max(e.position_name) position_name,
+                p.DUTY_DEPT_NAME,
+                p.DUTY_DEPT_CODE,
+                max(p.EMPOSER_NUM) EMPOSER_NUM,
+                group_concat(p.DEVICE_NAME order by p.DEVICE_NAME separator ',') as device_name,
+                max(p.BUILD_NUM) BUILD_NUM,
+                max(p.CREATE_TIME) CREATE_TIME,
+                max(p.PROCESS_CODE) PROCESS_CODE
+            from safety_build_power p
+            left join safety_employee_message e on p.EMPLOYEE_CODE = e.emp_no and e.status = 'NORMAL'
+            <include refid="queryCondition"/>
+            GROUP BY p.EMPLOYEE_CODE,
+                    p.DUTY_DEPT_NAME,
+                    p.DUTY_DEPT_CODE
+        )s
+    </select>
+
+    <select id="getPeopleList" parameterType="com.yutong.safety.core.dto.build.SafetyBuildPowerDTO"
+            resultType="com.yutong.safety.core.dto.build.SafetyBuildPowerDTO">
+        select * from safety_build_power p
+        <include refid="queryCondition"/>
+        order by p.UPDATE_TIME desc
+    </select>
+
+
+    <insert id="insertSafetyBuildPower" parameterType="java.util.List">
+        <if test="list != null">
+            <foreach collection="list" item="ll" separator=";">
+                insert into safety_build_power
+                <trim prefix="(" suffix=")" suffixOverrides=",">
+                    <if test="ll.employeeCode != null">
+                        EMPLOYEE_CODE,
+                    </if>
+                    <if test="ll.employeeName != null">
+                        EMPLOYEE_NAME,
+                    </if>
+                    <if test="ll.deviceCode != null">
+                        DEVICE_CODE,
+                    </if>
+                    <if test="ll.deviceName != null">
+                        DEVICE_NAME,
+                    </if>
+                    <if test="ll.dutyDeptCode != null">
+                        DUTY_DEPT_CODE,
+                    </if>
+                    <if test="ll.dutyDeptName != null">
+                        DUTY_DEPT_NAME,
+                    </if>
+                    <if test="ll.processId != null">
+                        PROCESS_ID,
+                    </if>
+                    <if test="ll.processCode != null">
+                        PROCESS_CODE,
+                    </if>
+                    <if test="ll.emposerNum != null">
+                        EMPOSER_NUM,
+                    </if>
+                    <if test="ll.buildNum != null">
+                        BUILD_NUM,
+                    </if>
+                    <if test="ll.createTime != null">
+                        CREATE_TIME,
+                    </if>
+                    <if test="ll.updateTime != null">
+                        UPDATE_TIME,
+                    </if>
+                    <if test="ll.isDelete != null">
+                        IS_DELETE,
+                    </if>
+                    <if test="ll.employeeLogin != null">
+                        EMPLOYEE_LOGIN,
+                    </if>
+                    <if test="ll.buildSysManagerRole != null">
+                        build_sys_manager_role,
+                    </if>
+                    <if test="ll.remark != null">
+                        remark,
+                    </if>
+                </trim>
+                <trim prefix="values (" suffix=")" suffixOverrides=",">
+                    <if test="ll.employeeCode != null">
+                        #{ll.employeeCode,jdbcType=VARCHAR},
+                    </if>
+                    <if test="ll.employeeName != null">
+                        #{ll.employeeName,jdbcType=VARCHAR},
+                    </if>
+                    <if test="ll.deviceCode != null">
+                        #{ll.deviceCode,jdbcType=VARCHAR},
+                    </if>
+                    <if test="ll.deviceName != null">
+                        #{ll.deviceName,jdbcType=VARCHAR},
+                    </if>
+                    <if test="ll.dutyDeptCode != null">
+                        #{ll.dutyDeptCode,jdbcType=VARCHAR},
+                    </if>
+                    <if test="ll.dutyDeptName != null">
+                        #{ll.dutyDeptName,jdbcType=VARCHAR},
+                    </if>
+                    <if test="ll.processId != null">
+                        #{ll.processId,jdbcType=VARCHAR},
+                    </if>
+                    <if test="ll.processCode != null">
+                        #{ll.processCode,jdbcType=VARCHAR},
+                    </if>
+                    <if test="ll.emposerNum != null">
+                        #{ll.emposerNum,jdbcType=INTEGER},
+                    </if>
+                    <if test="ll.buildNum != null">
+                        #{ll.buildNum,jdbcType=INTEGER},
+                    </if>
+                    <if test="ll.createTime != null">
+                        #{ll.createTime,jdbcType=VARCHAR},
+                    </if>
+                    <if test="ll.updateTime != null">
+                        #{ll.updateTime,jdbcType=VARCHAR},
+                    </if>
+                    <if test="ll.isDelete != null">
+                        #{ll.isDelete,jdbcType=VARCHAR},
+                    </if>
+                    <if test="ll.employeeLogin != null">
+                        #{ll.employeeLogin,jdbcType=VARCHAR},
+                    </if>
+                    <if test="ll.buildSysManagerRole != null">
+                        #{ll.buildSysManagerRole,jdbcType=VARCHAR},
+                    </if>
+                    <if test="ll.remark != null">
+                        #{ll.remark,jdbcType=VARCHAR},
+                    </if>
+                </trim>
+            </foreach>
+        </if>
+    </insert>
+
+    <update id="updateData" parameterType="com.yutong.safety.core.db.entity.build.SafetyBuildPowerDO">
+        update safety_build_power
+        set
+            UPDATE_TIME = now()
+            <if test="buildNum != null and buildNum != ''">
+                ,BUILD_NUM = #{buildNum}
+            </if>
+            <if test="emposerNum != null and emposerNum != ''">
+                ,EMPOSER_NUM = #{emposerNum}
+            </if>
+        where
+            IS_DELETE = '0'
+            and DUTY_DEPT_CODE = #{dutyDeptCode}
+    </update>
+
+    <select id="selectList" parameterType="com.yutong.safety.core.dto.build.SafetyBuildManageProcessDTO"
+            resultType="com.yutong.safety.core.dto.build.SafetyBuildManageProcessDTO">
+        select p.*,
+               <![CDATA[
+               CONCAT(#{bpmUrlPre},'&formInstanceId=',p.id,'&processId=',p.BPM_FLOW_ID) flow_url
+                ]]>
+        from safety_build_manage_process p
+        order by p.CREATE_TIME desc
+    </select>
+
+    <select id="getListByUserCode" resultType="com.yutong.safety.core.db.entity.build.SafetyBuildPowerDO" parameterType="java.util.List">
+        select p.* from
+            safety_build_power p
+        where 1 = 1
+        <if test="list != null">
+            and p.EMPLOYEE_CODE in
+            <foreach collection="list" separator="," item="ll" open="(" close=")">
+                #{ll}
+            </foreach>
+        </if>
+        and p.IS_DELETE = '0'
+    </select>
+
+    <select id="getListWithPosByUserCode" resultType="com.yutong.safety.core.dto.build.SafetyBuildPowerDTO" parameterType="java.util.List">
+        select p.*,m.position_code,m.position_name,m.org_code from
+            safety_build_power p
+                   left join safety_employee_message m
+                   on p.EMPLOYEE_CODE = m.emp_no and m.status = 'NORMAL'
+        where p.EMPLOYEE_CODE in
+        <foreach collection="list" separator="," item="ll" open="(" close=")">
+            #{ll}
+        </foreach>
+        and p.IS_DELETE = '0'
+        order by p.UPDATE_TIME desc
+    </select>
+
+    <update id="batchUpdate" >
+        update safety_build_power
+        set
+            PROCESS_ID = #{process.id},
+            PROCESS_CODE = #{process.processCode},
+            CREATE_TIME = #{process.applyTime},
+            UPDATE_TIME = #{process.applyTime}
+        where
+            IS_DELETE = '0'
+        and DUTY_DEPT_CODE in
+        <foreach collection="list" item="ll" separator="," open="(" close=")">
+            #{ll}
+        </foreach>
+    </update>
+
+    <update id="deleteByDeptCode" parameterType="java.lang.String">
+        update safety_build_power set IS_DELETE = '1',update_time=now() ,remark=#{remark}
+         where DUTY_DEPT_CODE = #{deptCode} and is_delete ='0'
+    </update>
+
+    <select id="getGroupDuty" resultType="com.yutong.safety.core.db.entity.build.vo.BuildGroupDutyVO">
+        select code,name,org_code_path,DUTY_DEPT_CODE,duty_dept_name
+         from  (select sgi.code ,sgi.name,sgi.org_code_path ,p.DUTY_DEPT_CODE,p.duty_dept_name, length (p.DUTY_DEPT_CODE) DUTY_LENGTH
+                  from safety_group_info sgi
+                  join (select distinct sbp.DUTY_DEPT_CODE, sbp.DUTY_DEPT_NAME
+                          from safety_build_power sbp
+                          where sbp.IS_DELETE = 0 and sbp.DUTY_DEPT_CODE != '') p on sgi.org_code_path like CONCAT( p.DUTY_DEPT_CODE, '%')
+                 where 1 = 1
+                   and sgi.code in
+                 <foreach collection="list" item="item" open="(" close=")" separator=",">
+                     #{item}
+                 </foreach>
+                ) cur
+         where
+            (code,duty_length) in (
+            select code, max(DUTY_LENGTH) DUTY_LENGTH
+             from (select sgi.code ,sgi.org_code_path ,p.DUTY_DEPT_CODE,length (p.DUTY_DEPT_CODE) DUTY_LENGTH
+                   from safety_group_info sgi
+                   join (select distinct sbp.DUTY_DEPT_CODE,sbp.DUTY_DEPT_NAME
+                           from safety_build_power sbp
+                          where sbp.IS_DELETE = 0 and sbp.DUTY_DEPT_CODE != '' ) p on sgi.org_code_path like CONCAT( p.DUTY_DEPT_CODE, '%')
+                  where 1 = 1
+                    and sgi.code in
+                    <foreach collection="list" item="item" open="(" close=")" separator=",">
+                        #{item}
+                    </foreach>
+                  ) cur group by code)
+    </select>
+
+    <!-- 获取各责任部门的责任人 -->
+    <select id="getDutyEmpByGroup" resultType="com.yutong.safety.core.db.entity.build.SafetyBuildPowerDO">
+        SELECT
+            DUTY_DEPT_CODE,
+            GROUP_CONCAT(DISTINCT EMPLOYEE_CODE SEPARATOR ',') AS EMPLOYEE_CODE,
+            GROUP_CONCAT(DISTINCT EMPLOYEE_NAME SEPARATOR ',') AS EMPLOYEE_NAME
+        FROM (
+            SELECT
+                sbp.DUTY_DEPT_CODE,
+                sbp.EMPLOYEE_CODE,
+                sbp.EMPLOYEE_NAME
+            FROM
+                safety_build_power sbp
+            WHERE
+                sbp.IS_DELETE = 0
+        ) cur
+        GROUP BY DUTY_DEPT_CODE
+    </select>
+
+    <!-- 获取设备的责任人和责任部门 -->
+    <select id="getDutyInfoByDevice" resultType="com.yutong.safety.core.db.entity.build.SafetyBuildPowerDO">
+        select sbp.DEVICE_CODE,
+               GROUP_CONCAT(DISTINCT sbp.EMPLOYEE_CODE SEPARATOR ',') EMPLOYEE_CODE ,
+               GROUP_CONCAT(DISTINCT sbp.EMPLOYEE_NAME SEPARATOR ',') EMPLOYEE_NAME ,
+               GROUP_CONCAT(DISTINCT sbp.DUTY_DEPT_CODE SEPARATOR ';') AS DUTY_DEPT_CODE,
+               GROUP_CONCAT(DISTINCT sbp.DUTY_DEPT_NAME SEPARATOR ';') AS DUTY_DEPT_NAME
+         from safety.safety_build_power sbp
+        where sbp.IS_DELETE = 0 and sbp.DEVICE_CODE  is not null
+        <if test="list != null">
+            and sbp.DEVICE_CODE in
+            <foreach collection="list" item="item" open="(" close=")" separator=",">
+                ${item}
+            </foreach>
+        </if>
+        group by sbp.DEVICE_CODE
+    </select>
+
+    <!-- 每个责任部门只获取一条记录 -->
+    <select id="getOnyDutyDeptList" resultType="com.yutong.safety.core.db.entity.build.SafetyBuildPowerDO" >
+        select
+        <include refid="Base_Column_List"/>
+          from safety.safety_build_power sbp
+         where IS_DELETE = 0 and sbp.id in (select min(id) from safety.safety_build_power group by DUTY_DEPT_CODE)
+        <if test="list != null">
+            and DUTY_DEPT_CODE in
+            <foreach collection="list" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <sql id="Base_Column_List">
+        ID, EMPLOYEE_CODE, EMPLOYEE_NAME, DEVICE_CODE, DEVICE_NAME, DUTY_DEPT_CODE, DUTY_DEPT_NAME,
+        PROCESS_ID, PROCESS_CODE, EMPOSER_NUM, BUILD_NUM, CREATE_TIME, UPDATE_TIME, IS_DELETE,
+        EMPLOYEE_LOGIN
+    </sql>
+
+
+    <select id="getGroupDutyDeviceCode" parameterType="java.lang.String" resultType="com.yutong.safety.core.db.entity.build.vo.BuildGroupDutyEmpNoVO">
+        select code,name,org_code_path,DUTY_DEPT_CODE,duty_dept_name, deviceCode
+            from  (select sgi.code ,sgi.name,sgi.org_code_path ,p.DUTY_DEPT_CODE,p.duty_dept_name, p.DEVICE_CODE as deviceCode, length (p.DUTY_DEPT_CODE) DUTY_LENGTH
+                from safety_group_info sgi
+                join (select distinct sbp.DUTY_DEPT_CODE, sbp.DUTY_DEPT_NAME, sbp.DEVICE_CODE
+                        from safety_build_power sbp
+                        where sbp.IS_DELETE = 0 and sbp.DUTY_DEPT_CODE != '') p on sgi.org_code_path like CONCAT( p.DUTY_DEPT_CODE, '%')
+                where 1 = 1
+                    and sgi.code = #{orgCode}
+        ) cur
+        where
+            (code,duty_length) in (
+            select code, max(DUTY_LENGTH) DUTY_LENGTH
+                from (select sgi.code ,sgi.org_code_path ,p.DUTY_DEPT_CODE,length (p.DUTY_DEPT_CODE) DUTY_LENGTH
+                    from safety_group_info sgi
+                    join (select distinct sbp.DUTY_DEPT_CODE,sbp.DUTY_DEPT_NAME
+                        from safety_build_power sbp
+                        where sbp.IS_DELETE = 0 and sbp.DUTY_DEPT_CODE != '' ) p on sgi.org_code_path like CONCAT( p.DUTY_DEPT_CODE, '%')
+                where 1 = 1
+                and sgi.code = #{orgCode}
+                ) cur group by code)
+    </select>
+</mapper>

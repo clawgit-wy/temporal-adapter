@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.risk.mapper.YTSafetyHazardDelayApplyMapper">
+
+    <select id="listBYHazardReportId" resultType="com.yutong.modules.risk.vo.YTSafetyHazardDelayApplyVO">
+        SELECT
+            id,
+            process_id as processId,
+            applicant_user_emp_no AS applicantUserEmpNo,
+            original_deadline AS originalDeadline,
+            apply_deadline AS applyDeadline,
+            delay_reason AS delayReason,
+            apply_result AS applyResult,
+            status AS status
+        FROM ytsafety_hazard_delay_apply
+        WHERE process_id = #{id}
+    </select>
+    <select id="getNewestByProcessId" resultType="com.yutong.modules.risk.entity.YTSafetyHazardDelayApply">
+        SELECT *
+        FROM ytsafety_hazard_delay_apply
+        WHERE process_id = #{processId}
+        ORDER BY create_time DESC
+        LIMIT 1
+    </select>
+</mapper>

@@ -1,0 +1,680 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.SafetyOutsiderPromiseChangeMapper">
+  <resultMap id="BaseResultMap" type="com.yutong.safety.core.dto.SafetyOutsiderPromiseChangeDTO">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="flow_id" jdbcType="VARCHAR" property="flowId" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="creator" jdbcType="VARCHAR" property="creator" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="publish_time" jdbcType="TIMESTAMP" property="publishTime" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="flow_no" jdbcType="VARCHAR" property="flowNo" />
+    <result column="creator_name" jdbcType="VARCHAR" property="creatorName" />
+    <result column="creator_dept" jdbcType="VARCHAR" property="creatorDept" />
+    <result column="creator_phone" jdbcType="VARCHAR" property="creatorPhone" />
+    <result column="service_desc" jdbcType="VARCHAR" property="serviceDesc" />
+    <result column="section_chief_no" jdbcType="VARCHAR" property="sectionChiefNo" />
+    <result column="section_chief_name" jdbcType="VARCHAR" property="sectionChiefName" />
+    <result column="section_chief_username" jdbcType="VARCHAR" property="sectionChiefUsername" />
+    <result column="dept_head_no" jdbcType="DATE" property="deptHeadNo" />
+    <result column="dept_head_name" jdbcType="DATE" property="deptHeadName" />
+    <result column="dept_head_username" jdbcType="VARCHAR" property="deptHeadUsername" />
+    <result column="secret" jdbcType="VARCHAR" property="secret" />
+    <result column="secret_auditor" jdbcType="VARCHAR" property="secretAuditor" />
+  </resultMap>
+
+  <resultMap id="ListResultMap" type="com.yutong.safety.core.dto.SafetyOutsiderPromiseDTO">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="creator_no" jdbcType="VARCHAR" property="creatorNo" />
+    <result column="creator_name" jdbcType="TIMESTAMP" property="creatorName" />
+    <result column="emp_no" jdbcType="TIMESTAMP" property="empNo" />
+    <result column="emp_name" jdbcType="VARCHAR" property="empName" />
+    <result column="emp_org" jdbcType="VARCHAR" property="empOrg" />
+    <result column="factory" jdbcType="VARCHAR" property="factory" />
+    <result column="update_time" jdbcType="VARCHAR" property="updateTime" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="card_status" jdbcType="VARCHAR" property="cardStatus" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="service_end_date" jdbcType="VARCHAR" property="serviceEndDate" />
+    <result column="photo_url" jdbcType="VARCHAR" property="photoUrl" />
+    <result column="status_desc" jdbcType="VARCHAR" property="statusDesc" />
+    <result column="phone_no" jdbcType="VARCHAR" property="phoneNo" />
+  </resultMap>
+
+  <sql id="where_block">
+    <where>
+      <if test="dto.creatorNo != null and dto.creatorNo != ''">
+        and (creator_name like concat('%',#{dto.creatorNo},'%') or creator_no like concat('%',#{dto.creatorNo},'%'))
+      </if>
+      <if test="dto.powerNo != null and dto.powerNo != '' and dto.sqlWhereType == true">
+        and (creator_name like concat('%',#{dto.powerNo},'%') or creator_no like concat('%',#{dto.powerNo},'%'))
+      </if>
+      <if test="dto.powerNo != null and dto.powerNo != '' and dto.sqlWhereType == false">
+        and (creator_name like concat('%',#{dto.powerNo},'%') or creator_no like concat('%',#{dto.powerNo},'%') or creator_no is null)
+      </if>
+      <if test="dto.empNo != null and dto.empNo != ''">
+        and emp_no like concat('%',#{dto.empNo},'%')
+      </if>
+      <if test="dto.empName != null and dto.empName != ''">
+        and emp_name like concat('%',#{dto.empName},'%')
+      </if>
+      <if test="dto.phoneNo != null and dto.phoneNo != ''">
+        and FIND_IN_SET(#{dto.phoneNo}, phone_no) > 0
+      </if>
+      <if test="dto.updateTimeStart != null and dto.updateTimeStart != ''">
+        and t.update_time <![CDATA[>=]]> #{dto.updateTimeStart}
+      </if>
+      <if test="dto.updateTimeEnd != null and dto.updateTimeStart != ''">
+        and t.update_time <![CDATA[<=]]> #{dto.updateTimeEnd}
+      </if>
+      <if test="dto.powerStatus!=null and dto.powerStatus!=''">
+        <if test='dto.powerStatus == "1"'>
+          and (status=1 and service_end_date >= curdate())
+        </if>
+        <if test='dto.powerStatus == "2"'>
+          <![CDATA[
+            and (status=1 and service_end_date < curdate())
+           ]]>
+        </if>
+        <if test='dto.powerStatus == "3"'>
+          and (status=0 and service_end_date >= curdate())
+        </if>
+        <if test='dto.powerStatus == "4"'>
+          <![CDATA[
+          and (status=0 and service_end_date < curdate())
+          ]]>
+        </if>
+      </if>
+      <if test="dto.status!=null">
+        and status = #{dto.status}
+      </if>
+      <if test="dto.photoFlag != null and dto.photoFlag !=''">
+        <if test='dto.photoFlag == "1"'>
+          and (photo_url is not null and photo_url != '')
+        </if>
+        <if test='dto.photoFlag == "0"'>
+          and (photo_url is null or photo_url = '')
+        </if>
+      </if>
+    </where>
+  </sql>
+
+  <insert id="insert">
+    insert into safety_outsider_promise_change (flow_id, title, creator, create_time, status, flow_no, creator_name, creator_dept, creator_phone, service_desc, section_chief_no,
+                                                section_chief_name, section_chief_username, dept_head_no, dept_head_name, dept_head_username, secret, secret_auditor)
+    values (#{flowId}, #{title}, #{creator}, now(), #{status}, #{flowNo}, #{creatorName}, #{creatorDept}, #{creatorPhone}, #{serviceDesc}, #{sectionChiefNo},
+            #{sectionChiefName}, #{sectionChiefUsername}, #{deptHeadNo}, #{deptHeadName}, #{deptHeadUsername}, #{secret}, #{secretAuditor})
+  </insert>
+  <insert id="insertDetail">
+    insert into safety.safety_outsider_promise_change_detail (flow_id, emp_no, emp_name, org, factory,service_end_date) values
+    <foreach collection="detailDTOS" item="item" separator="," index="index">
+      (#{flowId}, #{item.empNo}, #{item.empName}, #{item.org}, #{item.factory}, #{item.serviceEndDate})
+    </foreach>
+  </insert>
+  <insert id="insertOldDetail">
+    insert into safety.safety_outsider_promise_change_history (flow_id, emp_no, emp_name, org, factory,service_end_date) values
+    <foreach collection="oldDetailDTOS" item="item" separator="," index="index">
+      (#{flowId}, #{item.empNo}, #{item.empName}, #{item.org}, #{item.factory}, #{item.serviceEndDate})
+    </foreach>
+  </insert>
+  <insert id="saveOrUpdate" parameterType="java.util.List" useGeneratedKeys="true" keyColumn="emp_no">
+    insert into safety.safety_outsider_promise (creator_no, creator_name, emp_no, emp_name, emp_org, factory, update_time, status, card_status, remark,service_end_date, phone_no) values
+    <foreach collection="list" item="item" index="index" separator=",">
+        (#{item.creatorNo}, #{item.creatorName}, #{item.empNo}, #{item.empName}, #{item.empOrg}, #{item.factory}, now(), #{item.status}, 0, #{item.remark},#{item.serviceEndDate}, #{item.phoneNo})
+    </foreach>
+    ON DUPLICATE KEY UPDATE
+    creator_name = values(creator_name), creator_no = values(creator_no), emp_no = values(emp_no), emp_name = values(emp_name),emp_org=values(emp_org),
+    factory = values(factory), update_time = now(),status=values(status), remark = values(remark),service_end_date = values(service_end_date),
+    card_status = case when values(card_status) is null then safety_outsider_promise.card_status else values(card_status) end,
+    phone_no = case when values(phone_no)  != '' and values(phone_no) is not null then values(phone_no) else safety_outsider_promise.phone_no end
+  </insert>
+  <update id="updateFlowStatus">
+    update safety_outsider_promise_change set publish_time = now(), status = '30' where flow_id = #{flowId}
+  </update>
+  <update id="updateDetails">
+    <foreach collection="details" item="item" separator=";">
+      update safety_outsider_promise_change_detail
+        set emp_name = #{item.empName},
+            emp_no = #{item.empNo},
+            factory = #{item.factory},
+            org = #{item.org},
+            service_end_date = #{item.serviceEndDate}
+        where id = #{item.id}
+    </foreach>
+  </update>
+  <update id="updatePromiseCardStatus">
+    update safety_outsider_promise set card_status = 1 where emp_no = #{empNo}
+  </update>
+
+  <update id="cancelPower">
+    update safety_outsider_promise set factory = '',service_end_date = '',update_time = now()
+    <if test="record.remark != null">
+      ,remark = #{record.remark}
+    </if>
+     where emp_no in
+    <foreach collection="empNos.split(',')" item="item" open="(" separator="," close=")">
+      #{item}
+    </foreach>
+  </update>
+
+  <sql id="list_column">
+        t.id,t.creator_no, t.creator_name, t.emp_name, t.emp_no, t.emp_org, t.remark, t.status,t.service_end_date,
+            date_format(t.update_time,'%Y-%m-%d %H:%i:%s') update_time, group_concat(m.field_name) factory
+  </sql>
+
+  <sql id="list_column2">
+    t.id,t.creator_no, t.creator_name, t.emp_name, t.emp_no, t.emp_org, t.remark, t.status,t.service_end_date, t.phone_no,
+            date_format(t.update_time,'%Y-%m-%d %H:%i:%s') update_time, t.factory,t.photo_url,
+    <![CDATA[
+        case when status = 1 and t.service_end_date >= curdate() then '权限正常'
+             when status = 1 and t.service_end_date < curdate() then '授权已到期'
+             when status = 0 and t.service_end_date >= curdate() then '卡已注销'
+             when status = 0 and t.service_end_date < curdate() then '已离职'
+             else '权限正常' end status_desc
+        ]]>
+  </sql>
+  <select id="findPageList" resultMap="ListResultMap">
+    select
+        <include refid="list_column2"/>
+    from safety_outsider_promise t
+    <include refid="where_block" />
+    order by t.update_time desc limit #{start},15
+  </select>
+  <select id="findCount" resultType="java.lang.Integer">
+    select count(1)from safety_outsider_promise t
+    <include refid="where_block" />
+  </select>
+  <select id="findList" resultMap="ListResultMap">
+    select
+    <include refid="list_column2"/>
+    from safety_outsider_promise t
+    <include refid="where_block" />
+    order by t.update_time desc
+  </select>
+  <select id="findByFlowId" resultMap="BaseResultMap">
+    select * from safety_outsider_promise_change t where t.flow_id = #{flowId}
+  </select>
+  <select id="findDetailsByFlowId"
+          resultType="com.yutong.safety.core.dto.SafetyOutsiderPromiseChangeDetailDTO">
+    select * from safety_outsider_promise_change_detail t where t.flow_id = #{flowId}
+  </select>
+  <select id="findOldDetailsByFlowId"
+          resultType="com.yutong.safety.core.dto.SafetyOutsiderPromiseChangeDetailDTO">
+    select * from safety_outsider_promise_change_history t where t.flow_id = #{flowId}
+  </select>
+  <select id="findFlowData" resultType="com.yutong.safety.core.dto.SafetyOutsiderPromiseDTO">
+    select c.creator creatorNo, c.creator_name, d.emp_no, d.emp_name, d.org emp_org,
+           d.factory, c.service_desc remark,t.status,d.service_end_date
+      from safety_outsider_promise_change c
+      left join safety_outsider_promise_change_detail d on c.flow_id = d.flow_id
+      left join safety_outsider_promise t on d.emp_no = t.emp_no
+    where c.flow_id = #{flowId}
+  </select>
+
+  <select id="getEmpDept" resultType="java.util.Map">
+    select e.org_name_path orgPath, e.email, e.emp_name name from safety_employee_message e where e.emp_no = #{empNos} and e.status = 'NORMAL'
+  </select>
+
+  <select id="findOldPromise" resultType="com.yutong.safety.core.dto.SafetyOutsiderPromiseDTO" resultMap="ListResultMap">
+    select * from safety_outsider_promise t where 1=1
+    <if test="creatorNo != ''">
+      and (t.creator_no = #{creatorNo} or t.creator_no is null)
+    </if>
+     and t.emp_no in
+    <foreach collection="empNos" item="item" open="(" separator="," close=")">
+      #{item}
+    </foreach>
+  </select>
+  <select id="findFactoryIds" resultType="java.lang.String">
+    select group_concat(m.id) from safety_field_manage m where m.field_code in
+    <foreach collection="factory" item="item" open="(" separator="," close=")">
+      #{item}
+    </foreach>
+     and m.field_type = 'factory' group by m.field_type
+  </select>
+  <select id="findEmpDatas" resultType="java.util.Map">
+    select e.org_name_path orgPath, e.emp_no empNo, e.emp_name name from safety_employee_message e where e.status = 'NORMAL' and e.emp_no in
+    <foreach collection="empNos" item="item" open="(" separator="," close=")">
+      #{item}
+    </foreach>
+  </select>
+  <select id="findOldPromiseForView" resultType="com.yutong.safety.core.dto.SafetyOutsiderPromiseDTO">
+    select * from safety_outsider_promise t where t.emp_no in
+    <foreach collection="details" item="item" open="(" separator="," close=")">
+      #{item.empNo}
+    </foreach>
+  </select>
+  <select id="findFactoryCodes" resultType="java.lang.String">
+    select group_concat(m.field_code) from safety_field_manage m where m.id in
+    <foreach collection="factory" item="item" open="(" separator="," close=")">
+      #{item}
+    </foreach>
+    and m.field_type = 'factory' group by m.field_type
+  </select>
+
+  <select id="findFaceDevices" resultType="java.lang.String">
+    select d.empower_no from safety_empower_device d where d.empower_type = '外协' and d.region_name = '大门人脸' and d.factory_id = #{factoryId} and d.delete_falg = 0
+  </select>
+
+  <select id="findDevices" parameterType="java.util.Map" resultType="java.lang.String">
+    select d.empower_no from safety_empower_device d
+                        where d.empower_type = #{empowerType}
+                          and d.region_name = #{regionName}
+                          <if test="factoryIds != null">
+                            and d.factory_id in
+                            <foreach collection="factoryIds" item="ll" open="(" close=")" separator=",">
+                              #{ll}
+                            </foreach>
+                          </if>
+                          and d.delete_falg = 0
+  </select>
+
+  <select id="findCardDevices" resultType="java.lang.String">
+    select d.empower_no from safety_empower_device d where d.empower_type = '外协' and d.region_name = '大门门禁' and d.factory_id = #{factoryId} and d.delete_falg = 0
+  </select>
+  <select id="getForCardDistribute" resultType="com.yutong.safety.core.dto.SafetyOutsiderPromiseDTO">
+    select * from safety_outsider_promise t where t.card_status = '0'
+  </select>
+
+  <!-- 根据名字/员工号查询人员信息 -->
+  <select id="findPromiseByName" resultType="com.yutong.safety.core.dto.SafetyOutsiderPromiseDTO" resultMap="ListResultMap">
+    select * from safety_outsider_promise t where 1=1
+    <if test="creatorNo != ''">
+      and (t.creator_no = #{creatorNo} or t.creator_no is null)
+    </if>
+      and (emp_no = #{empStr} or emp_name = #{empStr})
+  </select>
+
+  <select id="getEmpListByDept" resultType="java.util.Map">
+        select e.org_name_path orgPath, e.emp_no empNo, e.email, e.emp_name name from safety_employee_message e where (e.emp_no = #{empNos} or e.emp_name = #{empNos}) and e.status = 'NORMAL'
+  </select>
+
+  <select id="getEndDateByEmpNo" resultType="java.lang.String">
+    select service_end_date from safety_outsider_promise p where p.emp_no = #{empNo}
+  </select>
+
+
+  <select id="getEndDateByEmpNoList" parameterType="java.util.List" resultType="com.yutong.safety.core.dto.SafetyOutsiderPromiseDTO">
+    select emp_no,p.emp_name,p.emp_org,ifnull(service_end_date,'2099-12-31') as service_end_date,p.factory,p.creator_no,
+           p.creator_name,p.`status`,p.card_status,p.phone_no,p.photo_url,p.remark from safety_outsider_promise p
+     where p.emp_no in
+               <foreach collection="list" separator="," item="ll" close=")" open="(">
+                 #{ll}
+               </foreach>
+  </select>
+
+  <select id="findFactoryByEmpNo" resultType="java.lang.String">
+    select d.empower_no from safety_outsider_promise p right join safety_empower_device d on FIND_IN_SET(d.factory_id,p.factory) where p.emp_no = #{workNo} and d.empower_type = '外协' and d.region_name = '大门人脸'
+  </select>
+
+  <select id="findFactoryByEmpNoList" parameterType="java.util.List" resultType="com.yutong.safety.core.dto.SafetyOutsiderPromiseDTO">
+    select * from (
+      select p.emp_no,d.empower_no as power_no from
+      safety_outsider_promise p
+      right join safety_empower_device d on FIND_IN_SET(d.factory_id,p.factory)
+      where p.emp_no in
+      <foreach collection="list" open="(" close=")" item="ll" separator=",">
+        #{ll}
+      </foreach>
+      and d.empower_type = '外协'
+      and d.region_name = '大门人脸'
+    ) aa where aa.power_no is not null
+  </select>
+
+  <select id="getLastTimeData" parameterType="java.lang.String" resultType="java.lang.String">
+    select
+        flow_id
+    from safety_outsider_promise_change
+    where status = '30'
+    <![CDATA[
+      and publish_time >= #{beginTime}
+      and publish_time < #{endTime}
+    ]]>
+  </select>
+
+  <select id="getIssueFailData" resultType="java.lang.String">
+    select
+      flow_id
+    from safety_issue_data
+    order by create_time desc
+    limit 50
+  </select>
+
+  <insert id="saveIssueDate" parameterType="java.util.List">
+
+    <foreach collection="flowIdList" item="item" separator=";">
+      insert into safety_issue_data(flow_id) values (#{item})
+   </foreach>
+  </insert>
+  
+  <delete id="deleteIssueDate" parameterType="java.util.List">
+    delete from safety_issue_data where flow_id in
+    <foreach collection="flowIdList" item="item" open="(" close=")" separator=",">
+      #{item}
+    </foreach>
+  </delete>
+
+  <select id="findDetailsByFlowIdList" parameterType="java.util.List" resultType="com.yutong.safety.core.dto.SafetyOutsiderPromiseDTO">
+    select t.* from safety_outsider_promise t
+    left join safety_outsider_promise_change_detail s on t.emp_no = s.emp_no
+    where s.flow_id in
+    <foreach collection="flowIdList" item="f" separator="," open="(" close=")">
+      #{f}
+    </foreach>
+  </select>
+
+  <select id="findFlowDataList" resultType="com.yutong.safety.core.dto.SafetyOutsiderPromiseDTO">
+    select c.flow_id,
+           c.creator      creatorNo,
+           c.creator_name,
+           d.emp_no,
+           d.emp_name,
+           d.org          emp_org,
+           d.factory,
+           c.service_desc remark,
+           t.status,
+          t.service_end_date,
+          e.phone_no
+    from safety_outsider_promise_change c
+           left join safety_outsider_promise_change_detail d on c.flow_id = d.flow_id
+           left join safety_outsider_promise t on d.emp_no = t.emp_no
+            left join safety_employee_message e on d.emp_no = e.emp_no
+    where c.flow_id in
+    <foreach collection="processIdList" item="item" separator="," open="(" close=")">
+      #{item}
+    </foreach>
+  </select>
+
+  <select id="findPageProcessList"
+          parameterType="com.yutong.safety.core.dto.SafetyOutsiderPromiseProcessDTO"
+          resultType="com.yutong.safety.core.dto.SafetyOutsiderPromiseProcessDTO">
+    select  pc.creator_name       as submitter,
+            pc.creator            as submitterId,
+            pc.creator_dept       as department,
+            pd.emp_name           as cooperativePerson,
+            pd.emp_no             as cooperativePersonId,
+            pd.org                as cooperativeOrganization,
+            p.factory             as authorizedFacility,
+            pd.factory            as changedFacility,
+            p.service_end_date    as beforeEndDate,
+            pd.service_end_date   as afterEndDate,
+            pc.section_chief_name as departmentHead,
+            pc.status             as processStatus,
+            pc.create_time        as submissionTime,
+            <![CDATA[
+                CONCAT(#{bpmUrlPre},'&formInstanceId=',pc.id,'&processId=',pc.flow_id) as bpmUrl
+            ]]>
+    from safety_outsider_promise_change pc
+    left join safety_outsider_promise_change_detail pd on pc.flow_id = pd.flow_id
+    left join safety_outsider_promise_change_history p on p.flow_id = pd.flow_id and p.emp_no = pd.emp_no
+    <where>
+    <if test="flowId != null">
+      and pc.flow_id = #{flowId}
+    </if>
+      <if test="submitter != null">
+        AND pc.creator_name = #{submitter}
+      </if>
+      <if test="submitterId != null">
+        AND pc.creator = #{submitterId}
+      </if>
+      <if test="department != null">
+        AND pc.creator_dept = #{department}
+      </if>
+      <if test="cooperativePerson != null">
+        AND pd.emp_name = #{cooperativePerson}
+      </if>
+      <if test="cooperativePersonId != null">
+        AND pd.emp_no = #{cooperativePersonId}
+      </if>
+      <if test="cooperativeOrganization != null">
+        AND pd.org = #{cooperativeOrganization}
+      </if>
+      <if test="authorizedFacility != null">
+        and FIND_IN_SET (#{authorizedFacility},p.factory)
+      </if>
+      <if test="changedFacility != null">
+        and FIND_IN_SET (#{changedFacility},pd.factory)
+      </if>
+      <if test="departmentHead != null">
+        AND pc.section_chief_name = #{departmentHead}
+      </if>
+      <if test="processStatus != null">
+        AND pc.status = #{processStatus}
+      </if>
+      <if test="submissionStartTime != null">
+        AND pc.create_time >= #{submissionStartTime}
+      </if>
+      <if test="submissionEndTime != null">
+        <![CDATA[
+        AND pc.create_time <= #{submissionEndTime}
+        ]]>
+      </if>
+    </where>
+    order by pc.create_time desc
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+
+  <select id="getProcessCount" parameterType="com.yutong.safety.core.dto.SafetyOutsiderPromiseProcessDTO" resultType="java.lang.Integer">
+    select  count(1)
+    from safety_outsider_promise_change pc
+    left join safety_outsider_promise_change_detail pd on pc.flow_id = pd.flow_id
+    left join safety_outsider_promise p on p.emp_no = pd.emp_no
+    <where>
+      <if test="submitter != null">
+        AND pc.creator_name = #{submitter}
+      </if>
+      <if test="submitterId != null">
+        AND pc.creator = #{submitterId}
+      </if>
+      <if test="department != null">
+        AND pc.creator_dept = #{department}
+      </if>
+      <if test="cooperativePerson != null">
+        AND pd.emp_name = #{cooperativePerson}
+      </if>
+      <if test="cooperativePersonId != null">
+        AND pd.emp_no = #{cooperativePersonId}
+      </if>
+      <if test="cooperativeOrganization != null">
+        AND pd.org = #{cooperativeOrganization}
+      </if>
+      <if test="authorizedFacility != null">
+        and FIND_IN_SET (#{authorizedFacility},p.factory)
+      </if>
+      <if test="changedFacility != null">
+        and FIND_IN_SET (#{changedFacility},pd.factory)
+      </if>
+      <if test="departmentHead != null">
+        AND pc.section_chief_name = #{departmentHead}
+      </if>
+      <if test="processStatus != null">
+        AND pc.status = #{processStatus}
+      </if>
+      <if test="submissionStartTime != null">
+        AND pc.create_time >= #{submissionStartTime}
+      </if>
+      <if test="submissionEndTime != null">
+        <![CDATA[
+        AND pc.create_time <= #{submissionEndTime}
+        ]]>
+      </if>
+    </where>
+  </select>
+
+  <update id="updateCreator" parameterType="com.yutong.safety.core.dto.SafetyOutsiderPromiseChangeDTO">
+    update safety_outsider_promise set
+    creator_name = #{creatorName},
+    creator_no = #{creator},
+    card_status = 1,
+    <if test="remark != null">
+      remark = #{remark},
+    </if>
+    <if test="factory != null">
+      factory = #{factory},
+    </if>
+    <if test="serviceEndDate != null">
+      service_end_date = #{serviceEndDate},
+    </if>
+    update_time = now()
+    where
+    id = #{id}
+  </update>
+
+  <select id="validProcess" parameterType="java.lang.String" resultType="java.lang.Integer">
+    select count(1) from safety_outsider_promise where creator_no = #{curEmpNo} and emp_no = #{chooseEmpNo}
+  </select>
+
+  <update id="updatePromiseByFlowId" parameterType="java.lang.String">
+    update safety_outsider_promise p
+      inner join safety_outsider_promise_change_detail pc on p.emp_no = pc.emp_no
+      set p.factory = pc.factory,
+          p.service_end_date = pc.service_end_date,
+          p.card_status = 1,
+          p.update_time = now()
+    where pc.flow_id = #{flowId}
+  </update>
+
+  <select id="processFactoryByEmpNo" parameterType="java.lang.String" resultType="com.yutong.safety.core.db.entity.SafetyFieldManageDO">
+    select m.id,m.field_name
+    from safety_field_manage m
+    where m.field_type = 'factory'
+      and m.delete_falg = 0
+      and find_in_set(m.id,(select p.factory from safety_outsider_promise p where p.emp_no = #{empNo}));
+  </select>
+
+  <select id="getChangeInfoByProcessId" parameterType="java.lang.String" resultType="com.yutong.safety.core.dto.SafetyOutsiderPromiseDTO">
+    select pd.emp_no,pd.factory,p.service_end_date,e.phone_no,pd.service_end_date
+    from safety_outsider_promise_change_detail pd
+    left join safety_outsider_promise p on pd.emp_no = p.emp_no
+    left join safety_employee_message e on pd.emp_no = e.emp_no
+    where pd.flow_id = #{flowId} order by pd.id desc
+  </select>
+
+  <select id="getEnById" parameterType="java.lang.String" resultType="com.yutong.safety.core.dto.SafetyOutsiderPromiseDTO">
+    select c.creator_no,
+           c.creator_name,
+           c.emp_no,
+           c.emp_name,
+           c.emp_org,
+           c.factory,
+           c.remark,
+           c.status,
+           c.service_end_date,
+           e.phone_no
+      from safety_outsider_promise c
+      left join safety_employee_message e on c.emp_no = e.emp_no
+    where c.id = #{id}
+  </select>
+
+  <select id="selectListByWxInfo" resultType="com.yutong.safety.core.dto.ParamDTO">
+    SELECT
+        a.emp_no AS empNo,
+        a.emp_name AS empname,
+        a.factory AS factoryId,
+	    a.service_end_date AS powerEndTime,
+	    a.creator_name as creatorName,
+	    a.creator_no as creatorNo,
+	    a.emp_org as empOrg,
+	    a.remark as remark,
+	    a.status as status,
+        b.phone_no AS phoneNo,
+        b.org_name_path as orgNamePath,
+        b.org_code_path as orgCodePath,
+        'WX'       AS userType
+    FROM
+        safety_outsider_promise a
+        LEFT JOIN safety_employee_message b ON a.emp_no = b.emp_no
+    WHERE
+        a.card_status = '0' and a.status = '1' and a.update_time > DATE_SUB(now(), INTERVAL 3 DAY)
+        <if test="empNos != null">
+            and a.emp_no in
+            <foreach collection="empNos" item="item" separator="," open="(" close=")">
+              #{item}
+            </foreach>
+        </if>
+  </select>
+
+  <update id="updateStatus" parameterType="java.util.List">
+    update safety_outsider_promise set card_status = 1, update_time = now()
+    where card_status = 0 and emp_no in
+    <foreach collection="empNoList" item="item" separator="," open="(" close=")">
+      #{item}
+    </foreach>
+  </update>
+
+  <select id="selectListByEmpNoList" resultType="com.yutong.safety.core.dto.ParamDTO">
+    SELECT
+        a.emp_no AS empNo,
+        a.emp_name AS empname,
+        a.factory AS factoryId,
+	    a.service_end_date AS powerEndTime,
+	    a.creator_name as creatorName,
+	    a.creator_no as creatorNo,
+	    a.emp_org as empOrg,
+	    a.remark as remark,
+	    a.status as status,
+        'WX'       AS userType
+    FROM
+        safety_outsider_promise a
+    WHERE a.status = '1' and a.emp_no in
+    <foreach collection="empNoList" item="item" separator="," open="(" close=")">
+      #{item}
+    </foreach>
+  </select>
+
+  <update id="updateOutsiderInfo">
+    <foreach collection="details" item="item" separator=";">
+      update safety_outsider_promise
+        set factory = #{item.factory},
+             update_time = now(),
+             remark = #{item.remark}
+       where emp_no = #{item.empNo}
+    </foreach>
+  </update>
+
+    <insert id="saveOrUpdateTemp" parameterType="java.util.List" useGeneratedKeys="true" keyColumn="emp_no">
+        insert into safety.safety_outsider_promise_temp (creator_no, creator_name, emp_no, emp_name, emp_org, factory, update_time, status, card_status, remark,service_end_date, phone_no) values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.creatorNo}, #{item.creatorName}, #{item.empNo}, #{item.empName}, #{item.empOrg}, #{item.factory}, now(), #{item.status}, 0, #{item.remark},#{item.serviceEndDate}, #{item.phoneNo})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        creator_name = values(creator_name), creator_no = values(creator_no), emp_no = values(emp_no), emp_name = values(emp_name),emp_org=values(emp_org),
+        factory = values(factory), update_time = now(),status=values(status), remark = values(remark),service_end_date = values(service_end_date),
+        card_status = case when values(card_status) is null then safety_outsider_promise_temp.card_status else values(card_status) end,
+        phone_no = case when values(phone_no)  != '' and values(phone_no) is not null then values(phone_no) else safety_outsider_promise_temp.phone_no end
+    </insert>
+
+  <insert id="batchUpdate" keyColumn="emp_no" parameterType="java.util.List">
+    insert into safety_outsider_promise
+        (emp_no, emp_name, factory,update_time,status,card_status,service_end_date)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+        (#{item.empNo}, #{item.empName}, #{item.factoryId},
+         now(),1,1,#{item.powerEndTime})
+    </foreach>
+    ON DUPLICATE KEY UPDATE
+    card_status = 1,
+    update_time = now()
+  </insert>
+
+  <insert id="batchUpdateForPhoto" keyColumn="emp_no" parameterType="java.util.List">
+    insert into safety_outsider_promise
+    (emp_no, emp_name, factory,update_time,status,card_status,service_end_date,photo_url)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.empNo}, #{item.empName}, #{item.factoryId},
+      now(),1,1,#{item.powerEndTime},#{item.photoUrl})
+    </foreach>
+    ON DUPLICATE KEY UPDATE
+    photo_url = values(photo_url),
+    update_time = now()
+  </insert>
+</mapper>

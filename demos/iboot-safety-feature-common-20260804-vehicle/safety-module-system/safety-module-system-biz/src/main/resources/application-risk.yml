@@ -1,0 +1,22 @@
+server:
+  port: 7002
+  
+spring:
+  application:
+    name: iboot-safety-system
+  cloud:
+    nacos:
+      username: safetytest
+      password: safetytest
+      server-addr: 10.66.228.170:8142,10.66.228.171:8142,10.66.228.172:8142
+      config:
+        server-addr: ${spring.cloud.nacos.server-addr}
+        namespace: safetytest
+        group: DEFAULT_GROUP
+      discovery:
+        server-addr: ${spring.cloud.nacos.server-addr}
+        namespace: mp
+        group: DEFAULT_GROUP
+  config:
+    import:
+      - optional:nacos:iboot-safety-test.yaml

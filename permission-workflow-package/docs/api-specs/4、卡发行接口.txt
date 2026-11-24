@@ -1,0 +1,62 @@
+接口：http://10.66.230.210:60009/Api/FaceHandSet/DoorIssue
+
+参数去除GID输入，
+接口参数同原卡发行参数，返回参数和原接口一致
+调整参数 ："AuthDevice":["1","2"] 字段，无需构造DoorGrant
+
+
+{
+    "useModel": 1,
+    "orginazitionId": "09A5DC0C-461A-4899-8A4B-60F5BC342308",
+    "staffNo": "SI1000001",
+    "tokenId": "6D367312",
+    "endDate": "2999-01-01 00:00:00",
+    "tokenOper": 1,
+    "stcm": "2C3DB448-9918-4665-A4C1-C99797E2A4DD",
+    "tcm": "BBB817CE-E6A9-4F9C-8C2D-BDFD2431C053",
+    "serialNo": "6D367312",
+    "token": "6D367312",
+    "icStartTimeL1": "00:00",
+    "icStartTimeL2": "00:00",
+    "icStartTimeL3": "00:00",
+    "icStartTimeL4": "00:00",
+    "icStartTimeR1": "23:59",
+    "icStartTimeR2": "00:00",
+    "icStartTimeR3": "00:00",
+    "icStartTimeR4": "00:00",
+    "CarPass": "123456",
+    "beginDate": "2024-06-26 14:50:33",
+    "staffName": "张三",
+    "tokenType": 1,
+    "AuthDevice":["1","2"]
+}
+
+正确参数
+
+http://10.66.230.210:60009/api/FaceHandSet/Doorissue
+{
+    "useModel": 1,
+    "orginazitionId": "C8BBDAA5-BA9E-41F2-BF0C-05522AA4DEC7",
+    "staffNo": "60019349",
+    "tokenId": "F1F26B59",
+    "endDate": "2999-01-01 00:00:00",
+    "tokenOper": 1,
+    "stcm": "2C3DB448-9918-4665-A4C1-C99797E2A4DD",
+    "tcm": "BBB817CE-E6A9-4F9C-8C2D-BDFD2431C053",
+    "serialNo": "F1F26B59",
+    "token": "F1F26B59",
+    "icStartTimeL1": "00:00",
+    "icStartTimeL2": "00:00",
+    "icStartTimeL3": "00:00",
+    "icStartTimeL4": "00:00",
+    "icStartTimeR1": "23:59",
+    "icStartTimeR2": "00:00",
+    "icStartTimeR3": "00:00",
+    "icStartTimeR4": "00:00",
+    "CarPass": "123456",
+    "beginDate": "2024-06-26 14:50:33",
+    "staffName": "王军领",
+    "tokenType": 1,
+ "AuthDevice":["1","2"]
+}
+

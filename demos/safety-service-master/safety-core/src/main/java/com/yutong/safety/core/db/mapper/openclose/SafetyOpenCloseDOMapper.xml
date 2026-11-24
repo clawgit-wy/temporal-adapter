@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.openclose.SafetyOpenCloseDOMapper">
+    <update id="setOpenStatus" parameterType="com.yutong.safety.core.db.entity.openclose.SafetyOpenCloseDO">
+        update safety_open_close
+        set
+            open_or_close = #{openOrClose}
+        where open_name = #{openName}
+    </update>
+
+    <select id="getOpenInfo" parameterType="com.yutong.safety.core.db.entity.openclose.SafetyOpenCloseDO"
+            resultType="com.yutong.safety.core.db.entity.openclose.SafetyOpenCloseDO">
+        select id,open_name,open_or_close from safety_open_close where open_name = #{openName}
+    </select>
+</mapper>

@@ -1,0 +1,33 @@
+server:
+  port: 18092
+
+spring:
+  application:
+    name: hik-sync-worker
+  jackson:
+    default-property-inclusion: non_null
+  profiles:
+    active: @activatedProperties@
+  datasource:
+    mysql:
+      url: ${MYSQL_URL:jdbc:mysql://10.66.229.187:33306/safety?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false}
+      username: ${MYSQL_USERNAME:root}
+      password: ${MYSQL_PASSWORD:root}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+    pg:
+      url: ${PG_URL:jdbc:postgresql://10.40.0.1:7092/ctm02brss_ctm02brssdb}
+      username: ${PG_USERNAME:hikface}
+      password: ${PG_PASSWORD:zjk@111++}
+      driver-class-name: org.postgresql.Driver
+
+temporal:
+  server:
+    address: ${TEMPORAL_ADDRESS:127.0.0.1:7233}
+
+worker:
+  scenarios: ${WORKER_SCENARIOS:hikSync}
+
+logging:
+  level:
+    com.hik.worker: INFO
+    io.temporal: INFO

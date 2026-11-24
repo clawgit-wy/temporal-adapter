@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.user.mapper.YtsafetySysResponsibleMapper">
+    <select id="queryPage" resultType="com.yutong.modules.user.vo.YtsafetySysResponsibleVO">
+        select
+            sr.id,
+            sr.user_id,
+            sr.emp_name,
+            su.user_type,
+            em.phone_no,
+            tde.depart_name,
+            sr.valid_period,
+            sr.emp_no,
+            em.email,
+            em.org_name,
+            sr.user_name,
+            tde.power_factory_name,
+            tde.role_name,
+            sr.remark,
+            sr.update_time,
+            sr.status,
+            sr.update_source
+        from ytsafety_sys_responsible sr
+        inner join safety_sys_user su on sr.user_id = su.id
+        inner join safety_employee_message em on em.emp_no = sr.emp_no
+        left join (
+            select m.user_id,
+                GROUP_CONCAT(distinct m.depart_name SEPARATOR ',') AS depart_name,
+                GROUP_CONCAT(distinct m.role_name SEPARATOR ',') AS role_name,
+                GROUP_CONCAT(distinct m.factory_name SEPARATOR ',') AS power_factory_name
+            from ytsafety_sys_responsible_mapping m
+            group by m.user_id
+        ) tde on sr.user_id = tde.user_id
+        where sr.del_flag = 0 and su.delete_falg = 0
+        <if test="dto.departPath != null and dto.departPath != ''">
+            AND sr.user_id IN (
+                select m.user_id from ytsafety_sys_responsible_mapping m
+                where m.depart_path LIKE CONCAT(#{dto.departPath}, '%'))
+        </if>
+        <if test="dto.belongFactoryId != null and dto.belongFactoryId != ''">
+            AND sr.user_id IN (
+                select m.user_id from ytsafety_sys_responsible_mapping m
+                where FIND_IN_SET(m.factory_id, #{dto.belongFactoryId}))
+        </if>
+        <if test="dto.roleId != null and dto.roleId != ''">
+            AND sr.user_id IN (
+                select m.user_id from ytsafety_sys_responsible_mapping m
+                where FIND_IN_SET(m.role_id, #{dto.roleId}))
+        </if>
+        <if test="dto.empName != null and dto.empName != ''">
+            AND em.emp_name LIKE CONCAT('%',#{dto.empName},'%')
+        </if>
+        <if test="dto.empNo != null and dto.empNo != ''">
+            AND em.emp_no LIKE CONCAT('%',#{dto.empNo},'%')
+        </if>
+        <if test="dto.phone != null and dto.phone != ''">
+            AND em.phone_no like CONCAT('%',#{dto.phone},'%')
+        </if>
+        <if test="dto.userType != null">
+            AND su.user_type = #{dto.userType}
+        </if>
+        order by sr.update_time desc
+    </select>
+    <select id="querySysResponsibleEditVO" resultType="com.yutong.modules.user.vo.YtsafetySysResponsibleEditVO">
+        select
+        sr.id,
+        sr.user_id,
+        sr.emp_name,
+        su.user_type,
+        su.user_name,
+        em.phone_no phone,
+        tde.depart_id,
+        sr.valid_period,
+        sr.emp_no,
+        em.email,
+        em.org_name,
+        sr.user_name,
+        tde.power_factory_id,
+        tde.role_id,
+        sr.remark,
+        sr.update_time,
+        sr.status,
+        sr.update_source
+        from ytsafety_sys_responsible sr
+        inner join (
+            select sr.id,
+            GROUP_CONCAT(distinct sud.depart_id SEPARATOR ',') AS depart_id,
+            GROUP_CONCAT(distinct suf.factory_id SEPARATOR ',') AS power_factory_id,
+            GROUP_CONCAT(distinct sur.role_id SEPARATOR ',') AS role_id
+            from ytsafety_sys_responsible sr
+            left join safety_sys_user_role sur on sr.user_id = sur.user_id and sur.del_flag=0 and sur.role_type in(0,1)
+            left join ytsafety_sys_user_depart sud on sud.user_id=sr.user_id
+            left join ytsafety_sys_user_factory suf on sr.user_id=suf.user_id
+            where sr.del_flag = 0
+            and sr.id=#{id}
+            group by sr.id
+        ) tde on sr.id=tde.id
+        inner join safety_sys_user su on sr.user_id=su.id
+        inner join safety_employee_message em on em.emp_no = su.emp_no
+        where sr.del_flag = 0 and sr.id=#{id}
+    </select>
+
+    <select id="queryResponsibleByEmpNo" resultType="com.yutong.modules.user.vo.YtsafetySysResponsibleEditVO">
+        select
+        sr.id,
+        sr.user_id,
+        sr.emp_name,
+        su.user_type,
+        su.user_name,
+        em.phone_no phone,
+        tde.depart_id,
+        sr.valid_period,
+        sr.emp_no,
+        em.email,
+        em.org_name,
+        sr.user_name,
+        tde.power_factory_id,
+        tde.role_id,
+        sr.remark,
+        sr.update_time,
+        sr.status,
+        sr.update_source
+        from ytsafety_sys_responsible sr
+        inner join (
+        select sr.id,
+        GROUP_CONCAT(distinct sud.depart_id SEPARATOR ',') AS depart_id,
+        GROUP_CONCAT(distinct suf.factory_id SEPARATOR ',') AS power_factory_id,
+        GROUP_CONCAT(distinct sur.role_id SEPARATOR ',') AS role_id
+        from ytsafety_sys_responsible sr
+        left join safety_sys_user_role sur on sr.user_id = sur.user_id and sur.del_flag=0 and sur.role_type in(0,1)
+        left join ytsafety_sys_user_depart sud on sud.user_id=sr.user_id
+        left join ytsafety_sys_user_factory suf on sr.user_id=suf.user_id
+        where sr.del_flag = 0 and sr.emp_no=#{empNo}
+        group by sr.id
+        ) tde on sr.id=tde.id
+        inner join safety_sys_user su on sr.user_id=su.id
+        inner join safety_employee_message em on em.emp_no = su.emp_no
+        where sr.del_flag = 0 and sr.emp_no=#{empNo}
+    </select>
+    <select id="querySysUserByEmpNo" resultType="com.yutong.modules.user.vo.YtsafetySysResponsibleEditVO">
+        select su.id,su.id user_id,
+        em.emp_name,
+        su.user_type,
+        em.phone_no,
+        tde.depart_id,
+        em.emp_no,
+        em.email,
+        em.org_name,
+        em.emp_login user_name,
+        tde.power_factory_id,
+        tde.role_id
+        from safety_sys_user su
+        left join (
+            select su.id,
+            GROUP_CONCAT(distinct sud.depart_id SEPARATOR ',') AS depart_id,
+            GROUP_CONCAT(distinct suf.factory_id SEPARATOR ',') AS power_factory_id,
+            GROUP_CONCAT(distinct sur.role_id SEPARATOR ',') AS role_id
+            from safety_sys_user su
+            left join safety_sys_user_role sur on su.id = sur.user_id and sur.del_flag=0 and sur.role_type in(0,1)
+            left join ytsafety_sys_user_depart sud on sud.user_id=su.id
+            left join ytsafety_sys_user_factory suf on su.id=suf.user_id
+            where su.delete_falg=0
+            and su.emp_no=#{empNo}
+        group by su.id
+        ) tde on su.id=tde.id
+        inner join safety_employee_message em on em.emp_no = su.emp_no
+        where su.delete_falg=0 and su.emp_no=#{empNo}
+    </select>
+
+    <select id="querySysUserByUserNo" resultType="com.yutong.modules.user.vo.YtsafetySysResponsibleEditVO">
+        select su.id,su.id user_id,
+        em.emp_name,
+        em.phone_no,
+        tde.depart_id,
+        em.emp_no,
+        em.email,
+        em.org_name,
+        em.emp_login user_name,
+        tde.power_factory_id,
+        tde.role_id,
+        (case when jrm.is_security>=1 then 1 else 0 end) as user_type
+        from safety_employee_message em
+        left join safety_sys_user su on em.emp_no = su.emp_no
+        left join (select job_code,count(1) is_security from ytsafety_sys_job_role_mapping where del_flag=0 group by job_code) jrm on jrm.job_code=em.position_code
+        left join (
+            select su.id,
+            GROUP_CONCAT(distinct sud.depart_id SEPARATOR ',') AS depart_id,
+            GROUP_CONCAT(distinct suf.factory_id SEPARATOR ',') AS power_factory_id,
+            GROUP_CONCAT(distinct sur.role_id SEPARATOR ',') AS role_id
+            from safety_sys_user su
+            left join safety_sys_user_role sur on su.id = sur.user_id and sur.del_flag=0 and sur.role_type in(0,1)
+            left join ytsafety_sys_user_depart sud on sud.user_id=su.id
+            left join ytsafety_sys_user_factory suf on su.id=suf.user_id
+            where su.delete_falg=0
+            group by su.id
+        ) tde on su.id=tde.id
+        where em.emp_login is not null and em.emp_no in
+        <foreach collection="empNos" item="empNo" open="(" separator="," close=")">
+            #{empNo}
+        </foreach>
+    </select>
+
+    <select id="queryExportList" resultType="com.yutong.modules.user.vo.YtsafetySysResponsibleVO">
+        select
+            sr.id,
+            sr.user_id,
+            sr.emp_name,
+            su.user_type,
+            em.phone_no,
+            tde.depart_name,
+            sr.valid_period,
+            sr.emp_no,
+            em.email,
+            em.org_name,
+            sr.user_name,
+            tde.power_factory_name,
+            tde.role_name,
+            sr.remark,
+            sr.update_time,
+            sr.status,
+            sr.update_source
+        from ytsafety_sys_responsible sr
+        inner join safety_sys_user su on sr.user_id = su.id
+        inner join safety_employee_message em on em.emp_no = sr.emp_no
+        left join (
+            select m.user_id,
+                GROUP_CONCAT(distinct m.depart_name SEPARATOR ',') AS depart_name,
+                GROUP_CONCAT(distinct m.role_name SEPARATOR ',') AS role_name,
+                GROUP_CONCAT(distinct m.factory_name SEPARATOR ',') AS power_factory_name
+            from ytsafety_sys_responsible_mapping m
+            group by m.user_id
+        ) tde on sr.user_id = tde.user_id
+        where sr.del_flag = 0 and su.delete_falg = 0
+        <if test="dto.departPath != null and dto.departPath != ''">
+            AND sr.user_id IN (
+                select m.user_id from ytsafety_sys_responsible_mapping m
+                where m.depart_path LIKE CONCAT(#{dto.departPath}, '%'))
+        </if>
+        <if test="dto.belongFactoryId != null and dto.belongFactoryId != ''">
+            AND sr.user_id IN (
+                select m.user_id from ytsafety_sys_responsible_mapping m
+                where FIND_IN_SET(m.factory_id, #{dto.belongFactoryId}))
+        </if>
+        <if test="dto.roleId != null and dto.roleId != ''">
+            AND sr.user_id IN (
+                select m.user_id from ytsafety_sys_responsible_mapping m
+                where FIND_IN_SET(m.role_id, #{dto.roleId}))
+        </if>
+        <if test="dto.empName != null and dto.empName != ''">
+            AND em.emp_name LIKE CONCAT('%',#{dto.empName},'%')
+        </if>
+        <if test="dto.empNo != null and dto.empNo != ''">
+            AND em.emp_no LIKE CONCAT('%',#{dto.empNo},'%')
+        </if>
+        <if test="dto.phone != null and dto.phone != ''">
+            AND em.phone_no like CONCAT('%',#{dto.phone},'%')
+        </if>
+        <if test="dto.userType != null">
+            AND su.user_type = #{dto.userType}
+        </if>
+        order by sr.update_time desc
+    </select>
+
+
+</mapper>

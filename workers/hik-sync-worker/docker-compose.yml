@@ -1,0 +1,86 @@
+##############################################################################
+# hik-sync-worker Docker Compose 配置
+# 支持弹性扩容：通过 --scale 参数调整副本数量
+# 示例：docker compose up -d --scale worker=3
+##############################################################################
+
+services:
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.offline
+    image: hik-sync-worker:1.0.0
+    container_name: hik-sync-worker-${HOSTNAME:-default}
+    environment:
+      - TEMPORAL_ADDRESS=${TEMPORAL_ADDRESS:-temporal:7233}
+      - WORKER_SCENARIOS=${WORKER_SCENARIOS:-hikSync}
+      - MYSQL_URL=${MYSQL_URL:-jdbc:mysql://mysql:3306/safety?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false}
+      - MYSQL_USERNAME=${MYSQL_USERNAME:-root}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-root}
+      - PG_URL=${PG_URL:-jdbc:postgresql://postgres:5432/ctm02brss_ctm02brssdb}
+      - PG_USERNAME=${PG_USERNAME:-hikface}
+      - PG_PASSWORD=${PG_PASSWORD:-zjk@111++}
+      - JAVA_OPTS=${JAVA_OPTS:--Xms256m -Xmx512m}
+    # 弹性扩容时每个容器需要唯一的 hostname
+    hostname: "hik-sync-worker-{{.Task.Slot}}"
+    # 健康检查
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:18092/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    # 资源限制
+    deploy:
+      resources:
+        limits:
+          memory: "1g"
+          cpus: "1.0"
+        reservations:
+          memory: "256m"
+          cpus: "0.25"
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+    networks:
+      - temporal-network
+      - business-network
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "3"
+
+networks:
+  temporal-network:
+    external: true
+    name: temporal_default
+  business-network:
+    driver: bridge
+
+# 运维管理常用命令说明（仅文档用途，不参与 compose 解析）
+#
+# 1. 构建镜像：
+#    docker compose build
+#
+# 2. 启动单个实例：
+#    docker compose up -d
+#
+# 3. 弹性扩容（启动 3 个实例）：
+#    docker compose up -d --scale worker=3
+#
+# 4. 缩容（减少到 2 个实例）：
+#    docker compose up -d --scale worker=2
+#
+# 5. 查看状态：
+#    docker compose ps
+#
+# 6. 查看日志：
+#    docker compose logs -f worker
+#
+# 7. 停止所有实例：
+#    docker compose down
+#
+# 8. 强制重新构建并启动：
+#    docker compose up -d --build

@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.risk.mapper.YTSafetyTaskExecutionMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="resultTaskExecutionXCRWExportVO" type="com.yutong.modules.risk.vo.YTSafetyTaskExecutionXCRWExportVO">
+        <result column="task_code" property="taskCode"/>
+        <result column="task_name" property="taskName"/>
+        <result column="exec_user_name" property="execUserName"/>
+        <result column="risk_category_id" property="riskCategoryId"/>
+        <result column="task_start_time" property="taskStartTime"/>
+        <result column="task_complete_time" property="taskCompleteTime"/>
+        <result column="complete_interval" property="completeInterval"/>
+        <result column="task_status" property="taskStatus"/>
+        <result column="is_abnormal" property="isAbnormal"/>
+        <result column="attachment_img_id" property="attachmentImgId"/>
+        <collection  property="attachmentImgList" ofType="com.yutong.modules.common.entity.YTSafetyFileInfo"
+                     select="selectAttachmentImgList" column="{id=attachment_img_id}">
+        </collection>
+        <collection  property="attachmentList" ofType="com.yutong.modules.common.entity.YTSafetyFileInfo"
+                     select="selectAttachmentList" column="{id=attachment_id}">
+        </collection>
+    </resultMap>
+
+    <resultMap id="resultTaskExecutionZXRWExportVO" type="com.yutong.modules.risk.vo.YTSafetyTaskExecutionZXRWExportVO">
+        <result column="task_code" property="taskCode"/>
+        <result column="task_name" property="taskName"/>
+        <result column="exec_user_name" property="execUserName"/>
+        <result column="risk_category_id" property="riskCategoryId"/>
+        <result column="task_start_time" property="taskStartTime"/>
+        <result column="task_complete_time" property="taskCompleteTime"/>
+        <result column="end_date" property="endDate"/>
+        <result column="task_status" property="taskStatus"/>
+<!--        <result column="is_abnormal" property="isAbnormal"/>-->
+        <result column="attachment_img_id" property="attachmentImgId"/>
+        <result column="attachment_id" property="attachmentId"/>
+        <collection  property="attachmentImgList" ofType="com.yutong.modules.common.entity.YTSafetyFileInfo"
+                     select="selectAttachmentImgList" column="{id=attachment_img_id}">
+        </collection>
+        <collection  property="attachmentList" ofType="com.yutong.modules.common.entity.YTSafetyFileInfo"
+                     select="selectAttachmentList" column="{id=attachment_id}">
+        </collection>
+    </resultMap>
+
+    <resultMap id="resultTaskExecutionVO" type="com.yutong.modules.risk.vo.YTSafetyTaskExecutionVO">
+        <id column="id" property="id"/>
+        <result column="task_info_id" property="taskInfoId"/>
+        <result column="task_code" property="taskCode"/>
+        <result column="task_name" property="taskName"/>
+        <result column="factory_id" property="factoryId"/>
+        <result column="area_id" property="areaId"/>
+        <result column="org_id" property="orgId"/>
+        <result column="exec_user_id" property="execUserId"/>
+        <result column="exec_user_name" property="execUserName"/>
+        <result column="risk_level" property="riskLevel"/>
+        <result column="risk_category_id" property="riskCategoryId"/>
+        <result column="task_start_time" property="taskStartTime"/>
+        <result column="task_complete_time" property="taskCompleteTime"/>
+        <result column="complete_interval" property="completeInterval"/>
+        <result column="task_status" property="taskStatus"/>
+        <result column="is_abnormal" property="isAbnormal"/>
+        <result column="attachment_img_id" property="attachmentImgId"/>
+        <result column="attachment_id" property="attachmentId"/>
+        <result column="create_name" property="createName"/>
+        <result column="create_user" property="createUser"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_name" property="updateName"/>
+        <result column="update_user" property="updateUser"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="version" property="version"/>
+        <result column="start_date" property="startDate"/>
+        <result column="end_date" property="endDate"/>
+        <collection  property="attachmentImgList" ofType="com.yutong.modules.common.entity.YTSafetyFileInfo"
+                     select="selectAttachmentImgList" column="{id=attachment_img_id}">
+        </collection>
+        <collection  property="attachmentList" ofType="com.yutong.modules.common.entity.YTSafetyFileInfo"
+                     select="selectAttachmentList" column="{id=attachment_id}">
+        </collection>
+    </resultMap>
+
+<select id="selectAttachmentImgList" resultType="com.yutong.modules.common.entity.YTSafetyFileInfo">
+    SELECT
+        *
+    FROM ytsafety_file_info t
+    WHERE FIND_IN_SET(t.id, #{id}) > 0
+</select>
+
+    <select id="selectAttachmentList" resultType="com.yutong.modules.common.entity.YTSafetyFileInfo">
+        SELECT
+        *
+        FROM ytsafety_file_info t
+        WHERE FIND_IN_SET(t.id, #{id}) > 0
+    </select>
+
+    <select id="queryPage" resultMap="resultTaskExecutionVO">
+        SELECT 
+            t.*,
+            t1.task_description
+        FROM ytsafety_task_execution t
+        LEFT JOIN ytsafety_task_info t1 ON t.task_info_id = t1.id
+        WHERE t.del_flag = 0
+        AND t1.del_flag = 0
+        <if test="dto.type != null and dto.type != ''">
+            AND t1.task_type = #{dto.type}
+        </if>
+        <if test="dto.taskDescription != null and dto.taskDescription != ''">
+            AND t1.task_description like CONCAT('%', #{dto.taskDescription}, '%')
+        </if>
+        <if test="dto.taskCode != null and dto.taskCode != ''">
+            AND t.task_code = #{dto.taskCode}
+        </if>
+        <if test="dto.taskName != null and dto.taskName != ''">
+            AND t.task_name LIKE CONCAT('%', #{dto.taskName}, '%')
+        </if>
+        <if test="dto.riskCategoryId != null">
+            AND FIND_IN_SET(#{dto.riskCategoryId}, t.risk_category_id) > 0
+        </if>
+        <if test="dto.execUserName != null and dto.execUserName != ''">
+            AND t.exec_user_name LIKE CONCAT('%', #{dto.execUserName}, '%')
+        </if>
+        <if test="dto.taskStartTimeStart != null and dto.taskStartTimeEnd != null">
+            AND DATE(t.task_start_time) BETWEEN #{dto.taskStartTimeStart} AND #{dto.taskStartTimeEnd}
+        </if>
+        <if test="dto.taskCompleteTimeStart != null and dto.taskCompleteTimeEnd != null">
+            AND DATE(t.task_complete_time) BETWEEN #{dto.taskCompleteTimeStart} AND #{dto.taskCompleteTimeEnd}
+        </if>
+        <if test="dto.endDateStart != null and dto.endDateEnd != null">
+            AND DATE(t.end_date) BETWEEN #{dto.endDateStart} AND #{dto.endDateEnd}
+        </if>
+        <if test="dto.completeIntervalStart != null">
+            AND CAST(t.complete_interval AS SIGNED) &gt;= #{dto.completeIntervalStart}
+        </if>
+        <if test="dto.completeIntervalEnd != null">
+            AND CAST(t.complete_interval AS SIGNED) &lt;= #{dto.completeIntervalEnd}
+        </if>
+        <if test="dto.taskStatus != null and dto.taskStatus != ''">
+            AND t.task_status = #{dto.taskStatus}
+        </if>
+        <if test="dto.isAbnormal != null">
+            AND t.is_abnormal = #{dto.isAbnormal}
+        </if>
+        ORDER BY t.create_time DESC
+    </select>
+
+    <select id="exportPatrolMissionQueryPage" resultMap="resultTaskExecutionXCRWExportVO">
+        SELECT
+        t.*,
+        t1.task_description
+        FROM ytsafety_task_execution t
+        LEFT JOIN ytsafety_task_info t1 ON t.task_info_id = t1.id
+        WHERE t.del_flag = 0
+        AND t1.del_flag = 0
+        AND t1.task_type = 'XCRW'
+        <if test="dto.selections != null and dto.selections != ''">
+            AND t.id IN
+            <foreach collection="dto.selections.split(',')" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="dto.taskCode != null and dto.taskCode != ''">
+            AND t.task_code = #{dto.taskCode}
+        </if>
+        <if test="dto.taskName != null and dto.taskName != ''">
+            AND t.task_name LIKE CONCAT('%', #{dto.taskName}, '%')
+        </if>
+        <if test="dto.riskCategoryId != null">
+            AND FIND_IN_SET(#{dto.riskCategoryId}, t.risk_category_id) > 0
+        </if>
+        <if test="dto.execUserName != null and dto.execUserName != ''">
+            AND t.exec_user_name LIKE CONCAT('%', #{dto.execUserName}, '%')
+        </if>
+        <if test="dto.taskStartTimeStart != null and dto.taskStartTimeEnd != null">
+            AND t.task_start_time BETWEEN #{dto.taskStartTimeStart} AND #{dto.taskStartTimeEnd}
+        </if>
+        <if test="dto.taskCompleteTimeStart != null and dto.taskCompleteTimeEnd != null">
+            AND t.task_complete_time BETWEEN #{dto.taskCompleteTimeStart} AND #{dto.taskCompleteTimeEnd}
+        </if>
+        <if test="dto.completeIntervalStart != null">
+            AND CAST(t.complete_interval AS SIGNED) &gt;= #{dto.completeIntervalStart}
+        </if>
+        <if test="dto.completeIntervalEnd != null">
+            AND CAST(t.complete_interval AS SIGNED) &lt;= #{dto.completeIntervalEnd}
+        </if>
+        <if test="dto.taskStatus != null and dto.taskStatus != ''">
+            AND t.task_status = #{dto.taskStatus}
+        </if>
+        <if test="dto.isAbnormal != null">
+            AND t.is_abnormal = #{dto.isAbnormal}
+        </if>
+        ORDER BY t.create_time DESC
+    </select>
+
+    <select id="exportSpecialTaskQueryPage" resultMap="resultTaskExecutionZXRWExportVO">
+        SELECT
+        t.*,
+        t1.task_description
+        FROM ytsafety_task_execution t
+        LEFT JOIN ytsafety_task_info t1 ON t.task_info_id = t1.id
+        WHERE t.del_flag = 0
+        AND t1.del_flag = 0
+        AND t1.task_type = 'ZXRW'
+        <if test="dto.selections != null and dto.selections != ''">
+            AND t.id IN
+            <foreach collection="dto.selections.split(',')" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="dto.taskCode != null and dto.taskCode != ''">
+            AND t.task_code = #{dto.taskCode}
+        </if>
+        <if test="dto.taskName != null and dto.taskName != ''">
+            AND t.task_name LIKE CONCAT('%', #{dto.taskName}, '%')
+        </if>
+        <if test="dto.riskCategoryId != null">
+            AND t.risk_category_id = #{dto.riskCategoryId}
+        </if>
+        <if test="dto.execUserName != null and dto.execUserName != ''">
+            AND t.exec_user_name LIKE CONCAT('%', #{dto.execUserName}, '%')
+        </if>
+        <if test="dto.taskStartTimeStart != null and dto.taskStartTimeEnd != null">
+            AND DATE(t.task_start_time) BETWEEN #{dto.taskStartTimeStart} AND #{dto.taskStartTimeEnd}
+        </if>
+        <if test="dto.taskCompleteTimeStart != null and dto.taskCompleteTimeEnd != null">
+            AND DATE(t.task_complete_time) BETWEEN #{dto.taskCompleteTimeStart} AND #{dto.taskCompleteTimeEnd}
+        </if>
+        <if test="dto.endDateStart != null and dto.endDateEnd != null">
+            AND DATE(t.end_date) BETWEEN #{dto.endDateStart} AND #{dto.endDateEnd}
+        </if>
+        <if test="dto.completeIntervalStart != null">
+            AND CAST(t.complete_interval AS SIGNED) &gt;= #{dto.completeIntervalStart}
+        </if>
+        <if test="dto.completeIntervalEnd != null">
+            AND CAST(t.complete_interval AS SIGNED) &lt;= #{dto.completeIntervalEnd}
+        </if>
+        <if test="dto.taskStatus != null and dto.taskStatus != ''">
+            AND t.task_status = #{dto.taskStatus}
+        </if>
+        <if test="dto.isAbnormal != null">
+            AND t.is_abnormal = #{dto.isAbnormal}
+        </if>
+        ORDER BY t.create_time DESC
+    </select>
+
+    <!-- 查询用户待办任务分组统计（按 taskType + postType 分组） -->
+    <select id="selectPatrolToDo" resultType="com.yutong.modules.risk.vo.PatrolTaskGroupVO">
+        SELECT
+            t1.task_type AS taskType,
+            CASE
+                WHEN t1.task_type = 'XCRW' THEN '巡查任务'
+                WHEN t1.task_type = 'ZXRW' THEN '专项任务'
+                WHEN t1.task_type = 'DDXG' THEN '定点巡更任务'
+                WHEN t1.task_type = 'YWYZ' THEN '业务验证'
+                WHEN t1.task_type = 'GWYZ' THEN '岗位验证'
+                ELSE t1.task_type
+            END AS taskTypeName,
+            COALESCE(t1.post_type, '') AS postType,
+            COUNT(*) AS totalCount,
+            SUM(CASE WHEN t.task_status IN ('COMPLETED', 'OVERDUE_COMPLETED') THEN 1 ELSE 0 END) AS completedCount,
+            SUM(CASE WHEN t.task_status IN ('RUNNING', 'OVERDUE_UNCOMPLETED') THEN 1 ELSE 0 END) AS pendingCount
+        FROM ytsafety_task_execution t
+        INNER JOIN ytsafety_task_info t1 ON t.task_info_id = t1.id
+        WHERE t.del_flag = 0
+          AND t1.del_flag = 0
+          AND t.exec_user_id = #{execUserId}
+          AND t.task_status IN ('RUNNING', 'COMPLETED', 'OVERDUE_COMPLETED', 'OVERDUE_UNCOMPLETED')
+        GROUP BY t1.task_type, t1.post_type
+        ORDER BY t1.task_type, t1.post_type
+    </select>
+</mapper>

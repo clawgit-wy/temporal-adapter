@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.goodsOut.SafetyGoodsOutExceptionRecordsDOExtMapper">
+
+    <sql id="conditionsQuery">
+        <where>
+            <if test="applicant != null and applicant != ''">
+                and (p.submit_name like concat('%',#{applicant},'%')
+                or p.submit_phone like concat('%',#{applicant},'%'))
+            </if>
+            <if test="personLeaving != null and personLeaving != ''">
+                and (p.goout_emp_name like concat('%',#{personLeaving},'%')
+                or p.goout_phone like concat('%',#{personLeaving},'%'))
+            </if>
+            <if test="reviewer != null and reviewer != ''">
+                and (p.examine_emp_name like concat('%',#{reviewer},'%')
+                or p.examine_emp_no like concat('%',#{reviewer},'%')
+                or p.examine_emp_eip like concat('%',#{reviewer},'%')
+                )
+            </if>
+            <if test="outboundType != null and outboundType != ''">
+                and p.out_type_name = #{outboundType}
+            </if>
+            <if test="factoryLocation != null and factoryLocation != ''">
+                and p.out_factory_id = #{factoryLocation}
+            </if>
+            <if test="submissionStartTime != null">
+                and re.event_created_time >= #{submissionStartTime}
+            </if>
+            <if test="submissionEndTime != null">
+                <![CDATA[
+                    and re.event_created_time <= #{submissionEndTime}
+                ]]>
+            </if>
+            <if test="outFactoryIds != null and outFactoryIds != '' ">
+                and (p.out_factory_id in
+                <foreach item="item" index="index" collection="outFactoryIds.split(',')" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+                <if test="curPersonLogin != null and curPersonLogin != '' ">
+                    or p.creator = #{curPersonLogin}
+                </if>
+                )
+            </if>
+        </where>
+    </sql>
+
+    <select id="pageList" parameterType="com.yutong.safety.core.dto.goodsOut.SafetyGoodsOutExceptionRequestDTO"
+            resultType="com.yutong.safety.core.dto.goodsOut.SafetyGoodsOutExceptionResponseDTO">
+        select re.id,
+               p.id as related_process_id,
+                p.flow_no,
+                p.subject,
+                p.create_time,
+                re.exception_type,
+                re.detailed_description,
+                re.operator_name,
+                re.event_created_time,
+                re.cur_node_name,
+                p.submit_name,
+                p.submit_no,
+                p.submit_phone,
+                p.submit_dept,
+                p.out_factory_name,
+                p.out_type_name,
+                p.examine_emp_name,
+                p.examine_emp_no,
+                p.examine_dept,
+                p.out_person_type,
+                p.goout_emp_name,
+                p.goout_phone,
+                p.goout_emp_no,
+                p.goout_emp_dept,
+                p.is_vehicle,
+                p.vehicle_no,
+                p.is_set_accept,
+                p.receive_eip_str,
+                p.scene_img,
+                p.release_img,
+                p.receive_status,
+                p.un_receive_reason,
+                p.weight_sheet_upload,
+                re.remarks,
+                p.release_emp,
+                p.release_time,
+                p.release_status,
+        <![CDATA[ CONCAT(#{bpmUrlPre},'&formInstanceId=',p.id,'&processId=',p.flow_id) bpm_flow_url ]]>
+        from safety_goods_out_exception_records re
+        left join safety_goods_out_process p on re.exit_pass_id = p.id
+        <include refid="conditionsQuery" />
+        order by re.event_updated_time desc
+        <if test="limit != null">
+            <if test="offset != null">
+                limit ${offset}, ${limit}
+            </if>
+            <if test="offset == null">
+                limit ${limit}
+            </if>
+        </if>
+    </select>
+
+    <select id="pageListCount" parameterType="com.yutong.safety.core.dto.goodsOut.SafetyGoodsOutExceptionRequestDTO"
+            resultType="java.lang.Integer">
+        select count(1)
+        from safety_goods_out_exception_records re
+        left join safety_goods_out_process p on re.exit_pass_id = p.id
+        <include refid="conditionsQuery" />
+    </select>
+
+    <insert id="saveBatch" parameterType="java.util.List">
+        <if test="list != null">
+            <foreach collection="list" item="ll" separator=";">
+                    insert into safety.safety_goods_out_exception_records
+                    <trim prefix="" suffix="" suffixOverrides=",">
+                        <if test="ll.exitPassId != null">
+                            exit_pass_id,
+                        </if>
+                        <if test="ll.violationReportId != null">
+                            violation_report_id,
+                        </if>
+                        <if test="ll.eventCreatedTime != null">
+                            event_created_time,
+                        </if>
+                        <if test="ll.eventUpdatedTime != null">
+                            event_updated_time,
+                        </if>
+                        <if test="ll.exceptionType != null">
+                            exception_type,
+                        </if>
+                        <if test="ll.detailedDescription != null">
+                            detailed_description,
+                        </if>
+                        <if test="ll.operatorName != null">
+                            operator_name,
+                        </if>
+                        <if test="ll.operatorEip != null">
+                            operator_eip,
+                        </if>
+                        <if test="ll.operatorCode != null">
+                            operator_code,
+                        </if>
+                        <if test="ll.curNodeId != null">
+                            cur_node_id,
+                        </if>
+                        <if test="ll.curNodeName != null">
+                            cur_node_name,
+                        </if>
+                        <if test="ll.remarks != null">
+                            remarks,
+                        </if>
+                    </trim>
+                    <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+                        <if test="ll.exitPassId != null">
+                            #{ll.exitPassId},
+                        </if>
+                        <if test="ll.violationReportId != null">
+                            #{ll.violationReportId},
+                        </if>
+                        <if test="ll.eventCreatedTime != null">
+                            #{ll.eventCreatedTime},
+                        </if>
+                        <if test="ll.eventUpdatedTime != null">
+                            #{ll.eventUpdatedTime},
+                        </if>
+                        <if test="ll.exceptionType != null">
+                            #{ll.exceptionType},
+                        </if>
+                        <if test="ll.detailedDescription != null">
+                            #{ll.detailedDescription},
+                        </if>
+                        <if test="ll.operatorName != null">
+                            #{ll.operatorName},
+                        </if>
+                        <if test="ll.operatorEip != null">
+                            #{ll.operatorEip},
+                        </if>
+                        <if test="ll.operatorCode != null">
+                            #{ll.operatorCode},
+                        </if>
+                        <if test="ll.curNodeId != null">
+                            #{ll.curNodeId},
+                        </if>
+                        <if test="ll.curNodeName != null">
+                            #{ll.curNodeName},
+                        </if>
+                        <if test="ll.remarks != null">
+                            #{ll.remarks},
+                        </if>
+                    </trim>
+            </foreach>
+        </if>
+    </insert>
+
+    <select id="getDetailReceiveList" parameterType="java.util.Map" resultType="com.yutong.safety.core.db.entity.goodsOut.SafetyGoodsOutDetailReceiveDO">
+        select dr.process_id,dr.receive_emp_no,dr.receive_emp_eip,dr.receive_emp,dr.receive_emp_dept
+        from safety_goods_out_exception_records re
+                 inner join safety_goods_out_process p on re.exit_pass_id = p.id
+                 left join safety_goods_out_detail_receive dr on p.id = dr.process_id
+        where
+            re.exception_type = #{exceptionType}
+        and re.exit_pass_id = #{exitPassId}
+    </select>
+
+    <update id="updateExceptionStatus" parameterType="java.util.Map">
+        update safety_goods_out_exception_records
+        set
+            exception_type = #{exceptionTypeNew},
+            event_updated_time = now()
+        where
+            exit_pass_id = #{exitPassId}
+        and exception_type = #{exceptionTypeOld}
+    </update>
+</mapper>

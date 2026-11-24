@@ -1,0 +1,15 @@
+# 开发环境配置
+temporal:
+  address: 127.0.0.1:7233
+
+mokapi:
+  url: http://localhost:19090
+
+logging:
+  level:
+    com.hik.worker: DEBUG
+    com.hik.worker.activity: DEBUG
+    com.hik.worker.workflow: DEBUG
+    io.temporal: INFO
+  file:
+    path: logs

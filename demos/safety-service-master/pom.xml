@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.yutong</groupId>
+        <artifactId>yutong-pom</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+    </parent>
+    <groupId>com.yutong.safety</groupId>
+    <artifactId>safety</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <name>safety</name>
+    <description>Demo project for Spring Boot</description>
+    <properties>
+        <java.version>1.8</java.version>
+        <mybatis.generator.core>1.3.5</mybatis.generator.core>
+        <logback.version>1.1.6</logback.version>
+    </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.yutong.safety</groupId>
+                <artifactId>safety-common</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.yutong.safety</groupId>
+                <artifactId>safety-core</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.yutong.safety</groupId>
+                <artifactId>safety-web</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mybatis.generator</groupId>
+            <artifactId>mybatis-generator-core</artifactId>
+            <version>1.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.yutong.mybatis.generator</groupId>
+            <artifactId>mybatis-generator-core</artifactId>
+            <version>${mybatis.generator.core}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.101tec</groupId>
+            <artifactId>zkclient</artifactId>
+        </dependency>
+        <!--swagger        -->
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>2.7.0</version>
+        </dependency>
+        <!--swagger-ui.html模式        -->
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>2.7.0</version>
+        </dependency>
+        <!--doc.html模式        -->
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>swagger-bootstrap-ui</artifactId>
+            <version>1.9.2</version>
+        </dependency>
+        <dependency>
+            <groupId>cloud.tianai.captcha</groupId>
+            <artifactId>tianai-captcha-springboot-starter</artifactId>
+            <version>1.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.3.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.8.3.1</version> <!-- 版本 -->
+                <configuration>
+                    <!-- 控制台输出详情 -->
+                    <effort>Default</effort> <!-- 检测强度：Min/Default/Max -->
+                    <threshold>Medium</threshold> <!-- 报告敏感度：Low/Medium/High -->
+                    <failOnError>true</failOnError> <!-- 出现错误时构建失败 -->
+                    <includeTests>false</includeTests> <!-- 排除测试代码的检查 -->
+                    <excludeFilterFile>D:\Soft\spotbugs_code\findbugs-exclude-bugs20220711.xml</excludeFilterFile><!-- 排除的检测规则 -->
+                    <!-- HTML 报告输出路径 -->
+                    <outputDirectory>target/spotbugs-reports</outputDirectory>
+                    <xmlOutput>true</xmlOutput> <!-- 确保XML输出被启用，因为HTML输出依赖于它 -->
+                    <htmlOutput>true</htmlOutput> <!-- 启用HTML输出 -->
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>yutong Nexus Releases</name>
+            <url>http://dev.yutong.com/maven/content/repositories/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>yutong Nexus Snapshots</name>
+            <url>http://dev.yutong.com/maven/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+    <modules>
+        <module>safety-core</module>
+        <module>safety-common</module>
+        <module>safety-web</module>
+        <module>safety-kafka</module>
+    </modules>
+
+</project>

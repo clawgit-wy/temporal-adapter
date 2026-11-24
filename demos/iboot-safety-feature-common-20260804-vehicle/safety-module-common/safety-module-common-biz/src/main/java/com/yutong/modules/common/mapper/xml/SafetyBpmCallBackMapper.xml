@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.common.mapper.SafetyBpmCallBackMapper">
+    <select id="queryPage" resultType="com.yutong.modules.common.vo.SafetyBpmCallBackVO">
+        select * from safety_bpm_call_back ${ew.customSqlSegment}
+    </select>
+
+    <select id="queryList" resultType="com.yutong.modules.common.vo.SafetyBpmCallBackVO">
+        select * from safety_bpm_call_back ${ew.customSqlSegment}
+    </select>
+</mapper>

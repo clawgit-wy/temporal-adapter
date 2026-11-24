@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.build.SafetyBuildWhiteListDTOMapper">
+  <insert id="batchSaveOrUpdate" parameterType="java.util.List" keyColumn="EMPLOYEE_CODE">
+    INSERT INTO safety_build_white_list
+    (
+      EMPLOYEE_CODE,
+      EMPLOYEE_NAME,
+      POSITION_CODE,
+      POSITION_NAME,
+      DEVICE_CODE,
+      DEVICE_NAME,
+      DUTY_DEPT_CODE,
+      DUTY_DEPT_NAME,
+      DEPT_NAME,
+      DEPT_CODE,
+      CREATE_USER_CODE,
+      CREATE_USER_NAME,
+      CREATE_USER_ROLE,
+      CREATE_REASON,
+      CREATE_TIME,
+      IS_DELETE,
+      UPDATE_TIME,
+      source_from
+    )
+    VALUES
+    <foreach collection="list" item="ll" separator=",">
+      (
+        #{ll.employeeCode,jdbcType=VARCHAR},
+        #{ll.employeeName,jdbcType=VARCHAR},
+        #{ll.positionCode,jdbcType=VARCHAR},
+        #{ll.positionName,jdbcType=VARCHAR},
+        #{ll.deviceCode,jdbcType=VARCHAR},
+        #{ll.deviceName,jdbcType=VARCHAR},
+        #{ll.dutyDeptCode,jdbcType=VARCHAR},
+        #{ll.dutyDeptName,jdbcType=VARCHAR},
+        #{ll.deptName,jdbcType=VARCHAR},
+        #{ll.deptCode,jdbcType=VARCHAR},
+        #{ll.createUserCode,jdbcType=VARCHAR},
+        #{ll.createUserName,jdbcType=VARCHAR},
+        #{ll.createUserRole,jdbcType=VARCHAR},
+        #{ll.createReason,jdbcType=VARCHAR},
+        #{ll.createTime,jdbcType=VARCHAR},
+        #{ll.isDelete,jdbcType=VARCHAR},
+        #{ll.updateTime,jdbcType=VARCHAR},
+        #{ll.sourceFrom,jdbcType=VARCHAR}
+      )
+    </foreach>
+    ON DUPLICATE KEY UPDATE
+    DUTY_DEPT_CODE = VALUES(DUTY_DEPT_CODE),
+    DUTY_DEPT_NAME = VALUES(DUTY_DEPT_NAME),
+    POSITION_CODE = VALUES(POSITION_CODE),
+    POSITION_NAME = VALUES(POSITION_NAME),
+    IS_DELETE = VALUES(IS_DELETE),
+    UPDATE_TIME = VALUES(UPDATE_TIME),
+    CREATE_USER_CODE = VALUES(CREATE_USER_CODE),
+    CREATE_USER_NAME = VALUES(CREATE_USER_NAME),
+    CREATE_USER_ROLE = VALUES(CREATE_USER_ROLE),
+    CREATE_REASON = VALUES(CREATE_REASON),
+    CREATE_TIME = VALUES(CREATE_TIME)
+  </insert>
+
+  <update id="updateByEmpNo">
+    update safety_build_white_list set
+      CREATE_USER_CODE  = '',
+      CREATE_USER_NAME = '',
+      CREATE_USER_ROLE = '',
+      UPDATE_TIME = now()
+    where
+      IS_DELETE = '0'
+    and source_from = '0'
+    and CREATE_USER_CODE = #{empNo}
+    <if test="list != null">
+      and DUTY_DEPT_CODE in
+      <foreach collection="list" item="ll" separator="," open="(" close=")">
+        #{ll}
+      </foreach>
+    </if>
+  </update>
+
+  <update id="batchUpdate" parameterType="java.util.List">
+    <if test="list != null">
+      <foreach collection="list" item="ll" separator=";">
+        update safety_build_white_list
+        <set>
+          <if test="ll.employeeCode != null">
+            EMPLOYEE_CODE = #{ll.employeeCode,jdbcType=VARCHAR},
+          </if>
+          <if test="ll.employeeName != null">
+            EMPLOYEE_NAME = #{ll.employeeName,jdbcType=VARCHAR},
+          </if>
+          <if test="ll.positionCode != null">
+            POSITION_CODE = #{ll.positionCode,jdbcType=VARCHAR},
+          </if>
+          <if test="ll.positionName != null">
+            POSITION_NAME = #{ll.positionName,jdbcType=VARCHAR},
+          </if>
+          <if test="ll.deviceCode != null">
+            DEVICE_CODE = #{ll.deviceCode,jdbcType=VARCHAR},
+          </if>
+          <if test="ll.deviceName != null">
+            DEVICE_NAME = #{ll.deviceName,jdbcType=VARCHAR},
+          </if>
+          <if test="ll.dutyDeptCode != null">
+            DUTY_DEPT_CODE = #{ll.dutyDeptCode,jdbcType=VARCHAR},
+          </if>
+          <if test="ll.dutyDeptName != null">
+            DUTY_DEPT_NAME = #{ll.dutyDeptName,jdbcType=VARCHAR},
+          </if>
+          <if test="ll.deptName != null">
+            DEPT_NAME = #{ll.deptName,jdbcType=VARCHAR},
+          </if>
+          <if test="ll.deptCode != null">
+            DEPT_CODE = #{ll.deptCode,jdbcType=VARCHAR},
+          </if>
+          <if test="ll.createUserCode != null">
+            CREATE_USER_CODE = #{ll.createUserCode,jdbcType=VARCHAR},
+          </if>
+          <if test="ll.createUserName != null">
+            CREATE_USER_NAME = #{ll.createUserName,jdbcType=VARCHAR},
+          </if>
+          <if test="ll.createUserRole != null">
+            CREATE_USER_ROLE = #{ll.createUserRole,jdbcType=VARCHAR},
+          </if>
+          <if test="ll.createReason != null">
+            CREATE_REASON = #{ll.createReason,jdbcType=VARCHAR},
+          </if>
+          <if test="ll.createTime != null">
+            CREATE_TIME = #{ll.createTime,jdbcType=VARCHAR},
+          </if>
+          <if test="ll.isDelete != null">
+            IS_DELETE = #{ll.isDelete,jdbcType=VARCHAR},
+          </if>
+          <if test="ll.updateTime != null">
+            UPDATE_TIME = #{ll.updateTime,jdbcType=VARCHAR},
+          </if>
+          <if test="ll.sourceFrom != null">
+            source_from = #{ll.sourceFrom,jdbcType=VARCHAR},
+          </if>
+        </set>
+        where ID = #{ll.id,jdbcType=INTEGER}
+      </foreach>
+    </if>
+  </update>
+
+  <update id="updateByConditions">
+    update safety_build_white_list set
+      CREATE_USER_CODE = #{newEmpCode},
+      CREATE_USER_NAME = #{newEmpName},
+      UPDATE_TIME = date_format(now(),'%Y-%m-%d %H:%i:%m')
+    where
+        source_from = '0'
+    and IS_DELETE = '0'
+    and DUTY_DEPT_CODE = #{dutyDeptCode}
+    and CREATE_USER_CODE in
+    <foreach collection="list" item="ll" separator="," open="(" close=")">
+      #{ll}
+    </foreach>
+  </update>
+</mapper>

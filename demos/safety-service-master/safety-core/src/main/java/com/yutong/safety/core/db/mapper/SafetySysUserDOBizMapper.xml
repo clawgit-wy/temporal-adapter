@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.SafetySysUserDOBizMapper">
+  <resultMap id="BaseResultMap" type="com.yutong.safety.common.vo.sys.SysUserVO">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="user_name" jdbcType="VARCHAR" property="userName" />
+    <result column="emp_name" jdbcType="VARCHAR" property="empName" />
+    <result column="emp_no" jdbcType="VARCHAR" property="empNo" />
+    <result column="modify_emp" jdbcType="VARCHAR" property="modifyEmp" />
+    <result column="modify_emp_no" jdbcType="VARCHAR" property="modifyEmpNo" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="role_name" jdbcType="VARCHAR" property="roleName" />
+    <result column="roleId" jdbcType="VARCHAR" property="roleId" />
+    <result column="factory_id" jdbcType="VARCHAR" property="factoryId" />
+    <result column="power_factory_id" jdbcType="VARCHAR" property="powerFactoryId" />
+  </resultMap>
+  <sql id="search">
+    <if test="sh.empNo!=null and sh.empNo!=''">
+      AND su.emp_no LIKE CONCAT(CONCAT('%', #{sh.empNo}),'%')
+    </if>
+    <if test="sh.empName!=null and sh.empName!=''">
+      AND su.emp_name LIKE CONCAT(CONCAT('%', #{sh.empName}),'%')
+    </if>
+    <!--<if test="sh.factoryId!=null and sh.factoryId!=''">
+      AND su.factory_id LIKE CONCAT(CONCAT('%', #{sh.factoryId}),'%')
+    </if>-->
+  </sql>
+  <!-- 分页查询 -->
+  <select id="pageList" parameterType="java.util.Map" resultMap="BaseResultMap">
+    SELECT su.id, su.user_name, su.emp_name, su.emp_no, su.modify_emp, su.modify_emp_no, su.create_time, su.update_time, role.role_id roleId, role.role_name, su.factory_id,su.power_factory_id
+    FROM safety_sys_user su LEFT JOIN (select sur.user_id, GROUP_CONCAT(sur.role_id) as role_id, GROUP_CONCAT(sr.role_name) as role_name from safety_sys_user_role sur, safety_sys_role sr WHERE sur.role_id = sr.id GROUP BY sur.user_id) role
+    on su.id = role.user_id WHERE su.delete_falg = 0
+    <include refid="search" />
+    <if test="factoryIds!=null and factoryIds!=''">
+      AND (${factoryIds})
+    </if>
+    <if test="powerFactoryIds!=null and powerFactoryIds!=''">
+      AND (${powerFactoryIds})
+    </if>
+
+    <if test="sh.roleId!=null and sh.roleId!=''">
+      AND find_in_set(#{sh.roleId},role.role_id)>0
+    </if>
+
+    ORDER BY su.id
+    limit #{startRowNum},#{endRowNum}
+  </select>
+  <!-- 分页总条数 -->
+  <select id="pageListCount" parameterType="java.util.Map" resultType="java.lang.Long">
+    SELECT count(1)
+    FROM safety_sys_user su LEFT JOIN (select sur.user_id, GROUP_CONCAT(sur.role_id) as role_id, GROUP_CONCAT(sr.role_name) as role_name from safety_sys_user_role sur, safety_sys_role sr WHERE sur.role_id = sr.id GROUP BY sur.user_id) role
+    on su.id = role.user_id WHERE su.delete_falg = 0
+    <include refid="search" />
+    <if test="factoryIds!=null and factoryIds!=''">
+      AND (${factoryIds})
+    </if>
+    <if test="powerFactoryIds!=null and powerFactoryIds!=''">
+      AND (${powerFactoryIds})
+    </if>
+
+    <if test="sh.roleId!=null and sh.roleId!=''">
+      AND find_in_set(#{sh.roleId},role.role_id)>0
+    </if>
+  </select>
+  <!--设置用户拥有的角色-->
+  <insert id="setUserRoles" parameterType="java.util.Map">
+    INSERT INTO safety_sys_user_role (user_id, role_id)
+    VALUES
+    <foreach collection="roleIds" item="roleId" index="index" separator=",">
+      (#{userId},#{roleId})
+    </foreach>
+  </insert>
+  <!--删除用户和角色中间表数据-->
+  <delete id="deleteUserRolesByUserId" parameterType="java.lang.Integer">
+        DELETE FROM safety_sys_user_role WHERE user_id=#{userId}
+  </delete>
+  <!--查询账号已设置角色集合-->
+  <select id="getUserHasRoles" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+    SELECT role_id FROM safety_sys_user_role WHERE user_id=#{userId}
+  </select>
+  <!--数据批量插入-->
+  <insert id="batchInsert">
+    insert into `safety_sys_user` (`user_name`, `pass_word`, `emp_name`, `emp_no`, `modify_emp`, `modify_emp_no`, `create_time`, `update_time`, `delete_falg`) values
+    <foreach collection="blackList" item="item" separator=",">
+      ('','abcpwd123456',#{item.empName},#{item.empNo},#{item.modifyEmp},#{item.modifyEmpNo},now(),now(),'0');
+    </foreach>
+  </insert>
+  <!-- 导出数据查询 -->
+  <select id="exportList" parameterType="java.util.Map" resultMap="BaseResultMap">
+    SELECT su.id, su.user_name, su.emp_name, su.emp_no, su.modify_emp, su.modify_emp_no, su.create_time, su.update_time,
+    (SELECT group_concat(tb.role_name) FROM (SELECT sur.user_id, sr.role_name FROM safety_sys_user_role sur
+    LEFT JOIN safety_sys_role sr ON sur.role_id = sr.id AND sr.delete_falg = '0') tb WHERE tb.user_id = su.id) AS role_name
+    ,su.factory_id,su.power_factory_id
+    FROM safety_sys_user su
+    WHERE su.delete_falg = 0
+    <include refid="search" />
+    ORDER BY su.id
+  </select>
+
+  <select id="getUserList" resultType="com.yutong.safety.core.db.entity.SafetySysUserDO"
+    parameterType="com.yutong.safety.common.param.web.UserMessageListParam">
+    select DISTINCT u.id,u.user_name,u.pass_word,u.emp_name,u.emp_no,u.modify_emp,u.modify_emp_no,u.delete_falg,u.factory_id,u.power_factory_id
+      from safety_sys_user u,safety_sys_user_role ur,safety_sys_role r
+     where u.id = ur.user_id
+       and u.delete_falg = 0
+       and ur.role_id = r.id
+     <if test="factoryId != null and factoryId != '' ">
+        and FIND_IN_SET (#{factoryId},u.factory_id)
+     </if>
+    <if test="powerFactoryId != null and powerFactoryId != '' ">
+      and FIND_IN_SET (#{powerFactoryId},u.power_factory_id)
+    </if>
+    <if test="powerFactoryArr != null and powerFactoryArr != '' ">
+      and
+      <foreach collection="powerFactoryArr.split(',')" item="item" open="(" close=")" separator="or">
+        FIND_IN_SET (#{item},u.power_factory_id)
+      </foreach>
+    </if>
+     <if test="roleId != null">
+        and r.id = #{roleId}
+     </if>
+     <if test="roleName != null and roleName != ''">
+        and r.role_name = #{roleName}
+     </if>
+        <if test="roleNameArr != null and roleNameArr != ''">
+      and r.role_name in
+       <foreach collection="roleNameArr.split(',')" item="item" open="(" close=")" separator=",">
+         #{item}
+       </foreach>
+    </if>
+     <if test="userName != null and userName != ''">
+        and u.user_name = #{userName}
+     </if>
+  </select>
+
+  <select id="getAllUserRole" resultMap="BaseResultMap">
+    SELECT su.id,
+           su.user_name,
+           su.emp_name,
+           su.emp_no,
+           sr.role_id as roleId,
+           sm.email as role_name,
+           su.power_factory_id
+    FROM safety_sys_user_role sr
+    LEFT JOIN safety_sys_user su on su.id = sr.user_id
+    left join (select emp_no,email from safety_employee_message where status = 'NORMAL') sm on su.emp_no = sm.emp_no
+    WHERE su.delete_falg = 0
+  </select>
+
+  <select id="getAllUserInfo" resultType="com.yutong.safety.core.dto.SafetyUserDTO">
+    select su.emp_no as userCode, s.role_id as roleId
+    from safety_sys_user_role s
+           inner join safety_sys_user su on s.user_id = su.id and su.delete_falg = 0
+  </select>
+
+  <select id="getUserIdByCodeList" parameterType="java.util.List" resultType="java.lang.Integer">
+    select id from safety_sys_user where delete_falg = 0 and emp_no in
+                                   <foreach collection="list" item="ll" separator="," close=")" open="(">
+                                     #{ll}
+                                   </foreach>
+  </select>
+
+  <select id="getUserRoleList" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+    select user_id from safety_sys_user_role where role_id = 40
+  </select>
+
+  <insert id="batchInserUserRole" parameterType="java.util.List">
+    INSERT INTO safety_sys_user_role (user_id, role_id) VALUES
+    <foreach collection="paramList" item="p" separator=",">
+    (#{p.userId},#{p.roleId})
+    </foreach>
+  </insert>
+
+  <select id="getUserListByRoleId" parameterType="java.lang.Integer" resultType="com.yutong.safety.core.db.entity.SafetySysUserDO">
+    select u.*
+    from safety_sys_user u
+           left join safety_sys_user_role r on u.id = r.user_id
+    where r.role_id = #{roleId}
+  </select>
+
+  <select id="getUserListByParam" parameterType="java.util.Map" resultType="com.yutong.safety.core.db.entity.SafetySysUserDO">
+    select u.*
+    from safety_sys_user u
+           left join safety_sys_user_role r on u.id = r.user_id
+    where u.delete_falg = 0
+      and r.role_id = #{roleId}
+      and
+        <foreach collection="list" item="ll" separator=" or " open="(" close=")">
+          find_in_set(#{ll},u.power_factory_id)
+        </foreach>
+  </select>
+
+  <update id="batchInsertUserForEmpnos">
+    insert into safety.safety_sys_user
+    (emp_no,emp_name,user_name,modify_emp,modify_emp_no,create_time,update_time,delete_falg)
+    select emp_no,emp_name,emp_login,'门禁系统管理员','system',now(),now(),0
+    from safety.safety_employee_message sem
+    where sem.status = 'NORMAL'
+      and emp_no  in
+      <foreach collection="empNos" separator="," open="(" close=")" item="item">
+        #{item}
+      </foreach>
+      and emp_no not in (select emp_no from safety.safety_sys_user ssu where ssu.delete_falg = 0)
+  </update>
+</mapper>

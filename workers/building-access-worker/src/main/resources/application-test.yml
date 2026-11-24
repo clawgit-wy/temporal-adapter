@@ -1,0 +1,41 @@
+# 测试环境配置
+spring:
+  datasource:
+    mysql:
+      url: jdbc:mysql://10.66.229.187:33306/safety?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
+      username: root
+      password: root
+      driver-class-name: com.mysql.cj.jdbc.Driver
+    pg:
+      url: jdbc:postgresql://10.40.0.1:7092/ctm02brss_ctm02brssdb
+      username: hikface
+      password: zjk@111++
+      driver-class-name: org.postgresql.Driver
+
+fuji:
+  api:
+    base-url: ${FUJI_API_BASE_URL:http://10.66.230.210:60009}
+    check-token-path: /Api/FaceHandSet/CheckTokenState
+    face-issue-path: /Api/FaceHandSet/FaceIssue
+    face-modify-path: /Api/FaceHandSet/FaceModify
+    card-issue-path: /Api/FaceHandSet/DoorIssue
+    face-increment-path: /Api/FaceHandSet/FaceModifyBypowerType
+
+xinkaipu:
+  api:
+    base-url: ${XINKAIPU_API_BASE_URL:http://10.66.226.90}
+    # 新开普 IdentityWebService 接口路径
+    get-device-path: /IdentityWebService/Identity.ThirdOpenApiCall.ashx/group/GetAccessTermAreaInfo
+    get-area-path: /IdentityWebService/Identity.ThirdOpenApiCall.ashx/group/GetAccessAreaInfo
+    grant-build-path: /IdentityWebService/Identity.ThirdOpenApiCall.ashx/group/AddGrantByOutid
+    get-grant-info-path: /IdentityWebService/Identity.ThirdOpenApiCall.ashx/group/GetGrantInfo
+    get-record-path: /IdentityWebService/Identity.ThirdOpenApiCall.ashx/group/GetRecordInfo
+    # 认证配置
+    dpcode: 00000000
+    appid: 150000634047
+    encryption-key: 50155aa1f5e546318c2e48f3132a7283
+    signature-key: 0b29a923a06541d78037cbc8b5a4669d
+
+temporal:
+  server:
+    address: ${TEMPORAL_ADDRESS:test-temporal:7233}

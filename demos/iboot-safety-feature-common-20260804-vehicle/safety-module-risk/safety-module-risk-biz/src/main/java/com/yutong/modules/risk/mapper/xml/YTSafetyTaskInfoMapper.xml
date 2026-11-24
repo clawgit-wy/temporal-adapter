@@ -1,0 +1,673 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.modules.risk.mapper.YTSafetyTaskInfoMapper">
+
+    <select id="queryPage" resultType="com.yutong.modules.risk.vo.YTSafetyTaskInfoVO">
+        SELECT t.id,t.task_name,t.task_code,t.task_type,t.risk_category_id,t.task_description,t.start_date,
+        t.end_date,t.inspection_cycle,t.exec_scope,t.create_name,t.update_name,t.create_time,t.update_time,t.dormant_date,
+        t.post_type,t1.issue_type,t1.personnel_name,t1.personnel_id,t1.personnel_post_id,t1.personnel_post_name,t.task_status
+        FROM ytsafety_task_info t
+        LEFT JOIN ytsafety_task_info_extension t1 ON t.id = t1.task_info_id
+        where t.del_flag = 0
+        <if test="dto.taskCode != null and dto.taskCode != ''">
+            AND t.task_code  = #{dto.taskCode}
+        </if>
+        <if test="dto.taskName != null and dto.taskName != ''">
+            AND t.task_name LIKE CONCAT('%', #{dto.taskName}, '%')
+        </if>
+        <if test="dto.taskType != null and dto.taskType != ''">
+            AND t.task_type = #{dto.taskType}
+        </if>
+        <if test="dto.inspectionCycle != null">
+            AND t.inspection_cycle LIKE CONCAT('%', #{dto.inspectionCycle}, '%')
+        </if>
+        <if test="dto.taskDescription != null and dto.taskDescription != ''">
+            AND t.task_description LIKE CONCAT('%', #{dto.taskDescription}, '%')
+        </if>
+        <if test="dto.execScope != null and dto.execScope != ''">
+            AND FIND_IN_SET(#{dto.execScope}, t.exec_scope) > 0
+        </if>
+        <if test="dto.taskStatus != null and dto.taskStatus != '' ">
+            <choose>
+                <when test="dto.taskStatus == 'DORMANT'">
+                    AND t.dormant_date IS NOT NULL
+                </when>
+                <otherwise>
+                    AND t.task_status = #{dto.taskStatus}
+                    AND t.dormant_date IS NULL
+                </otherwise>
+            </choose>
+        </if>
+        <if test="dto.createName != null and dto.createName != ''">
+            AND (t.create_user LIKE CONCAT('%', #{dto.createName}, '%') or t.create_name LIKE CONCAT('%', #{dto.createName}, '%'))
+        </if>
+        <if test="dto.updateUser != null and dto.updateUser != ''">
+            AND (t.update_user LIKE CONCAT('%', #{dto.updateUser}, '%') or t.update_name LIKE CONCAT('%', #{dto.updateUser}, '%'))
+        </if>
+        <if test="dto.startDateStart != null and dto.startDateEnd != null">
+            AND t.start_date BETWEEN #{dto.startDateStart} AND #{dto.startDateEnd}
+        </if>
+        <if test="dto.endDateStart != null and dto.endDateEnd != null">
+            AND t.end_date BETWEEN #{dto.endDateStart} AND #{dto.endDateEnd}
+        </if>
+        <if test="dto.createTimeStart != null and dto.createTimeEnd != null">
+            AND DATE(t.create_time) BETWEEN #{dto.createTimeStart} AND #{dto.createTimeEnd}
+        </if>
+        <if test="dto.updateTimeStart != null and dto.updateTimeEnd != null">
+            AND DATE(t.update_time) BETWEEN #{dto.updateTimeStart} AND #{dto.updateTimeEnd}
+        </if>
+        <if test="dto.dormantDateStart != null and dto.dormantDateEnd != null">
+            AND DATE(t.dormant_date) BETWEEN #{dto.dormantDateStart} AND #{dto.dormantDateEnd}
+        </if>
+        <if test="dto.personnelName != null and dto.personnelName != ''">
+            <choose>
+                <when test="dto.personnelName != null and ('安全员,安全管理员,安全'.contains(dto.personnelName))">
+                    AND t1.issue_type = '1'
+                </when>
+                <otherwise>
+                    and (
+                    t1.personnel_name like concat('%',#{dto.personnelName},'%')
+                    or  t1.personnel_post_name like concat('%',#{dto.personnelName},'%')
+                    )
+                </otherwise>
+            </choose>
+        </if>
+        ORDER BY t.create_time DESC
+    </select>
+
+    <select id="getSafetySysRole" resultType="com.yutong.modules.user.entity.SafetySysRole">
+        select role_name from safety_sys_role
+        where role_code = #{safetyOfficer}
+        and delete_falg = '0'
+        limit 1
+    </select>
+
+
+<!--    <select id="queryPage" resultType="com.yutong.modules.risk.vo.YTSafetyTaskInfoVO">-->
+<!--        SELECT t.id,t.task_name,t.task_code,t.task_type,t.risk_category_id,t.task_description,t.start_date,-->
+<!--        t.end_date,t.inspection_cycle,t.exec_scope,t.create_name,t.update_name,t.create_time,t.update_time,t.dormant_date,-->
+<!--        t.post_type,t1.issue_type,t1.personnel_name,t1.personnel_id,t1.personnel_post_id,t1.personnel_post_name,t.task_status,-->
+<!--        GROUP_CONCAT(DISTINCT t3.emp_no ORDER BY t3.emp_no SEPARATOR ',') AS responsible_emp_nos,-->
+<!--        GROUP_CONCAT(DISTINCT t3.emp_name ORDER BY t3.emp_name SEPARATOR ',') AS responsible_emp_names-->
+<!--        FROM ytsafety_task_info t-->
+<!--            LEFT JOIN ytsafety_task_info_extension t1 ON t.id = t1.task_info_id-->
+<!--            LEFT JOIN ytsafety_risk_data t2-->
+<!--                ON IF(NULLIF(t1.org_id, '') IS NOT NULL,FIND_IN_SET(t2.org_id, t1.org_id) > 0, 1=1)-->
+<!--                AND IF(NULLIF(t1.factory_id, '') IS NOT NULL, FIND_IN_SET(t2.factory_id, t1.factory_id) > 0, 1=1)-->
+<!--                AND IF(NULLIF(t1.area_id, '') IS NOT NULL, FIND_IN_SET(t2.area_id, t1.area_id) > 0, 1=1)-->
+<!--                AND IF(NULLIF(t.risk_category_id, '') IS NOT NULL, FIND_IN_SET(t2.risk_type_id, t.risk_category_id) > 0, 1=1)-->
+<!--                AND IF(NULLIF(t1.risk_level, '') IS NOT NULL, FIND_IN_SET(t2.risk_level, t1.risk_level) > 0, 1=1)-->
+<!--        LEFT JOIN (-->
+<!--        SELECT DISTINCT sr.user_id,su.emp_name,su.emp_no,-->
+<!--            GROUP_CONCAT(DISTINCT sud.depart_id SEPARATOR ',') AS depart_id-->
+<!--            FROM  ytsafety_sys_responsible sr-->
+<!--            left JOIN safety_sys_user su ON sr.user_id = su.id AND su.delete_falg = 0-->
+<!--            left join safety_sys_user_role sur on su.id = sur.user_id and sur.del_flag = 0-->
+<!--            left join ytsafety_sys_user_depart sud ON su.id = sud.user_id-->
+<!--            WHERE sr.del_flag = 0-->
+<!--            and sur.role_code = #{dto.roleCode}-->
+<!--            GROUP BY sr.user_id, su.emp_name, su.emp_no-->
+<!--        ) t3 ON  FIND_IN_SET(t2.org_id,t3.depart_id) > 0-->
+<!--        where t.del_flag = 0-->
+<!--        <if test="dto.taskCode != null and dto.taskCode != ''">-->
+<!--            AND t.task_code  = #{dto.taskCode}-->
+<!--        </if>-->
+<!--        <if test="dto.taskName != null and dto.taskName != ''">-->
+<!--            AND t.task_name LIKE CONCAT('%', #{dto.taskName}, '%')-->
+<!--        </if>-->
+<!--        <if test="dto.taskType != null and dto.taskType != ''">-->
+<!--            AND t.task_type = #{dto.taskType}-->
+<!--        </if>-->
+<!--        <if test="dto.inspectionCycle != null">-->
+<!--            AND t.inspection_cycle LIKE CONCAT('%', #{dto.inspectionCycle}, '%')-->
+<!--        </if>-->
+<!--        <if test="dto.taskDescription != null and dto.taskDescription != ''">-->
+<!--            AND t.task_description LIKE CONCAT('%', #{dto.taskDescription}, '%')-->
+<!--        </if>-->
+<!--        <if test="dto.execScope != null and dto.execScope != ''">-->
+<!--            AND FIND_IN_SET(#{dto.execScope}, t.exec_scope) > 0-->
+<!--        </if>-->
+<!--        <if test="dto.taskStatus != null and dto.taskStatus != '' ">-->
+<!--            <choose>-->
+<!--                <when test="dto.taskStatus == 'DORMANT'">-->
+<!--                    AND t.dormant_date IS NOT NULL-->
+<!--                </when>-->
+<!--                <otherwise>-->
+<!--                    AND t.task_status = #{dto.taskStatus}-->
+<!--                    AND t.dormant_date IS NULL-->
+<!--                </otherwise>-->
+<!--            </choose>-->
+<!--        </if>-->
+<!--        <if test="dto.createName != null and dto.createName != ''">-->
+<!--            AND (t.create_user LIKE CONCAT('%', #{dto.createName}, '%') or t.create_name LIKE CONCAT('%', #{dto.createName}, '%'))-->
+<!--        </if>-->
+<!--        <if test="dto.updateUser != null and dto.updateUser != ''">-->
+<!--            AND (t.update_user LIKE CONCAT('%', #{dto.updateUser}, '%') or t.update_name LIKE CONCAT('%', #{dto.updateUser}, '%'))-->
+<!--        </if>-->
+<!--        <if test="dto.startDateStart != null and dto.startDateEnd != null">-->
+<!--            AND t.start_date BETWEEN #{dto.startDateStart} AND #{dto.startDateEnd}-->
+<!--        </if>-->
+<!--        <if test="dto.endDateStart != null and dto.endDateEnd != null">-->
+<!--            AND t.end_date BETWEEN #{dto.endDateStart} AND #{dto.endDateEnd}-->
+<!--        </if>-->
+<!--        <if test="dto.createTimeStart != null and dto.createTimeEnd != null">-->
+<!--            AND DATE(t.create_time) BETWEEN #{dto.createTimeStart} AND #{dto.createTimeEnd}-->
+<!--        </if>-->
+<!--        <if test="dto.updateTimeStart != null and dto.updateTimeEnd != null">-->
+<!--            AND DATE(t.update_time) BETWEEN #{dto.updateTimeStart} AND #{dto.updateTimeEnd}-->
+<!--        </if>-->
+<!--        <if test="dto.dormantDateStart != null and dto.dormantDateEnd != null">-->
+<!--            AND DATE(t.dormant_date) BETWEEN #{dto.dormantDateStart} AND #{dto.dormantDateEnd}-->
+<!--        </if>-->
+<!--        GROUP BY t.id,t.task_name,t.task_code,t.create_time,t.task_type,t.risk_category_id,t.task_description,t.dormant_date,-->
+<!--        t.start_date,t.end_date,t.inspection_cycle,t.exec_scope,t.create_name,t.update_name,t1.personnel_post_name,-->
+<!--        t.update_time,t.dormant_date,t.post_type,t1.issue_type,t1.personnel_name,t1.personnel_post_id,t1.personnel_id,t.task_status-->
+<!--        <if test="dto.personnelName != null and dto.personnelName != ''">-->
+<!--            HAVING (-->
+<!--                t1.personnel_name LIKE CONCAT('%', #{dto.personnelName}, '%')-->
+<!--                OR t1.personnel_id LIKE CONCAT('%', #{dto.personnelName}, '%')-->
+<!--                OR t1.personnel_post_name LIKE CONCAT('%', #{dto.personnelName}, '%')-->
+<!--                OR (-->
+<!--                    t1.issue_type = 1-->
+<!--                    AND (-->
+<!--                    responsible_emp_nos LIKE CONCAT('%', #{dto.personnelName}, '%')-->
+<!--                    OR responsible_emp_names LIKE CONCAT('%', #{dto.personnelName}, '%')-->
+<!--                    )-->
+<!--                )-->
+<!--            )-->
+<!--        </if>-->
+<!--        ORDER BY t.create_time DESC-->
+<!--    </select>-->
+    <select id="getRiskGradingStandard" resultType="java.lang.String">
+        SELECT risk_level FROM ytsafety_risk_level_dict WHERE id IN
+        <foreach item="item" collection="ids" separator="," open="(" close=")" index="">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getTaskUser" resultType="com.yutong.modules.risk.vo.YtsafetyTaskUserVO">
+        SELECT
+            su.id AS user_id,
+            su.emp_name,
+            su.emp_no,
+<!--            GROUP_CONCAT(DISTINCT sud.depart_name SEPARATOR ',') AS depart_name,-->
+            GROUP_CONCAT(DISTINCT suf.factory_id SEPARATOR ',') AS factory_id,
+            GROUP_CONCAT(DISTINCT suf.factory_name SEPARATOR ',') AS power_factory_name
+        FROM safety_sys_user su
+        LEFT JOIN ytsafety_sys_user_factory suf ON su.id = suf.user_id
+        LEFT JOIN safety_sys_user_role sur ON su.id = sur.user_id AND sur.del_flag = 0
+        left join ytsafety_sys_user_depart sud ON su.id = sud.user_id
+        WHERE su.delete_falg = 0
+        <if test="dto.roleCode != null and dto.roleCode != ''">
+            AND FIND_IN_SET(sur.role_code, #{dto.roleCode}) > 0
+        </if>
+        <if test="dto.empNameORempNo != null and dto.empNameORempNo != ''">
+            AND (su.emp_name LIKE CONCAT('%', #{dto.empNameORempNo}, '%')
+            OR su.emp_no LIKE CONCAT('%', #{dto.empNameORempNo}, '%'))
+        </if>
+        <if test="dto.orgCode != null and dto.orgCode != ''">
+            AND sud.depart_id= #{dto.orgCode}
+        </if>
+        <if test="dto.factoryId != null and dto.factoryId != ''">
+            AND su.id IN (
+            SELECT user_id
+            FROM ytsafety_sys_user_factory
+            WHERE FIND_IN_SET(#{dto.factoryId}, factory_id) > 0
+            )
+        </if>
+        GROUP BY su.id, su.emp_name, su.emp_no
+    </select>
+
+    <resultMap id="resultTaskInfoVO" type="com.yutong.modules.risk.vo.YTSafetyTaskInfoVO" >
+        <id column="id" property="id"/>
+        <result column="task_code" property="taskCode"/>
+        <result column="task_name" property="taskName"/>
+        <result column="task_type" property="taskType"/>
+        <result column="risk_category_id" property="riskCategoryId"/>
+        <result column="task_description" property="taskDescription"/>
+        <result column="start_date" property="startDate"/>
+        <result column="end_date" property="endDate"/>
+        <result column="inspection_cycle" property="inspectionCycle"/>
+        <result column="exec_scope" property="execScope"/>
+        <result column="task_status" property="taskStatus"/>
+        <result column="attachment_id" property="attachmentId"/>
+        <result column="attachment_img_id" property="attachmentImgId"/>
+        <result column="dormant_date" property="dormantDate"/>
+        <result column="post_type" property="postType"/>
+        <result column="create_name" property="createName"/>
+        <result column="create_user" property="createUser"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_name" property="updateName"/>
+        <result column="update_user" property="updateUser"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="version" property="version"/>
+        <result column="model_id" property="modelFlag"/>
+        <result column="flow_code" property="flowCode"/>
+        <result column="flow_subject" property="flowSubject"/>
+        <result column="issue_approval" property="issueApproval"/>
+        <result column="approval_user" property="approvalUser"/>
+        <result column="issue_approval" property="issueApproval"/>
+        <result column="approval_name" property="approvalName"/>
+
+        <association property="taskInfoExtension" javaType="com.yutong.modules.risk.vo.YtsafetyTaskInfoExtensionVO">
+            <id column="extension_id" property="extensionId"/>
+            <result column="task_info_id" property="taskInfoId"/>
+            <result column="factory_id" property="factoryId"/>
+            <result column="area_id" property="areaId"/>
+            <result column="org_id" property="orgId"/>
+            <result column="issue_type" property="issueType"/>
+            <result column="task_level" property="taskLevel"/>
+            <result column="risk_level" property="riskLevel"/>
+            <result column="exec_type" property="execType"/>
+            <result column="cycle_type" property="cycleType"/>
+            <result column="task_frequency" property="taskFrequency"/>
+            <result column="execution_date" property="executionDate"/>
+            <result column="skip_weekend" property="skipWeekend"/>
+            <result column="skip_holiday" property="skipHoliday"/>
+            <result column="personnel_name" property="personnelName"/>
+            <result column="personnel_post_name" property="personnelPostName"/>
+            <result column="personnel_id" property="personnelId"/>
+            <result column="personnel_post_id" property="personnelPostId"/>
+            <result column="personnel_factory_id" property="personnelFactoryId"/>
+            <result column="personnel_org_id" property="personnelOrgId"/>
+            <result column="current_execution_cycle" property="currentExecutionCycle"/>
+            <result column="task_status" property="taskStatus"/>
+            <result column="file_must" property="fileMust"/>
+            <result column="photo_must" property="photoMust"/>
+
+        </association>
+    </resultMap>
+
+    <select id="getTaskDetail" resultMap="resultTaskInfoVO">
+        SELECT t.*, e.id AS extension_id, e.task_info_id, e.factory_id, e.area_id, e.org_id, e.issue_type, e.task_level, e.risk_level, e.exec_type, e.cycle_type, e.task_frequency, e.execution_date, e.skip_weekend, e.skip_holiday, e.personnel_name, e.personnel_post_name, e.personnel_id, e.personnel_post_id, e.personnel_factory_id, e.personnel_org_id, e.current_execution_cycle, e.file_must, e.photo_must, e.issue_approval, e.approval_user
+        FROM ytsafety_task_info t
+        LEFT JOIN ytsafety_task_info_extension e ON t.id = e.task_info_id
+        where t.id = #{id}
+    </select>
+
+    <select id="getRiskLevelDict" resultType="com.yutong.modules.risk.vo.RiskLevelDictVO">
+        select * from ytsafety_risk_level_dict
+        order by id asc
+    </select>
+
+    <select id="getTaskRiskData" resultType="com.yutong.modules.risk.vo.YtsafetyTaskRiskDataVO">
+        SELECT t.risk_code,t.factory_name,t.area_name,t.org_name,t.org_code,t.location_name,t.risk_type_name,t.risk_factor_name,t.check_object,
+        t.risk_identify_name,t.risk_description,t.risk_level
+        FROM ytsafety_risk_data t
+        WHERE t.del_flag = 0
+        <if test="dto.riskTypeId!=null and dto.riskTypeId!='' ">
+            and t.risk_type_id in
+            <foreach collection="dto.riskTypeId.split(',')" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="dto.factoryId!=null and dto.factoryId!='' ">
+            and t.factory_id in
+            <foreach collection="dto.factoryId.split(',')" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="dto.areaId!=null and dto.areaId!='' ">
+            and t.area_id in
+            <foreach collection="dto.areaId.split(',')" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="dto.orgId!=null and dto.orgId!='' ">
+            and t.org_id in
+            <foreach collection="dto.orgId.split(',')" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="dto.riskLevel!=null and dto.riskLevel!='' ">
+            and t.risk_level in
+            <foreach collection="dto.riskLevel.split(',')" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        order by t.update_time desc
+
+    </select>
+
+    <select id="queryTaskRiskDataList" resultType="com.yutong.modules.risk.vo.YtsafetyTaskRiskDataVO">
+        SELECT t.*
+        FROM ytsafety_risk_data t
+        WHERE t.del_flag = 0
+        <if test="dto.riskTypeId!=null and dto.riskTypeId!='' ">
+            and t.risk_type_id in
+            <foreach collection="dto.riskTypeId.split(',')" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="dto.factoryId!=null and dto.factoryId!='' ">
+            and t.factory_id in
+            <foreach collection="dto.factoryId.split(',')" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="dto.areaId!=null and dto.areaId!='' ">
+            and t.area_id in
+            <foreach collection="dto.areaId.split(',')" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="dto.orgId!=null and dto.orgId!='' ">
+            and t.org_id in
+            (select depart_id from ytsafety_sys_user_depart
+            where user_id= (
+                select id from safety_sys_user
+                where emp_no=#{dto.orgId} and delete_falg = 0 limit 1))
+<!--            <foreach collection="dto.orgId.split(',')" item="item" open="(" separator="," close=")">-->
+<!--                #{item}-->
+<!--            </foreach>-->
+        </if>
+        <if test="dto.riskLevel!=null and dto.riskLevel!='' ">
+            and t.risk_level in
+            <foreach collection="dto.riskLevel.split(',')" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+<!--    <select id="getSafetyOfficer" resultType="com.yutong.modules.risk.vo.YtsafetyTaskUserVO">-->
+<!--        SELECT DISTINCT-->
+<!--        sr.user_id AS userId,-->
+<!--        su.emp_name AS empName,-->
+<!--        su.emp_no AS empNo-->
+<!--        FROM ytsafety_risk_data t-->
+<!--        INNER JOIN ytsafety_sys_user_depart ud-->
+<!--        ON ud.depart_code = (-->
+<!--        SELECT ud2.depart_code-->
+<!--        FROM safety_group_info gi2-->
+<!--        INNER JOIN ytsafety_sys_user_depart ud2-->
+<!--        ON FIND_IN_SET(ud2.depart_code, gi2.org_code_path) > 0-->
+<!--        INNER JOIN ytsafety_sys_responsible sr2-->
+<!--        ON sr2.user_id = ud2.user_id AND sr2.status = 0 AND sr2.del_flag = 0-->
+<!--        INNER JOIN safety_sys_user_role ur2-->
+<!--        ON ur2.user_id = sr2.user_id AND ur2.del_flag = 0-->
+<!--        AND ur2.role_code = #{dto.safetyOfficer}-->
+<!--        WHERE gi2.code = t.org_code AND gi2.status = 'Y'-->
+<!--        ORDER BY FIND_IN_SET(ud2.depart_code, gi2.org_code_path) DESC-->
+<!--        LIMIT 1-->
+<!--        )-->
+<!--        INNER JOIN ytsafety_sys_responsible sr-->
+<!--        ON sr.user_id = ud.user_id AND sr.status = 0 AND sr.del_flag = 0-->
+<!--        INNER JOIN safety_sys_user su-->
+<!--        ON su.id = sr.user_id AND su.delete_falg = 0-->
+<!--        INNER JOIN safety_sys_user_role sur-->
+<!--        ON sur.user_id = su.id AND sur.del_flag = 0-->
+<!--        AND sur.role_code = #{dto.safetyOfficer}-->
+<!--        WHERE t.del_flag = 0-->
+<!--        <if test="dto.riskTypeId!=null and dto.riskTypeId!='' ">-->
+<!--            and t.risk_type_id in-->
+<!--            <foreach collection="dto.riskTypeId.split(',')" item="item" open="(" separator="," close=")">-->
+<!--                #{item}-->
+<!--            </foreach>-->
+<!--        </if>-->
+<!--        <if test="dto.factoryId!=null and dto.factoryId!='' ">-->
+<!--            and t.factory_id in-->
+<!--            <foreach collection="dto.factoryId.split(',')" item="item" open="(" separator="," close=")">-->
+<!--                #{item}-->
+<!--            </foreach>-->
+<!--        </if>-->
+<!--        <if test="dto.areaId!=null and dto.areaId!='' ">-->
+<!--            and t.area_id in-->
+<!--            <foreach collection="dto.areaId.split(',')" item="item" open="(" separator="," close=")">-->
+<!--                #{item}-->
+<!--            </foreach>-->
+<!--        </if>-->
+<!--        <if test="dto.orgId!=null and dto.orgId!='' ">-->
+<!--            and t.org_id in-->
+<!--            <foreach collection="dto.orgId.split(',')" item="item" open="(" separator="," close=")">-->
+<!--                #{item}-->
+<!--            </foreach>-->
+<!--        </if>-->
+<!--        <if test="dto.riskLevel!=null and dto.riskLevel!='' ">-->
+<!--            and t.risk_level in-->
+<!--            <foreach collection="dto.riskLevel.split(',')" item="item" open="(" separator="," close=")">-->
+<!--                #{item}-->
+<!--            </foreach>-->
+<!--        </if>-->
+<!--    </select>-->
+
+    <select id="queryTaskRiskOrgCodeList" resultType="java.lang.String">
+        SELECT DISTINCT t.org_code
+        FROM ytsafety_risk_data t
+        WHERE t.del_flag = 0
+        <if test="dto.riskTypeId!=null and dto.riskTypeId!='' ">
+            and t.risk_type_id in
+            <foreach collection="dto.riskTypeId.split(',')" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="dto.factoryId!=null and dto.factoryId!='' ">
+            and t.factory_id in
+            <foreach collection="dto.factoryId.split(',')" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="dto.areaId!=null and dto.areaId!='' ">
+            and t.area_id in
+            <foreach collection="dto.areaId.split(',')" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="dto.orgId!=null and dto.orgId!='' ">
+            and t.org_id in
+            <foreach collection="dto.orgId.split(',')" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="dto.riskLevel!=null and dto.riskLevel!='' ">
+            and t.risk_level in
+            <foreach collection="dto.riskLevel.split(',')" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <update id="setTaskDormancy">
+        UPDATE ytsafety_task_info
+        SET dormant_date = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <!-- 查询任务列表用于导出 -->
+    <select id="queryExportList" resultType="com.yutong.modules.risk.vo.YTSafetyTaskInfoExporVO">
+        SELECT t.id,t.task_name,t.task_code,t.task_type,t.risk_category_id,t.task_description,t.start_date,t.dormant_date,
+            t.end_date,t.inspection_cycle,t.exec_scope,t.create_name,t.update_name,t.create_time,t.update_time,
+            t.post_type,t1.issue_type,t1.personnel_name,t1.personnel_id,t1.personnel_post_id,t1.personnel_post_name,t.task_status
+        FROM ytsafety_task_info t
+        LEFT JOIN ytsafety_task_info_extension t1 ON t.id = t1.task_info_id
+        where t.del_flag = 0
+        <if test="dto.taskCode != null and dto.taskCode != ''">
+            AND t.task_code  = #{dto.taskCode}
+        </if>
+        <if test="dto.selections != null and dto.selections != ''">
+            AND t.id IN
+            <foreach collection="dto.selections.split(',')" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="dto.taskName != null and dto.taskName != ''">
+            AND t.task_name LIKE CONCAT('%', #{dto.taskName}, '%')
+        </if>
+        <if test="dto.taskType != null and dto.taskType != ''">
+            AND t.task_type = #{dto.taskType}
+        </if>
+        <if test="dto.inspectionCycle != null">
+            AND t.inspection_cycle LIKE CONCAT('%', #{dto.inspectionCycle}, '%')
+        </if>
+        <if test="dto.taskDescription != null and dto.taskDescription != ''">
+            AND t.task_description LIKE CONCAT('%', #{dto.taskDescription}, '%')
+        </if>
+        <if test="dto.execScope != null and dto.execScope != ''">
+            AND FIND_IN_SET(#{dto.execScope}, t.exec_scope) > 0
+        </if>
+        <if test="dto.taskStatus != null and dto.taskStatus != '' ">
+            <choose>
+                <when test="dto.taskStatus == 'DORMANT'">
+                    AND t.dormant_date IS NOT NULL
+                </when>
+                <otherwise>
+                    AND t.task_status = #{dto.taskStatus}
+                    AND t.dormant_date IS  NULL
+                </otherwise>
+            </choose>
+        </if>
+        <if test="dto.createName != null and dto.createName != ''">
+            AND (t.create_user LIKE CONCAT('%', #{dto.createName}, '%') or t.create_name LIKE CONCAT('%', #{dto.createName}, '%'))
+        </if>
+        <if test="dto.updateUser != null and dto.updateUser != ''">
+            AND (t.update_user LIKE CONCAT('%', #{dto.updateUser}, '%') or t.update_name LIKE CONCAT('%', #{dto.updateUser}, '%'))
+        </if>
+        <if test="dto.startDateStart != null and dto.startDateEnd != null">
+            AND t.start_date BETWEEN #{dto.startDateStart} AND #{dto.startDateEnd}
+        </if>
+        <if test="dto.endDateStart != null and dto.endDateEnd != null">
+            AND t.end_date BETWEEN #{dto.endDateStart} AND #{dto.endDateEnd}
+        </if>
+        <if test="dto.createTimeStart != null and dto.createTimeEnd != null">
+            AND DATE(t.create_time) BETWEEN #{dto.createTimeStart} AND #{dto.createTimeEnd}
+        </if>
+        <if test="dto.updateTimeStart != null and dto.updateTimeEnd != null">
+            AND DATE(t.update_time) BETWEEN #{dto.updateTimeStart} AND #{dto.updateTimeEnd}
+        </if>
+        <if test="dto.dormantDateStart != null and dto.dormantDateEnd != null">
+            AND DATE(t.dormant_date) BETWEEN #{dto.dormantDateStart} AND #{dto.dormantDateEnd}
+        </if>
+        <if test="dto.personnelName != null and dto.personnelName != ''">
+            <choose>
+                <when test="dto.personnelName != null and ('安全员,安全管理员,安全'.contains(dto.personnelName))">
+                    AND t1.issue_type = '1'
+                </when>
+                <otherwise>
+                    and (
+                    t1.personnel_name like concat('%',#{dto.personnelName},'%')
+                    or  t1.personnel_post_name like concat('%',#{dto.personnelName},'%')
+                    )
+                </otherwise>
+            </choose>
+        </if>
+        ORDER BY t.create_time DESC
+    </select>
+
+    <!--  更新所有待执行任务为执行中  -->
+    <update id="updateTaskStatusPening">
+        UPDATE ytsafety_task_info t
+        INNER JOIN ytsafety_task_info_extension e ON t.id = e.task_info_id
+        SET t.task_status = 'RUNNING'
+        WHERE t.task_status = 'PENDING'
+        AND t.del_flag = 0
+        AND DATE(e.current_execution_cycle) = CURDATE()
+    </update>
+
+    <!--  更新所有结束日期小于等于当前时间的任务状态为已过期  -->
+    <update id="updateTaskStatusExpired">
+        update  ytsafety_task_info set task_status = 'EXPIRED'
+        where end_date &lt; CURDATE()
+        and task_status != 'EXPIRED'
+        and del_flag = 0
+    </update>
+
+
+    <!-- 更新所有今天结束但未完成的任务状态为超期未完成-->
+    <update id="updateUserTaskExecutionStatus">
+        update ytsafety_task_execution set task_status = 'OVERDUE_UNCOMPLETED'
+        where end_date &lt; CURDATE()
+        and task_complete_time is null
+        and task_status != 'OVERDUE_UNCOMPLETED'
+    </update>
+
+    <select id="taskAssignment" resultMap="resultTaskInfoVO">
+        SELECT t.*, t1.id AS extension_id, t1.task_info_id, t1.factory_id, t1.area_id, t1.org_id, t1.issue_type, t1.task_level, t1.risk_level, t1.exec_type, t1.cycle_type, t1.task_frequency, t1.execution_date, t1.skip_weekend, t1.skip_holiday, t1.personnel_name, t1.personnel_post_name, t1.personnel_id, t1.personnel_post_id, t1.personnel_factory_id, t1.personnel_org_id, t1.current_execution_cycle, t1.file_must, t1.photo_must, t1.issue_approval, t1.approval_user
+        FROM ytsafety_task_info t
+        LEFT JOIN ytsafety_task_info_extension t1 ON t.id = t1.task_info_id
+        <where>
+            <choose>
+                <when test="taskInfoId != null and taskInfoId != ''">
+                    t.id = #{taskInfoId}
+                </when>
+                <otherwise>
+                    t.task_status  = 'RUNNING'
+                    AND t1.exec_type !='ONCE'
+                    AND (t.dormant_date IS  NULL OR t.dormant_date = '')
+                    AND t1.current_execution_cycle = CURDATE()
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+
+    <select id="queryHolidayList" resultType="com.yutong.modules.risk.entity.YTSafetyHoliday">
+        SELECT * FROM ytsafety_holiday
+        WHERE holiday_year = YEAR(CURDATE())
+    </select>
+
+
+    <select id="queryMyTaskList" resultType="com.yutong.modules.risk.vo.YTSafetyMyTaskInfoVO">
+        select t.id,t.start_date, t.end_date,
+               t1.task_name, t1.task_type, t1.post_type, t1.task_description, t.task_complete_time, t.report_post_id
+        from ytsafety_task_execution t
+        left join ytsafety_task_info t1 on t.task_info_id = t1.id
+        where (t.exec_user_id = #{userId} or t.exec_user_id = #{empNo})
+        and FIND_IN_SET(#{execScope}, t1.exec_scope) > 0
+        <if test = "startDate!= null and startDate!=''">
+            and DATE(t.start_date) >= STR_TO_DATE(#{startDate}, '%Y-%m-%d')
+        </if>
+        <if test = "endDate!= null and endDate!=''">
+            and DATE(t.end_date) &lt;= STR_TO_DATE(#{endDate}, '%Y-%m-%d')
+        </if>
+        <choose>
+            <when test="isCompleted == 1">
+                and (t.task_complete_time is not null or t.task_status = 'APPROVAL')
+            </when>
+            <otherwise>
+                and t.task_complete_time is null and t.task_status != 'APPROVAL'
+            </otherwise>
+        </choose>
+        order by t.end_date asc
+    </select>
+
+    <select id="getCompletedQuantity" resultType="java.util.Map">
+        SELECT
+        COUNT(*) AS totalCount,
+        COALESCE(SUM(CASE WHEN (t.task_complete_time is not null or t.task_status = 'APPROVAL') THEN 1 ELSE 0 END), 0) AS completedCount
+        from ytsafety_task_execution t
+        left join ytsafety_task_info t1 on t.task_info_id = t1.id
+        where (t.exec_user_id = #{userId} or t.exec_user_id = #{empNo})
+        AND FIND_IN_SET(#{execScope}, t1.exec_scope) > 0
+        <if test = "startDate!= null and startDate!=''">
+            and DATE(t.start_date) >= STR_TO_DATE(#{startDate}, '%Y-%m-%d')
+        </if>
+        <if test = "endDate!= null and endDate!=''">
+            and DATE(t.end_date) &lt;= STR_TO_DATE(#{endDate}, '%Y-%m-%d')
+        </if>
+    </select>
+
+    <select id="approvefirefighters" resultType="java.lang.String">
+        SELECT
+        distinct(su.user_name)
+        FROM safety_sys_user su
+        LEFT JOIN safety_sys_user_role sur ON su.id = sur.user_id AND sur.del_flag = 0
+        LEFT join ytsafety_sys_user_depart sud on su.id = sud.user_id
+        WHERE su.delete_falg = 0
+        and sur.role_code=#{firefighter}
+        and sud.depart_code in (
+        select depart_code from ytsafety_sys_user_depart
+        where user_id=#{userId} )
+    </select>
+    <select id="getDictItem" resultType="java.util.Map">
+        select id,item_name as itemName from safety_dict_item
+        where supper_code = 'RISK_TYPE'
+        and pid is null
+    </select>
+    <update id="updateTaskExecutionIsAbnormal">
+        update ytsafety_task_execution
+            set is_abnormal = 1
+        where id = #{taskExecutionId}
+    </update>
+</mapper>

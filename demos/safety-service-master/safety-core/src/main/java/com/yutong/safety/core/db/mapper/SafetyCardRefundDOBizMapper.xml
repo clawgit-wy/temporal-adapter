@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.SafetyCardRefundDOBizMapper">
+  <update id="updateLoseDay">
+    update
+      safety_card_refund
+      set
+      lose_day = DATEDIFF(NOW(), hairpin_time)
+      where
+      delete_falg = 0
+  </update>
+</mapper>

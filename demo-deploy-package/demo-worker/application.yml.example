@@ -1,0 +1,27 @@
+server:
+  port: 18093
+
+spring:
+  application:
+    name: demo-worker
+  jackson:
+    default-property-inclusion: non_null
+  profiles:
+    active: @activatedProperties@
+
+temporal:
+  address: ${TEMPORAL_ADDRESS:127.0.0.1:7233}
+
+mokapi:
+  url: ${MOKAPI_URL:http://localhost:19090}
+
+logging:
+  level:
+    com.hik.worker: DEBUG
+    com.hik.worker.config: INFO
+    com.hik.worker.controller: INFO
+    com.hik.worker.activity: DEBUG
+    com.hik.worker.workflow: DEBUG
+    io.temporal: INFO
+  file:
+    path: logs

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.SafetyStaffEvectionDOBizMapper">
+
+  <insert id="batchInsert">
+    insert into safety.safety_staff_evection (staff_no, staff_name, begin_time, end_time, remark, create_time, update_time) values
+    <foreach collection="staffList" item="item" separator=",">
+      (#{item.staffNo}, #{item.staffName}, #{item.beginDate}, #{item.endDate}, #{item.remark}, now(), now())
+    </foreach>
+  </insert>
+
+  <update id="batchUpdate">
+    <foreach collection="staffList" item="item" separator=";">
+      update safety.safety_staff_evection
+      <set>
+        <if test="item.staffName != null">
+          staff_name = #{item.staffName,jdbcType=VARCHAR},
+        </if>
+        <if test="item.beginTime != null">
+          begin_time = #{item.beginDate,jdbcType=VARCHAR},
+        </if>
+        <if test="item.endTime != null">
+          end_time = #{item.endDate,jdbcType=VARCHAR},
+        </if>
+        <if test="item.remark != null">
+          remark = #{item.remark,jdbcType=VARCHAR},
+        </if>
+          update_time = now()
+      </set>
+      where staff_no = #{item.staffNo}
+    </foreach>
+  </update>
+
+  <insert id="add">
+    insert into safety.safety_staff_evection (staff_no, staff_name, begin_time, end_time, remark, create_time, update_time) values
+    (#{param.staffNo}, #{param.staffName}, #{param.beginDate}, #{param.endDate}, #{param.remark}, now(), now())
+  </insert>
+
+  <update id="update">
+    update safety.safety_staff_evection t set t.begin_time = #{param.beginDate}, t.end_time = #{param.endDate}, t.remark = #{param.remark}, t.update_time = now() where t.staff_no = #{param.staffNo}
+  </update>
+
+  <select id="findAll" resultType="java.lang.String">
+    select t.staff_no from safety.safety_staff_evection t
+  </select>
+  <select id="queryList" resultType="com.yutong.safety.core.db.entity.SafetyStaffEvectionDO">
+    select t.staff_no, s.emp_name staff_name, s.org_name_path staff_group, t.begin_time begin_date, t.end_time end_date, t.remark
+    from safety.safety_staff_evection t left join safety.safety_employee_message s on t.staff_no = s.emp_no
+    where 1=1
+     <if test="param.staffNo !=null">
+      and t.staff_no like concat('%',#{param.staffNo},'%')
+     </if>
+    <if test="param.staffName !=null">
+      and t.staff_name like concat('%',#{param.staffName},'%')
+    </if>
+    <if test="param.beginDate !=null">
+      and str_to_date(t.begin_time,'%Y-%m-%d') <![CDATA[>=]]> str_to_date(#{param.beginDate},'%Y-%m-%d')
+    </if>
+    <if test="param.endDate !=null">
+      and str_to_date(t.end_time,'%Y-%m-%d') <![CDATA[<=]]> str_to_date(#{param.endDate},'%Y-%m-%d')
+    </if>
+    order by str_to_date(t.begin_time,'%Y-%m-%d') desc
+    limit #{start}, #{end}
+  </select>
+
+  <select id="pageListCount" resultType="java.lang.Long">
+    select count(1)
+    from safety.safety_staff_evection t left join safety.safety_employee_message s on t.staff_no = s.emp_no
+    where 1=1
+    <if test="param.staffNo !=null">
+      and t.staff_no like concat('%',#{param.staffNo},'%')
+    </if>
+    <if test="param.staffName !=null">
+      and t.staff_name like concat('%',#{param.staffName},'%')
+    </if>
+    <if test="param.beginDate !=null">
+      and str_to_date(t.begin_time,'%Y-%m-%d') &gt; cast(#{param.beginDate} as date)
+    </if>
+    <if test="param.endDate !=null">
+      and str_to_date(t.end_time,'%Y-%m-%d') &lt; cast(#{param.endDate} as date)
+    </if>
+  </select>
+
+  <select id="queryListByEmpNos" resultType="com.yutong.safety.core.db.entity.SafetyStaffEvectionDO">
+    select t.staff_no,
+    MAX(t.staff_name) as staff_name,
+    MAX(t.begin_time) as begin_date,
+    MAX(t.end_time) as end_date,
+    MAX(t.remark) as remark,
+    MAX(t.create_time) as create_time
+    from safety.safety_staff_evection t where t.staff_no in (
+    <foreach collection="users" separator="," item="item">
+      #{item,jdbcType=VARCHAR}
+    </foreach>
+    )
+    group by t.staff_no
+  </select>
+
+  <select id="getGcList" resultType="com.yutong.safety.core.db.entity.SafetyStaffEvectionDO">
+    select staff_no,id,staff_name,begin_time,end_time
+    from safety.safety_staff_evection t
+  </select>
+</mapper>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yutong.safety.core.db.mapper.spot.SafetySpotRulePermDOBizMapper">
+  <insert id="batchInsert">
+    insert into `safety_spot_rule_perm` (`spot_id`, `rule_id`) values
+    <foreach collection="blackList" item="item" separator=",">
+      (#{spotId}, #{item})
+    </foreach>
+  </insert>
+</mapper>

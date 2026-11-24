@@ -1,0 +1,113 @@
+##############################################################################
+# Temporal Server + Temporal UI Server 一体化 Docker Compose
+#
+# 用途：
+#   为 ui-redesign 和 ui-main 项目提供后端服务
+#   - Temporal Server (gRPC 7233)：工作流调度核心
+#   - Temporal UI Server (HTTP 8080)：REST API 代理，供前端调用
+#   - PostgreSQL (5432)：持久化存储
+#
+# 启动：docker compose -f docker-compose.temporal-stack.yml up -d
+# 停止：docker compose -f docker-compose.temporal-stack.yml down
+# 查看日志：docker compose -f docker-compose.temporal-stack.yml logs -f
+#
+# 镜像加载（离线服务器）：
+#   docker load -i mirrors/temporalio-auto-setup-1.29.7-amd64.tar
+#   docker load -i mirrors/temporalio-ui-2.32.0-amd64.tar
+#   docker load -i mirrors/postgres-15-alpine-amd64.tar
+##############################################################################
+services:
+  # 1. PostgreSQL 数据库 - 持久化存储
+  postgresql:
+    image: postgres:15-alpine
+    container_name: temporal-postgresql
+    environment:
+      - POSTGRES_USER=temporal
+      - POSTGRES_PASSWORD=temporal
+      # auto-setup 镜像会自动创建 temporal 数据库
+      - POSTGRES_DB=temporal
+    volumes:
+      # CentOS 7 SELinux 需要加 :Z 标签，否则容器无法写入
+      - ./data/postgresql:/var/lib/postgresql/data:Z
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U temporal"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - temporal-network
+    restart: unless-stopped
+
+  # 2. Temporal Server - 工作流调度核心
+  # 使用 auto-setup 镜像，首次启动自动初始化数据库 schema
+  temporal:
+    image: temporalio/auto-setup:1.29.7
+    container_name: temporal-server
+    ports:
+      - "7233:7233" # gRPC 端口，Worker / UI Server 通过此端口连接
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=temporal
+      - POSTGRES_SEEDS=postgresql
+      # 数据库名（auto-setup 镜像默认 persistence）
+      # 实际会创建 temporal 库
+      - DBNAME=temporal
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/docker.yaml
+      - LOG_LEVEL=error,warn,info
+      # 关闭高级特性（如未使用可保持默认）
+      - SERVICES=history,matching,frontend,worker
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    volumes:
+      # 挂载动态配置（启用 Worker 心跳）
+      # CentOS 7 SELinux 需要加 :Z 标签
+      - ./dynamicconfig/docker.yaml:/etc/temporal/config/dynamicconfig/docker.yaml:Z
+    networks:
+      - temporal-network
+    restart: unless-stopped
+
+  # 3. Temporal UI Server - REST API 代理 + 官方 UI
+  # 提供 /api/v1/* REST API 端点，ui-redesign 和 ui-main 前端通过此端口访问
+  temporal-ui:
+    image: temporalio/ui:2.32.0
+    container_name: temporal-ui-server
+    ports:
+      - "8280:8080" # REST API + 官方 UI 端口
+    environment:
+      # 连接到 Temporal Server 的 gRPC 地址
+      # 在同一 docker 网络内，使用容器名 + 端口
+      - TEMPORAL_ADDRESS=temporal-server:7233
+      - TEMPORAL_UI_PORT=8080
+      - TEMPORAL_UI_ENABLED=true
+      # 允许跨域请求（前端开发用，生产环境应配置具体域名）
+      - TEMPORAL_CORS_UNSAFE_ALLOW_ALL_ORIGINS=true
+      - TEMPORAL_DEFAULT_NAMESPACE=default
+      - TEMPORAL_AUTH_ENABLED=false
+      # 允许写操作（终止 / 取消 / 启动工作流 / 创建计划）
+      - TEMPORAL_DISABLE_WRITE_ACTIONS=false
+      - TEMPORAL_WORKFLOW_TERMINATE_DISABLED=false
+      - TEMPORAL_WORKFLOW_CANCEL_DISABLED=false
+      - TEMPORAL_WORKFLOW_SIGNAL_DISABLED=false
+      - TEMPORAL_WORKFLOW_UPDATE_DISABLED=false
+      - TEMPORAL_WORKFLOW_RESET_DISABLED=false
+      - TEMPORAL_START_WORKFLOW_DISABLED=false
+      # CSRF Cookie 配置（HTTP 下需要 insecure）
+      - TEMPORAL_CSRF_COOKIE_INSECURE=true
+      # 允许的 CORS 源（生产环境请改为具体域名/IP）
+      - TEMPORAL_CORS_ORIGINS=http://101.43.53.110:5173,http://101.43.53.110:8280,http://localhost:5173
+    depends_on:
+      temporal:
+        condition: service_started
+    networks:
+      - temporal-network
+    restart: unless-stopped
+
+networks:
+  temporal-network:
+    name: temporal_default
+    driver: bridge
